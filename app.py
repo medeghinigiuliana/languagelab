@@ -70,11 +70,12 @@ def submit():
         conn = sqlite3.connect("db.db")
         c = conn.cursor()
 
+        c.execute("DROP TABLE IF EXISTS results")
+
         c.execute("""
-            CREATE TABLE IF NOT EXISTS results 
+            CREATE TABLE results 
             (email TEXT, test_type TEXT, language TEXT, answer TEXT)
         """)
-
         c.execute("INSERT INTO results VALUES (?,?,?,?)", 
                   (email, test_type, language, answer))
 
