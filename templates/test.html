@@ -1,6 +1,73 @@
- 
-<form method="POST" action="/submit">
-  <input name="email" placeholder="Your email"><br><br>
-  <textarea name="answer" placeholder="Write something"></textarea><br><br>
-  <button>Submit</button>
-</form>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>LanguageLab</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f4f6f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      width: 350px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    input, select, textarea, button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      margin-top: 15px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #45a049;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h2>LanguageLab</h2>
+
+    <form method="POST" action="/submit">
+      
+      <input name="email" placeholder="Enter your email" required>
+
+      <select name="test_type" required>
+        <option value="">Select Test Type</option>
+        <option value="interpretation">Interpretation</option>
+        <option value="translation">Translation</option>
+        <option value="both">Both</option>
+      </select>
+
+      <input name="language" placeholder="Language (e.g. Spanish, French)" required>
+
+      <textarea name="answer" placeholder="Write your answer here..."></textarea>
+
+      <button type="submit">Start Test</button>
+
+    </form>
+  </div>
+</body>
+</html>
