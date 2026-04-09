@@ -22,12 +22,6 @@
       margin-bottom: 20px;
     }
 
-    img {
-      display: block;
-      margin: 0 auto 20px auto;
-      max-width: 200px;
-    }
-
     table {
       width: 100%;
       border-collapse: collapse;
@@ -60,7 +54,12 @@
 
     audio {
       width: 180px;
-      margin-bottom: 5px;
+      margin-bottom: 6px;
+    }
+
+    .small {
+      font-size: 13px;
+      opacity: 0.8;
     }
   </style>
 </head>
@@ -69,7 +68,6 @@
 
 <div class="container">
 
-  <img src="{{ url_for('static', filename='logo.png') }}">
   <h1>Candidate Dashboard</h1>
 
   <table>
@@ -79,6 +77,7 @@
       <th>Language</th>
       <th>Answers</th>
       <th>Recordings</th>
+      <th>Transcription</th>
       <th>Score</th>
     </tr>
 
@@ -89,7 +88,7 @@
       <td>{{ row[1] }}</td>
       <td>{{ row[2] }}</td>
 
-      <!-- ANSWERS -->
+      <!-- TRANSLATION -->
       <td>
         {% if row[3] != "N/A" %}
           {{ row[3].replace('\n', '<br>') | safe }}
@@ -98,24 +97,24 @@
         {% endif %}
       </td>
 
-      <!-- 🎧 AUDIO PLAYERS -->
+      <!-- AUDIO -->
       <td>
-        {% if row[5] %}
-          <audio controls src="{{ row[5] }}"></audio><br>
-        {% endif %}
-        {% if row[6] %}
-          <audio controls src="{{ row[6] }}"></audio><br>
-        {% endif %}
-        {% if row[7] %}
-          <audio controls src="{{ row[7] }}"></audio><br>
-        {% endif %}
-        {% if row[8] %}
-          <audio controls src="{{ row[8] }}"></audio><br>
-        {% endif %}
+        {% if row[5] %}<audio controls src="{{ row[5] }}"></audio>{% endif %}
+        {% if row[6] %}<audio controls src="{{ row[6] }}"></audio>{% endif %}
+        {% if row[7] %}<audio controls src="{{ row[7] }}"></audio>{% endif %}
+        {% if row[8] %}<audio controls src="{{ row[8] }}"></audio>{% endif %}
 
         {% if not row[5] and not row[6] and not row[7] and not row[8] %}
           ❌ No recordings
         {% endif %}
+      </td>
+
+      <!-- TRANSCRIPTION -->
+      <td class="small">
+        T1: {{ row[9] or "—" }}<br>
+        T2: {{ row[10] or "—" }}<br>
+        T3: {{ row[11] or "—" }}<br>
+        T4: {{ row[12] or "—" }}
       </td>
 
       <!-- SCORE -->

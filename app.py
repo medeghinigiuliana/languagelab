@@ -5,6 +5,11 @@ from datetime import datetime, timedelta
 import os
 from openai import OpenAI
 
+# 🔥 NEW IMPORTS
+import base64
+import io
+from pydub import AudioSegment
+
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = Flask(__name__)
@@ -24,20 +29,25 @@ def init_db():
         )
     """)
 
+    # 🔥 UPDATED TABLE (with transcription)
     c.execute("""
-        CREATE TABLE IF NOT EXISTS results (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            email TEXT,
-            test_type TEXT,
-            language TEXT,
-            answer TEXT,
-            score TEXT,
-            audio1 TEXT,
-            audio2 TEXT,
-            audio3 TEXT,
-            audio4 TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
+    CREATE TABLE IF NOT EXISTS results (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT,
+        test_type TEXT,
+        language TEXT,
+        answer TEXT,
+        score TEXT,
+        audio1 TEXT,
+        audio2 TEXT,
+        audio3 TEXT,
+        audio4 TEXT,
+        transcription1 TEXT,
+        transcription2 TEXT,
+        transcription3 TEXT,
+        transcription4 TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
     """)
 
     conn.commit()
@@ -45,6 +55,55 @@ def init_db():
 
 
 init_db()
+
+# ---------------------------
+# AUDIO HELPERS
+# ---------------------------
+def decode_audio(base64_audio):
+    try:
+        header, encoded = base64_audio.split(",", 1)
+        return base64.b64decode(encoded)
+    except:
+        return None
+
+
+def convert_to_wav(audio_bytes):
+    try:
+        audio = AudioSegment.from_file(io.BytesIO(audio_bytes), format="webm")
+        wav_io = io.BytesIO()
+        audio.export(wav_io, format="wav")
+        wav_io.seek(0)
+        return wav_io
+    except:
+        return None
+
+
+def transcribe_audio(file_obj):
+    try:
+        response = client.audio.transcriptions.create(
+            file=file_obj,
+            model="gpt-4o-transcribe"
+        )
+        return response.text
+    except Exception as e:
+        print("Transcription error:", e)
+        return ""
+
+
+def process_audio(base64_audio):
+    if not base64_audio:
+        return ""
+
+    audio_bytes = decode_audio(base64_audio)
+    if not audio_bytes or len(audio_bytes) < 1000:
+        return ""
+
+    wav_file = convert_to_wav(audio_bytes)
+    if not wav_file:
+        return ""
+
+    return transcribe_audio(wav_file)
+
 
 # ---------------------------
 # CREATE INVITE
@@ -108,7 +167,7 @@ def submit():
         language = request.form.get("language")
 
         # ---------------------------
-        # TRANSLATION (CLEAN INPUT)
+        # TRANSLATION
         # ---------------------------
         answer1 = (request.form.get("answer1") or "").strip()
         answer2 = (request.form.get("answer2") or "").strip()
@@ -127,16 +186,10 @@ def submit():
 
         score = "N/A"
 
-        # ---------------------------
-        # ✅ FIXED SCORING LOGIC
-        # ---------------------------
+        # ✅ TRANSLATION SCORING
         if test_type in ["translation", "both"] and any([
-            answer1 != "",
-            answer2 != "",
-            answer3 != "",
-            answer4 != ""
+            answer1 != "", answer2 != "", answer3 != "", answer4 != ""
         ]):
-
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
@@ -194,6 +247,12 @@ MARKETING:
         audio3 = request.form.get("audio3")
         audio4 = request.form.get("audio4")
 
+        # 🔥 TRANSCRIPTION
+        transcription1 = process_audio(audio1)
+        transcription2 = process_audio(audio2)
+        transcription3 = process_audio(audio3)
+        transcription4 = process_audio(audio4)
+
         # ---------------------------
         # SAVE
         # ---------------------------
@@ -201,9 +260,11 @@ MARKETING:
         c = conn.cursor()
 
         c.execute("""
-            INSERT INTO results 
-            (email, test_type, language, answer, score, audio1, audio2, audio3, audio4)
-            VALUES (?,?,?,?,?,?,?,?,?)
+        INSERT INTO results 
+        (email, test_type, language, answer, score,
+         audio1, audio2, audio3, audio4,
+         transcription1, transcription2, transcription3, transcription4)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
         """, (
             email,
             test_type,
@@ -213,7 +274,11 @@ MARKETING:
             audio1,
             audio2,
             audio3,
-            audio4
+            audio4,
+            transcription1,
+            transcription2,
+            transcription3,
+            transcription4
         ))
 
         conn.commit()
@@ -252,7 +317,9 @@ def dashboard():
         c = conn.cursor()
 
         c.execute("""
-        SELECT email, test_type, language, answer, score, audio1, audio2, audio3, audio4
+        SELECT email, test_type, language, answer, score,
+               audio1, audio2, audio3, audio4,
+               transcription1, transcription2, transcription3, transcription4
         FROM results
         ORDER BY created_at DESC
         """)
