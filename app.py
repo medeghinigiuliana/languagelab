@@ -92,34 +92,37 @@ def submit():
             f"Q4: {answer4}"
         )
 
-        # 🤖 AI SCORING (STRUCTURED + CLEAN)
+        # 🤖 AI SCORING (MULTI-LANGUAGE)
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {
                     "role": "system",
-                    "content": """You are a professional translation evaluator.
+                    "content": f"""You are a professional translation evaluator.
 
-Evaluate each section based on:
+The candidate translated into: {language}
+
+Evaluate based on:
 - Accuracy
 - Terminology
 - Tone adaptation
+- Natural fluency in {language}
 
-Return ONLY in this exact format:
+Return ONLY in this format:
 
 IT_SCORE: X/10
 LEGAL_SCORE: X/10
 MEDICAL_SCORE: X/10
 MARKETING_SCORE: X/10
 FINAL_SCORE: X/10
-FEEDBACK: short professional summary
+FEEDBACK: short professional feedback in English
 
-Do not include anything else."""
+Be strict but fair."""
                 },
                 {
                     "role": "user",
                     "content": f"""
-Evaluate this translation:
+Evaluate this translation into {language}:
 
 IT:
 {answer1}
