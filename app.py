@@ -115,10 +115,10 @@ def dashboard():
         conn = sqlite3.connect("db.db")
         c = conn.cursor()
 
-       c.execute("""
-           CREATE TABLE IF NOT EXISTS results 
-           (email TEXT, test_type TEXT, language TEXT, answer TEXT, score TEXT)
-       """)
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS results 
+            (email TEXT, test_type TEXT, language TEXT, answer TEXT, score TEXT)
+        """)
 
         c.execute("SELECT * FROM results")
         data = c.fetchall()
