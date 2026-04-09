@@ -72,7 +72,7 @@ def submit():
 
 
         c.execute("""
-            CREATE TABLE results 
+            CREATE TABLE IF NOT EXISTS results 
             (email TEXT, test_type TEXT, language TEXT, answer TEXT)
         """)
         c.execute("INSERT INTO results VALUES (?,?,?,?)", 
