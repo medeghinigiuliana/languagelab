@@ -107,11 +107,13 @@ def submit():
         test_type = request.form.get("test_type")
         language = request.form.get("language")
 
-        # TRANSLATION
-        answer1 = request.form.get("answer1")
-        answer2 = request.form.get("answer2")
-        answer3 = request.form.get("answer3")
-        answer4 = request.form.get("answer4")
+        # ---------------------------
+        # TRANSLATION (CLEAN INPUT)
+        # ---------------------------
+        answer1 = (request.form.get("answer1") or "").strip()
+        answer2 = (request.form.get("answer2") or "").strip()
+        answer3 = (request.form.get("answer3") or "").strip()
+        answer4 = (request.form.get("answer4") or "").strip()
 
         if test_type in ["translation", "both"]:
             answer = (
@@ -125,8 +127,16 @@ def submit():
 
         score = "N/A"
 
-        # ✅ FIXED CONDITION (THIS IS THE ONLY CHANGE)
-        if test_type in ["translation", "both"] and any([answer1, answer2, answer3, answer4]):
+        # ---------------------------
+        # ✅ FIXED SCORING LOGIC
+        # ---------------------------
+        if test_type in ["translation", "both"] and any([
+            answer1 != "",
+            answer2 != "",
+            answer3 != "",
+            answer4 != ""
+        ]):
+
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
@@ -176,13 +186,17 @@ MARKETING:
 
             score = response.choices[0].message.content.strip()
 
+        # ---------------------------
         # INTERPRETATION (AUDIO)
+        # ---------------------------
         audio1 = request.form.get("audio1")
         audio2 = request.form.get("audio2")
         audio3 = request.form.get("audio3")
         audio4 = request.form.get("audio4")
 
+        # ---------------------------
         # SAVE
+        # ---------------------------
         conn = sqlite3.connect("db.db")
         c = conn.cursor()
 
@@ -237,7 +251,12 @@ def dashboard():
         conn = sqlite3.connect("db.db")
         c = conn.cursor()
 
-        c.execute("SELECT * FROM results ORDER BY created_at DESC")
+        c.execute("""
+        SELECT email, test_type, language, answer, score, audio1, audio2, audio3, audio4
+        FROM results
+        ORDER BY created_at DESC
+        """)
+
         data = c.fetchall()
 
         conn.close()
