@@ -58,23 +58,33 @@ def home():
     return render_template("test.html")
 @app.route("/submit", methods=["POST"])
 def submit():
-    email = request.form["email"]
-    test_type = request.form["test_type"]
-    language = request.form["language"]
-    answer = request.form["answer"]
+    try:
+        email = request.form.get("email")
+        test_type = request.form.get("test_type")
+        language = request.form.get("language")
+        answer = request.form.get("answer")
 
-    conn = sqlite3.connect("db.db")
-    c = conn.cursor()
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS results 
-        (email TEXT, test_type TEXT, language TEXT, answer TEXT)
-    """)
-    c.execute("INSERT INTO results VALUES (?,?,?,?)", 
-              (email, test_type, language, answer))
-    conn.commit()
-    conn.close()
+        # Debug print (helps in logs)
+        print(email, test_type, language, answer)
 
-    return "Test submitted successfully!"
+        conn = sqlite3.connect("db.db")
+        c = conn.cursor()
+
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS results 
+            (email TEXT, test_type TEXT, language TEXT, answer TEXT)
+        """)
+
+        c.execute("INSERT INTO results VALUES (?,?,?,?)", 
+                  (email, test_type, language, answer))
+
+        conn.commit()
+        conn.close()
+
+        return "Test submitted successfully!"
+
+    except Exception as e:
+        return f"Error: {str(e)}"
 import os
 @app.route("/invite")
 def invite():
