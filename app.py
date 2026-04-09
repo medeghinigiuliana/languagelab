@@ -72,3 +72,15 @@ import os
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+@app.route("/invite")
+def invite():
+    email = request.args.get("email")
+
+    if not email:
+        return "Missing email"
+
+    token = create_invite(email)
+
+    link = f"https://languagelab.onrender.com/?token={token}"
+
+    return f"Invite link: {link}"
