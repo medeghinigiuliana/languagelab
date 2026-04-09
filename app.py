@@ -76,23 +76,24 @@ def submit():
             f"Q3: {answer3}"
         )
 
+        # 🤖 AI SCORING
         response = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[
-        {
-            "role": "system",
-            "content": "You are a professional language evaluator. Score translations from 1 to 10. Only return the score."
-        },
-        {
-            "role": "user",
-            "content": f"Evaluate this translation:\n{answer}"
-        }
-    ]
-)
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a professional language evaluator. Score translations from 1 to 10. Only return the score."
+                },
+                {
+                    "role": "user",
+                    "content": f"Evaluate this translation:\n{answer}"
+                }
+            ]
+        )
 
-score = response.choices[0].message.content.strip()
+        score = response.choices[0].message.content.strip()
 
-        print(email, test_type, language, answer)
+        print(email, test_type, language, answer, score)
 
         conn = sqlite3.connect("db.db")
         c = conn.cursor()
