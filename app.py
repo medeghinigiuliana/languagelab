@@ -7,24 +7,28 @@ from openai import OpenAI
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+app = Flask(__name__)
+
 def create_invite(email):
     token = str(uuid.uuid4())
     expires = datetime.now() + timedelta(hours=48)
 
     conn = sqlite3.connect("db.db")
     c = conn.cursor()
+
     c.execute("""
         CREATE TABLE IF NOT EXISTS invites
         (email TEXT, token TEXT, expires TEXT)
     """)
-    c.execute("INSERT INTO invites VALUES (?,?,?)", 
+
+    c.execute("INSERT INTO invites VALUES (?,?,?)",
               (email, token, expires))
+
     conn.commit()
     conn.close()
 
-    return token 
+    return token
 
-app = Flask(__name__)
 
 @app.route("/", methods=["GET", "HEAD"])
 def home():
@@ -52,13 +56,14 @@ def home():
     if not invite:
         return "Access denied (invalid token)"
 
-    # check expiration
     expires = datetime.strptime(invite[2], "%Y-%m-%d %H:%M:%S.%f")
 
     if datetime.now() > expires:
         return "This link has expired"
 
     return render_template("test.html")
+
+
 @app.route("/submit", methods=["POST"])
 def submit():
     try:
@@ -82,41 +87,39 @@ def submit():
             messages=[
                 {
                     "role": "system",
-                    "content": "Evaluate each answer separately from 1 to 10 and give a final average."
+                    "content": "You are a professional language evaluator. Evaluate each answer from 1 to 10, give a final score and short feedback."
                 },
                 {
                     "role": "user",
                     "content": f"""
-         Evaluate:
+Evaluate the following:
 
-         Q1: {answer1}
-         Q2: {answer2}
-         Q3: {answer3}
+Q1: {answer1}
+Q2: {answer2}
+Q3: {answer3}
 
-         Return:
-         Q1 score:
-         Q2 score:
-         Q3 score:
-         Final score:
-         Short feedback:
-         """
-                 }
-             ]
-         )
+Return:
+Q1 score:
+Q2 score:
+Q3 score:
+Final score:
+Short feedback:
+"""
+                }
+            ]
+        )
 
-         score = response.choices[0].message.content.strip()
-
-        print(email, test_type, language, answer, score)
+        score = response.choices[0].message.content.strip()
 
         conn = sqlite3.connect("db.db")
         c = conn.cursor()
 
         c.execute("""
-            CREATE TABLE IF NOT EXISTS results 
+            CREATE TABLE IF NOT EXISTS results
             (email TEXT, test_type TEXT, language TEXT, answer TEXT, score TEXT)
         """)
 
-        c.execute("INSERT INTO results VALUES (?,?,?,?,?)", 
+        c.execute("INSERT INTO results VALUES (?,?,?,?,?)",
                   (email, test_type, language, answer, score))
 
         conn.commit()
@@ -126,6 +129,8 @@ def submit():
 
     except Exception as e:
         return f"Error: {str(e)}"
+
+
 @app.route("/invite")
 def invite():
     email = request.args.get("email")
@@ -138,6 +143,8 @@ def invite():
     link = f"https://languagelab-7wou.onrender.com/?token={token}"
 
     return f"Invite link: {link}"
+
+
 @app.route("/dashboard")
 def dashboard():
     try:
@@ -145,7 +152,7 @@ def dashboard():
         c = conn.cursor()
 
         c.execute("""
-            CREATE TABLE IF NOT EXISTS results 
+            CREATE TABLE IF NOT EXISTS results
             (email TEXT, test_type TEXT, language TEXT, answer TEXT, score TEXT)
         """)
 
@@ -159,7 +166,7 @@ def dashboard():
     except Exception as e:
         return f"Error: {str(e)}"
 
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
-
     app.run(host="0.0.0.0", port=port)
