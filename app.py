@@ -20,15 +20,13 @@ def create_invite(email):
     conn.close()
 
     return token 
-from flask import Flask, render_template, request
-import sqlite3
 
 app = Flask(__name__)
 
 @app.route("/", methods=["GET", "HEAD"])
 def home():
     if request.method == "HEAD":
-        return "", 200  # prevents Render crash
+        return "", 200
 
     token = request.args.get("token")
 
@@ -49,13 +47,13 @@ def home():
     conn.close()
 
     if not invite:
-    	return "Access denied (invalid token)"
+        return "Access denied (invalid token)"
 
-# check expiration
-expires = datetime.strptime(invite[2], "%Y-%m-%d %H:%M:%S.%f")
+    # check expiration
+    expires = datetime.strptime(invite[2], "%Y-%m-%d %H:%M:%S.%f")
 
-if datetime.now() > expires:
-    return "This link has expired"
+    if datetime.now() > expires:
+        return "This link has expired"
 
     return render_template("test.html")
 @app.route("/submit", methods=["POST"])
