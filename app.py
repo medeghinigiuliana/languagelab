@@ -3,6 +3,9 @@ import sqlite3
 import uuid
 from datetime import datetime, timedelta
 import os
+from openai import OpenAI
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def create_invite(email):
     token = str(uuid.uuid4())
@@ -73,8 +76,21 @@ def submit():
             f"Q3: {answer3}"
         )
 
-        # 🔥 TEMP scoring (we upgrade later)
-        score = "Pending"
+        response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[
+        {
+            "role": "system",
+            "content": "You are a professional language evaluator. Score translations from 1 to 10. Only return the score."
+        },
+        {
+            "role": "user",
+            "content": f"Evaluate this translation:\n{answer}"
+        }
+    ]
+)
+
+score = response.choices[0].message.content.strip()
 
         print(email, test_type, language, answer)
 
@@ -96,7 +112,6 @@ def submit():
 
     except Exception as e:
         return f"Error: {str(e)}"
-import os
 @app.route("/invite")
 def invite():
     email = request.args.get("email")
@@ -131,4 +146,6 @@ def dashboard():
         return f"Error: {str(e)}"
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+    port = int(os.environ.get("PORT", 10000))
+
+    app.run(host="0.0.0.0", port=port)
