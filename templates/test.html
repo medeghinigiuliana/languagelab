@@ -2,21 +2,22 @@
 <html>
 <head>
   <title>LanguageLab</title>
+
   <style>
     body {
       font-family: Arial;
       background: #f4f6f9;
       display: flex;
       justify-content: center;
-      align-items: center;
-      height: 100vh;
+      align-items: flex-start;
+      padding: 40px;
     }
 
     .card {
       background: white;
       padding: 30px;
       border-radius: 10px;
-      width: 350px;
+      width: 700px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
 
@@ -24,7 +25,20 @@
       text-align: center;
     }
 
-    input, select, textarea, button {
+    h3 {
+      margin-top: 20px;
+    }
+
+    textarea {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      min-height: 80px;
+    }
+
+    input, select, button {
       width: 100%;
       margin-top: 10px;
       padding: 10px;
@@ -36,57 +50,104 @@
       background: #4CAF50;
       color: white;
       border: none;
-      margin-top: 15px;
+      margin-top: 20px;
       cursor: pointer;
     }
 
     button:hover {
       background: #45a049;
     }
+
+    hr {
+      margin: 20px 0;
+    }
+
   </style>
 </head>
 
 <body>
+
   <div class="card">
-    <h2>LanguageLab</h2>
+    <h2>LanguageLab Assessment</h2>
 
     <form method="POST" action="/submit">
-      
+
       <input name="email" placeholder="Enter your email" required>
 
-      <select name="test_type" required>
+      <select name="test_type" id="testType" required onchange="showTest()">
         <option value="">Select Test Type</option>
-        <option value="interpretation">Interpretation</option>
         <option value="translation">Translation</option>
+        <option value="interpretation">Interpretation</option>
         <option value="both">Both</option>
       </select>
 
       <select name="language" required>
-  	<option value="">Select Language</option>
- 	 <option>Spanish</option>
- 	 <option>French</option>
- 	 <option>Portuguese</option>
-  	<option>Arabic</option>
-  	<option>Mandarin</option>
+        <option value="">Select Language</option>
+        <option>Spanish</option>
+        <option>French</option>
+        <option>Portuguese</option>
+        <option>Arabic</option>
+        <option>Mandarin</option>
       </select>
 
-      <p><strong>Question 1:</strong></p>
-      <p>Translate: "The meeting has been rescheduled to tomorrow at 10 AM."</p>
-<textarea name="answer1" required></textarea>
+      <!-- ========================= -->
+      <!-- TRANSLATION TEST -->
+      <!-- ========================= -->
 
-      <p><strong>Question 2:</strong></p>
-      <p>Translate: "Please confirm your availability by the end of the day."</p>
-<textarea name="answer2" required></textarea>
+      <div id="translationTest" style="display:none;">
 
-      <p><strong>Question 3:</strong></p>
-      <p>Translate: "The interpreter will join the call in five minutes."</p>
-<textarea name="answer3" required></textarea>
+        <h3>The Brief</h3>
+        <p><strong>Task:</strong> Translate the following four passages into your native language.</p>
+        <p><strong>Context:</strong> Each section belongs to a different industry and requires specific tone and vocabulary.</p>
 
-      <textarea name="answer" placeholder="Write your translation here..." required>  </textarea>
-      
+        <hr>
+
+        <h4>1. Software & IT</h4>
+        <p>Error 404: Endpoint not found. The API gateway timed out while trying to fetch the JSON payload. To resolve this issue, please flush your DNS cache, verify your firewall configurations, and ensure your current OAuth token has not expired. If the bug persists, open a ticket with the DevOps team.</p>
+        <p><strong>[UI Button Constraint - Max 15 characters]:</strong> Retry Connection</p>
+        <textarea name="answer1" placeholder="Your translation..." required></textarea>
+
+        <hr>
+
+        <h4>2. Legal & Compliance</h4>
+        <p>Notwithstanding any prior agreements to the contrary, the Licensee agrees to indemnify, defend, and hold harmless the Licensor against any and all claims, liabilities, or punitive damages arising out of a material breach of this Non-Disclosure Agreement.</p>
+        <textarea name="answer2" required></textarea>
+
+        <hr>
+
+        <h4>3. Medical & Scientific</h4>
+        <p>The 54-year-old patient presented with symptoms indicative of an acute myocardial infarction, preceded by acute dyspnea and profuse diaphoresis. Intravenous administration of a thrombolytic agent is strictly contraindicated.</p>
+        <textarea name="answer3" required></textarea>
+
+        <hr>
+
+        <h4>4. Marketing & Retail</h4>
+        <p>Upgrade your everyday carry with our premium, full-grain leather tote. Built for modern trailblazers, it seamlessly transitions from the boardroom to the boardwalk.</p>
+        <textarea name="answer4" required></textarea>
+
+      </div>
+
       <button type="submit">Start Test</button>
 
     </form>
   </div>
+
+  <!-- ========================= -->
+  <!-- JAVASCRIPT -->
+  <!-- ========================= -->
+
+  <script>
+    function showTest() {
+      var type = document.getElementById("testType").value;
+      var translation = document.getElementById("translationTest");
+
+      if (type === "translation" || type === "both") {
+        translation.style.display = "block";
+      } else {
+        translation.style.display = "none";
+      }
+    }
+  </script>
+
 </body>
-</html> 
+</html>

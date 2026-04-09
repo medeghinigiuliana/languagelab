@@ -10,7 +10,7 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 app = Flask(__name__)
 
 # ---------------------------
-# INVITE SYSTEM
+# CREATE INVITE
 # ---------------------------
 def create_invite(email):
     token = str(uuid.uuid4())
@@ -83,25 +83,36 @@ def submit():
         answer1 = request.form.get("answer1")
         answer2 = request.form.get("answer2")
         answer3 = request.form.get("answer3")
+        answer4 = request.form.get("answer4")
 
         answer = (
             f"Q1: {answer1}\n"
             f"Q2: {answer2}\n"
-            f"Q3: {answer3}"
+            f"Q3: {answer3}\n"
+            f"Q4: {answer4}"
         )
 
-        # 🤖 AI SCORING (CLEAN FORMAT)
+        # 🤖 AI SCORING (STRUCTURED + CLEAN)
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {
                     "role": "system",
-                    "content": """You are a strict language evaluator.
+                    "content": """You are a professional translation evaluator.
+
+Evaluate each section based on:
+- Accuracy
+- Terminology
+- Tone adaptation
 
 Return ONLY in this exact format:
 
+IT_SCORE: X/10
+LEGAL_SCORE: X/10
+MEDICAL_SCORE: X/10
+MARKETING_SCORE: X/10
 FINAL_SCORE: X/10
-FEEDBACK: short clear sentence
+FEEDBACK: short professional summary
 
 Do not include anything else."""
                 },
@@ -110,9 +121,17 @@ Do not include anything else."""
                     "content": f"""
 Evaluate this translation:
 
-Q1: {answer1}
-Q2: {answer2}
-Q3: {answer3}
+IT:
+{answer1}
+
+LEGAL:
+{answer2}
+
+MEDICAL:
+{answer3}
+
+MARKETING:
+{answer4}
 """
                 }
             ]
