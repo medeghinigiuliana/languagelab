@@ -62,29 +62,32 @@ def submit():
         email = request.form.get("email")
         test_type = request.form.get("test_type")
         language = request.form.get("language")
-        anwser1 = request.form.get("answer1") 
-        anwser2 = request.form.get("answer2") 
-        anwser3 = request.form.get("answer3")
-	
-        answer = (
-    	    f"Q1: {answer1}\n"
-    	    f"Q2: {answer2}\n"
-    	    f"Q3: {answer3}"
-	)
 
-        # Debug print (helps in logs)
+        answer1 = request.form.get("answer1")
+        answer2 = request.form.get("answer2")
+        answer3 = request.form.get("answer3")
+
+        answer = (
+            f"Q1: {answer1}\n"
+            f"Q2: {answer2}\n"
+            f"Q3: {answer3}"
+        )
+
+        # 🔥 TEMP scoring (we upgrade later)
+        score = "Pending"
+
         print(email, test_type, language, answer)
 
         conn = sqlite3.connect("db.db")
         c = conn.cursor()
 
-
         c.execute("""
             CREATE TABLE IF NOT EXISTS results 
-            (email TEXT, test_type TEXT, language TEXT, answer TEXT)
+            (email TEXT, test_type TEXT, language TEXT, answer TEXT, score TEXT)
         """)
-        c.execute("INSERT INTO results VALUES (?,?,?,?)", 
-                  (email, test_type, language, answer))
+
+        c.execute("INSERT INTO results VALUES (?,?,?,?,?)", 
+                  (email, test_type, language, answer, score))
 
         conn.commit()
         conn.close()
@@ -112,10 +115,10 @@ def dashboard():
         conn = sqlite3.connect("db.db")
         c = conn.cursor()
 
-        c.execute("""
-            CREATE TABLE IF NOT EXISTS results 
-            (email TEXT, test_type TEXT, language TEXT, answer TEXT)
-        """)
+       c.execute("""
+           CREATE TABLE IF NOT EXISTS results 
+           (email TEXT, test_type TEXT, language TEXT, answer TEXT, score TEXT)
+       """)
 
         c.execute("SELECT * FROM results")
         data = c.fetchall()
