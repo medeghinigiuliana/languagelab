@@ -70,6 +70,7 @@ def submit():
         conn = sqlite3.connect("db.db")
         c = conn.cursor()
 
+
         c.execute("""
             CREATE TABLE results 
             (email TEXT, test_type TEXT, language TEXT, answer TEXT)
@@ -97,6 +98,22 @@ def invite():
     link = f"https://languagelab-7wou.onrender.com/?token={token}"
 
     return f"Invite link: {link}"
+@app.route("/dashboard")
+def dashboard():
+    conn = sqlite3.connect("db.db")
+    c = conn.cursor()
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS results 
+        (email TEXT, test_type TEXT, language TEXT, answer TEXT)
+    """)
+
+    c.execute("SELECT * FROM results")
+    data = c.fetchall()
+
+    conn.close()
+
+    return render_template("dashboard.html", data=data)
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
 # force update
