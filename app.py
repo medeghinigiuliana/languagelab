@@ -49,7 +49,7 @@ def home():
     conn.close()
 
     if not invite:
-    return "Access denied (invalid token)"
+    	return "Access denied (invalid token)"
 
 # check expiration
 expires = datetime.strptime(invite[2], "%Y-%m-%d %H:%M:%S.%f")
