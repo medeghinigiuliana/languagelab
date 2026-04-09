@@ -62,11 +62,11 @@ def submit():
         email = request.form.get("email")
         test_type = request.form.get("test_type")
         language = request.form.get("language")
-        answer1 = request.form.get("answer1")
-	answer2 = request.form.get("answer2")
-	answer3 = request.form.get("answer3")
-
-	answer = (
+        anwser1 = request.form.get("answer1") 
+        anwser2 = request.form.get("answer2") 
+        anwser3 = request.form.get("answer3")
+	
+        answer = (
     	    f"Q1: {answer1}\n"
     	    f"Q2: {answer2}\n"
     	    f"Q3: {answer3}"
