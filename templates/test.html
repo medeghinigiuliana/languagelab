@@ -61,10 +61,20 @@
         <option value="both">Both</option>
       </select>
 
-      <input name="language" placeholder="Language (e.g. Spanish, French)" required>
+      <select name="language" required>
+  	<option value="">Select Language</option>
+ 	 <option>Spanish</option>
+ 	 <option>French</option>
+ 	 <option>Portuguese</option>
+  	<option>Arabic</option>
+  	<option>Mandarin</option>
+      </select>
 
-      <textarea name="answer" placeholder="Write your answer here..."></textarea>
+      <p><strong>Translate this sentence:</strong></p>
+      <p>"The meeting has been rescheduled to tomorrow at 10 AM."</p>
 
+      <textarea name="answer" placeholder="Write your translation here..." required>  </textarea>
+      
       <button type="submit">Start Test</button>
 
     </form>
