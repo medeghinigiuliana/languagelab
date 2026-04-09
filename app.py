@@ -66,12 +66,11 @@ def submit():
 	answer2 = request.form.get("answer2")
 	answer3 = request.form.get("answer3")
 
-	# combine answers into one text
-	answer = f"""
-	Q1: {answer1}
-	Q2: {answer2}
-	Q3: {answer3}
-	"""
+	answer = (
+    	    f"Q1: {answer1}\n"
+    	    f"Q2: {answer2}\n"
+    	    f"Q3: {answer3}"
+	)
 
         # Debug print (helps in logs)
         print(email, test_type, language, answer)
