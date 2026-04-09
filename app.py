@@ -34,7 +34,7 @@ def create_invite(email):
 
 
 # ---------------------------
-# HOME (TOKEN ACCESS)
+# HOME
 # ---------------------------
 @app.route("/", methods=["GET", "HEAD"])
 def home():
@@ -48,11 +48,6 @@ def home():
 
     conn = sqlite3.connect("db.db")
     c = conn.cursor()
-
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS invites
-        (email TEXT, token TEXT, expires TEXT)
-    """)
 
     c.execute("SELECT * FROM invites WHERE token=?", (token,))
     invite = c.fetchone()
@@ -71,7 +66,7 @@ def home():
 
 
 # ---------------------------
-# SUBMIT TEST + AI SCORING
+# SUBMIT TEST
 # ---------------------------
 @app.route("/submit", methods=["POST"])
 def submit():
@@ -80,6 +75,7 @@ def submit():
         test_type = request.form.get("test_type")
         language = request.form.get("language")
 
+        # TRANSLATION ANSWERS
         answer1 = request.form.get("answer1")
         answer2 = request.form.get("answer2")
         answer3 = request.form.get("answer3")
@@ -92,13 +88,22 @@ def submit():
             f"Q4: {answer4}"
         )
 
-        # 🤖 AI SCORING (MULTI-LANGUAGE)
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": f"""You are a professional translation evaluator.
+        # 🎧 INTERPRETATION AUDIO
+        audio1 = request.form.get("audio1")
+        audio2 = request.form.get("audio2")
+        audio3 = request.form.get("audio3")
+        audio4 = request.form.get("audio4")
+
+        score = "N/A"
+
+        # 🤖 ONLY RUN AI FOR TRANSLATION
+        if test_type in ["translation", "both"]:
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": f"""You are a professional translation evaluator.
 
 The candidate translated into: {language}
 
@@ -118,10 +123,10 @@ FINAL_SCORE: X/10
 FEEDBACK: short professional feedback in English
 
 Be strict but fair."""
-                },
-                {
-                    "role": "user",
-                    "content": f"""
+                    },
+                    {
+                        "role": "user",
+                        "content": f"""
 Evaluate this translation into {language}:
 
 IT:
@@ -136,22 +141,25 @@ MEDICAL:
 MARKETING:
 {answer4}
 """
-                }
-            ]
-        )
+                    }
+                ]
+            )
 
-        score = response.choices[0].message.content.strip()
+            score = response.choices[0].message.content.strip()
 
+        # SAVE TO DATABASE
         conn = sqlite3.connect("db.db")
         c = conn.cursor()
 
         c.execute("""
             CREATE TABLE IF NOT EXISTS results
-            (email TEXT, test_type TEXT, language TEXT, answer TEXT, score TEXT)
+            (email TEXT, test_type TEXT, language TEXT, answer TEXT, score TEXT,
+             audio1 TEXT, audio2 TEXT, audio3 TEXT, audio4 TEXT)
         """)
 
-        c.execute("INSERT INTO results VALUES (?,?,?,?,?)",
-                  (email, test_type, language, answer, score))
+        c.execute("INSERT INTO results VALUES (?,?,?,?,?,?,?,?,?)",
+                  (email, test_type, language, answer, score,
+                   audio1, audio2, audio3, audio4))
 
         conn.commit()
         conn.close()
@@ -163,7 +171,7 @@ MARKETING:
 
 
 # ---------------------------
-# GENERATE INVITE
+# INVITE LINK
 # ---------------------------
 @app.route("/invite")
 def invite():
@@ -187,11 +195,6 @@ def dashboard():
     try:
         conn = sqlite3.connect("db.db")
         c = conn.cursor()
-
-        c.execute("""
-            CREATE TABLE IF NOT EXISTS results
-            (email TEXT, test_type TEXT, language TEXT, answer TEXT, score TEXT)
-        """)
 
         c.execute("SELECT * FROM results")
         data = c.fetchall()
