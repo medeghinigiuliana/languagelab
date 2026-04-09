@@ -1,5 +1,8 @@
+from flask import Flask, render_template, request
+import sqlite3
 import uuid
 from datetime import datetime, timedelta
+import os
 
 def create_invite(email):
     token = str(uuid.uuid4())
@@ -69,22 +72,6 @@ def submit():
 
     return "Test submitted successfully!"
 import os
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
-@app.route("/invite")
-def invite():
-    email = request.args.get("email")
-
-    if not email:
-        return "Missing email"
-
-    token = create_invite(email)
-
-    link = f"https://languagelab.onrender.com/?token={token}"
-
-    return f"Invite link: {link}"
-
 @app.route("/invite")
 def invite():
     email = request.args.get("email")
@@ -97,4 +84,6 @@ def invite():
     link = f"https://languagelab-7wou.onrender.com/?token={token}"
 
     return f"Invite link: {link}"
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
 # force update
