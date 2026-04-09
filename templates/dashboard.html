@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dashboard</title>
+  <title>Novox Dashboard</title>
 
   <style>
     body {
@@ -11,14 +11,23 @@
       padding: 20px;
     }
 
+    .logo {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .logo img {
+      max-width: 200px;
+    }
+
     h1 {
       text-align: center;
+      margin-bottom: 20px;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 30px;
       background: white;
       color: black;
       border-radius: 10px;
@@ -50,7 +59,11 @@
 
 <body>
 
-  <h1>📊 Candidate Dashboard</h1>
+  <div class="logo">
+    <img src="{{ url_for('static', filename='logo.png') }}">
+  </div>
+
+  <h1>Candidate Dashboard</h1>
 
   <table>
     <tr>
@@ -70,7 +83,6 @@
       <td class="score">{{ row[4] }}</td>
     </tr>
     {% endfor %}
-
   </table>
 
 </body>
