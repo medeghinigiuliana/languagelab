@@ -1,4 +1,22 @@
- 
+import uuid
+from datetime import datetime, timedelta
+
+def create_invite(email):
+    token = str(uuid.uuid4())
+    expires = datetime.now() + timedelta(hours=48)
+
+    conn = sqlite3.connect("db.db")
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS invites
+        (email TEXT, token TEXT, expires TEXT)
+    """)
+    c.execute("INSERT INTO invites VALUES (?,?,?)", 
+              (email, token, expires))
+    conn.commit()
+    conn.close()
+
+    return token 
 from flask import Flask, render_template, request
 import sqlite3
 
@@ -6,6 +24,19 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
+    token = request.args.get("token")
+
+    conn = sqlite3.connect("db.db")
+    c = conn.cursor()
+
+    c.execute("SELECT * FROM invites WHERE token=?", (token,))
+    invite = c.fetchone()
+
+    conn.close()
+
+    if not invite:
+        return "Access denied"
+
     return render_template("test.html")
 
 @app.route("/submit", methods=["POST"])
