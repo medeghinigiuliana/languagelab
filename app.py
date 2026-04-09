@@ -10,6 +10,47 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 app = Flask(__name__)
 
 # ---------------------------
+# INIT DB (VERY IMPORTANT)
+# ---------------------------
+def init_db():
+    conn = sqlite3.connect("db.db")
+    c = conn.cursor()
+
+    # INVITES TABLE
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS invites (
+            email TEXT,
+            token TEXT,
+            expires TEXT
+        )
+    """)
+
+    # RESULTS TABLE
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS results (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT,
+            test_type TEXT,
+            language TEXT,
+            answer TEXT,
+            score TEXT,
+            audio1 TEXT,
+            audio2 TEXT,
+            audio3 TEXT,
+            audio4 TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    conn.commit()
+    conn.close()
+
+
+# Run DB init on startup (IMPORTANT for Render)
+init_db()
+
+
+# ---------------------------
 # CREATE INVITE
 # ---------------------------
 def create_invite(email):
@@ -18,11 +59,6 @@ def create_invite(email):
 
     conn = sqlite3.connect("db.db")
     c = conn.cursor()
-
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS invites
-        (email TEXT, token TEXT, expires TEXT)
-    """)
 
     c.execute("INSERT INTO invites VALUES (?,?,?)",
               (email, token, expires))
@@ -75,29 +111,28 @@ def submit():
         test_type = request.form.get("test_type")
         language = request.form.get("language")
 
-        # TRANSLATION ANSWERS
+        # ---------------------------
+        # TRANSLATION
+        # ---------------------------
         answer1 = request.form.get("answer1")
         answer2 = request.form.get("answer2")
         answer3 = request.form.get("answer3")
         answer4 = request.form.get("answer4")
 
-        answer = (
-            f"Q1: {answer1}\n"
-            f"Q2: {answer2}\n"
-            f"Q3: {answer3}\n"
-            f"Q4: {answer4}"
-        )
-
-        # 🎧 INTERPRETATION AUDIO
-        audio1 = request.form.get("audio1")
-        audio2 = request.form.get("audio2")
-        audio3 = request.form.get("audio3")
-        audio4 = request.form.get("audio4")
+        if test_type in ["translation", "both"]:
+            answer = (
+                f"Q1: {answer1}\n"
+                f"Q2: {answer2}\n"
+                f"Q3: {answer3}\n"
+                f"Q4: {answer4}"
+            )
+        else:
+            answer = "N/A"
 
         score = "N/A"
 
-        # 🤖 ONLY RUN AI FOR TRANSLATION
-        if test_type in ["translation", "both"]:
+        # 🤖 AI SCORING (ONLY IF THERE IS CONTENT)
+        if test_type in ["translation", "both"] and answer1:
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
@@ -147,27 +182,43 @@ MARKETING:
 
             score = response.choices[0].message.content.strip()
 
-        # SAVE TO DATABASE
+        # ---------------------------
+        # INTERPRETATION (AUDIO)
+        # ---------------------------
+        audio1 = request.form.get("audio1")
+        audio2 = request.form.get("audio2")
+        audio3 = request.form.get("audio3")
+        audio4 = request.form.get("audio4")
+
+        # ---------------------------
+        # SAVE TO DB
+        # ---------------------------
         conn = sqlite3.connect("db.db")
         c = conn.cursor()
 
         c.execute("""
-            CREATE TABLE IF NOT EXISTS results
-            (email TEXT, test_type TEXT, language TEXT, answer TEXT, score TEXT,
-             audio1 TEXT, audio2 TEXT, audio3 TEXT, audio4 TEXT)
-        """)
-
-        c.execute("INSERT INTO results VALUES (?,?,?,?,?,?,?,?,?)",
-                  (email, test_type, language, answer, score,
-                   audio1, audio2, audio3, audio4))
+            INSERT INTO results 
+            (email, test_type, language, answer, score, audio1, audio2, audio3, audio4)
+            VALUES (?,?,?,?,?,?,?,?,?)
+        """, (
+            email,
+            test_type,
+            language,
+            answer,
+            score,
+            audio1,
+            audio2,
+            audio3,
+            audio4
+        ))
 
         conn.commit()
         conn.close()
 
-        return "Test submitted successfully!"
+        return "✅ Test submitted successfully!"
 
     except Exception as e:
-        return f"Error: {str(e)}"
+        return f"❌ Error: {str(e)}"
 
 
 # ---------------------------
@@ -196,7 +247,7 @@ def dashboard():
         conn = sqlite3.connect("db.db")
         c = conn.cursor()
 
-        c.execute("SELECT * FROM results")
+        c.execute("SELECT * FROM results ORDER BY created_at DESC")
         data = c.fetchall()
 
         conn.close()
@@ -212,4 +263,4 @@ def dashboard():
 # ---------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port))
