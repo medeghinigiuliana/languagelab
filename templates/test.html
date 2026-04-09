@@ -80,9 +80,10 @@
       <option value="both">Both</option>
     </select>
 
-    <!-- LANGUAGE -->
-    <select name="language" required>
-      <option value="">Target Language</option>
+    <!-- 🔍 SEARCHABLE LANGUAGE -->
+    <input type="text" id="languageSearch" placeholder="Search language..." onkeyup="filterLanguages()" required>
+
+    <select name="language" id="languageSelect" size="6" required>
       <option>Akan</option>
       <option>Amharic</option>
       <option>Arabic</option>
@@ -177,64 +178,33 @@
       <option>Zulu</option>
     </select>
 
-    <!-- ========================= -->
-    <!-- TRANSLATION TEST -->
-    <!-- ========================= -->
+    <!-- TRANSLATION -->
     <div id="translationTest" style="display:none;">
-
       <h3>The Multi-Industry Translation Test</h3>
       <p>Translate each passage into your native language using the correct tone and terminology.</p>
 
       <div class="section">
         <h3>1. Software & IT</h3>
-        <p>
-          Error 404: Endpoint not found. The API gateway timed out while trying to fetch the JSON payload.
-          To resolve this issue, please flush your DNS cache, verify your firewall configurations,
-          and ensure your current OAuth token has not expired. If the bug persists, open a ticket with the DevOps team.
-          <br><br>
-          <b>[UI Button Constraint - Max 15 characters]: Retry Connection</b>
-        </p>
         <textarea name="answer1"></textarea>
       </div>
 
       <div class="section">
         <h3>2. Legal & Compliance</h3>
-        <p>
-          Notwithstanding any prior agreements to the contrary, the Licensee agrees to indemnify, defend,
-          and hold harmless the Licensor against any and all claims, liabilities, or punitive damages arising
-          out of a material breach of this Non-Disclosure Agreement. In the event of force majeure,
-          this stipulation is rendered null and void. The governing law shall be the jurisdiction of the defendant.
-        </p>
         <textarea name="answer2"></textarea>
       </div>
 
       <div class="section">
         <h3>3. Medical & Scientific</h3>
-        <p>
-          The 54-year-old patient presented with symptoms indicative of an acute myocardial infarction,
-          preceded by acute dyspnea and profuse diaphoresis. Intravenous administration of a thrombolytic agent
-          is strictly contraindicated due to a recent history of a hemorrhagic stroke.
-          Immediate referral to the catheterization lab for percutaneous coronary intervention (PCI) is highly recommended.
-        </p>
         <textarea name="answer3"></textarea>
       </div>
 
       <div class="section">
         <h3>4. Marketing & Retail</h3>
-        <p>
-          Upgrade your everyday carry with our premium, full-grain leather tote.
-          Built for modern trailblazers, it seamlessly transitions from the boardroom to the boardwalk.
-          We've ditched the middlemen to bring you unparalleled craftsmanship at a fraction of the cost.
-          Don't miss out on our limited-time BOGO sale—grab yours before they're gone for good!
-        </p>
         <textarea name="answer4"></textarea>
       </div>
-
     </div>
 
-    <!-- ========================= -->
-    <!-- INTERPRETATION TEST -->
-    <!-- ========================= -->
+    <!-- INTERPRETATION -->
     <div id="interpretationTest" style="display:none;">
 
       <div class="section">
@@ -282,9 +252,6 @@
 </div>
 
 <script>
-let recorders = {};
-let chunks = {};
-
 function showTest() {
   let type = document.getElementById("testType").value;
 
@@ -294,6 +261,20 @@ function showTest() {
   document.getElementById("translationTest").style.display =
     (type === "translation" || type === "both") ? "block" : "none";
 }
+
+function filterLanguages() {
+  let input = document.getElementById("languageSearch").value.toLowerCase();
+  let select = document.getElementById("languageSelect");
+  let options = select.options;
+
+  for (let i = 0; i < options.length; i++) {
+    let txt = options[i].text.toLowerCase();
+    options[i].style.display = txt.includes(input) ? "" : "none";
+  }
+}
+
+let recorders = {};
+let chunks = {};
 
 async function startRecording(id) {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
