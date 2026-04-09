@@ -9,6 +9,9 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = Flask(__name__)
 
+# ---------------------------
+# INVITE SYSTEM
+# ---------------------------
 def create_invite(email):
     token = str(uuid.uuid4())
     expires = datetime.now() + timedelta(hours=48)
@@ -30,6 +33,9 @@ def create_invite(email):
     return token
 
 
+# ---------------------------
+# HOME (TOKEN ACCESS)
+# ---------------------------
 @app.route("/", methods=["GET", "HEAD"])
 def home():
     if request.method == "HEAD":
@@ -64,6 +70,9 @@ def home():
     return render_template("test.html")
 
 
+# ---------------------------
+# SUBMIT TEST + AI SCORING
+# ---------------------------
 @app.route("/submit", methods=["POST"])
 def submit():
     try:
@@ -81,29 +90,29 @@ def submit():
             f"Q3: {answer3}"
         )
 
-        # 🤖 AI SCORING
+        # 🤖 AI SCORING (CLEAN FORMAT)
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a professional language evaluator. Evaluate each answer from 1 to 10, give a final score and short feedback."
+                    "content": """You are a strict language evaluator.
+
+Return ONLY in this exact format:
+
+FINAL_SCORE: X/10
+FEEDBACK: short clear sentence
+
+Do not include anything else."""
                 },
                 {
                     "role": "user",
                     "content": f"""
-Evaluate the following:
+Evaluate this translation:
 
 Q1: {answer1}
 Q2: {answer2}
 Q3: {answer3}
-
-Return:
-Q1 score:
-Q2 score:
-Q3 score:
-Final score:
-Short feedback:
 """
                 }
             ]
@@ -131,6 +140,9 @@ Short feedback:
         return f"Error: {str(e)}"
 
 
+# ---------------------------
+# GENERATE INVITE
+# ---------------------------
 @app.route("/invite")
 def invite():
     email = request.args.get("email")
@@ -145,6 +157,9 @@ def invite():
     return f"Invite link: {link}"
 
 
+# ---------------------------
+# DASHBOARD
+# ---------------------------
 @app.route("/dashboard")
 def dashboard():
     try:
@@ -167,6 +182,9 @@ def dashboard():
         return f"Error: {str(e)}"
 
 
+# ---------------------------
+# RUN APP
+# ---------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
