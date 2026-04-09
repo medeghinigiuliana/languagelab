@@ -60,6 +60,11 @@
       opacity: 0.9;
       line-height: 1.5;
     }
+
+    .recording {
+      font-weight: bold;
+      margin-top: 10px;
+    }
   </style>
 </head>
 
@@ -84,98 +89,29 @@
     <input type="text" id="languageSearch" placeholder="Search language..." onkeyup="filterLanguages()" required>
 
     <select name="language" id="languageSelect" size="6" required>
-      <option>Akan</option>
-      <option>Amharic</option>
-      <option>Arabic</option>
-      <option>Assamese</option>
-      <option>Awadhi</option>
-      <option>Azerbaijani</option>
-      <option>Bengali</option>
-      <option>Bhojpuri</option>
-      <option>Bulgarian</option>
-      <option>Burmese</option>
-      <option>Cebuano</option>
-      <option>Chhattisgarhi</option>
-      <option>Chewa</option>
-      <option>Chittagonian</option>
-      <option>Czech</option>
-      <option>Danish</option>
-      <option>Deccan</option>
-      <option>Dutch</option>
-      <option>English</option>
-      <option>Finnish</option>
-      <option>French</option>
-      <option>Fula</option>
-      <option>Gan Chinese</option>
-      <option>German</option>
-      <option>Greek</option>
-      <option>Gujarati</option>
-      <option>Haitian Creole</option>
-      <option>Hakka Chinese</option>
-      <option>Haryanvi</option>
-      <option>Hausa</option>
-      <option>Hebrew</option>
-      <option>Hindi</option>
-      <option>Hungarian</option>
-      <option>Igbo</option>
-      <option>Italian</option>
-      <option>Japanese</option>
-      <option>Javanese</option>
-      <option>Jin Chinese</option>
-      <option>Kannada</option>
-      <option>Kazakh</option>
-      <option>Khmer</option>
-      <option>Kinyarwanda</option>
-      <option>Korean</option>
-      <option>Kurdish</option>
-      <option>Magahi</option>
-      <option>Maithili</option>
-      <option>Malagasy</option>
-      <option>Malay</option>
-      <option>Malayalam</option>
-      <option>Mandarin Chinese</option>
-      <option>Marathi</option>
-      <option>Marwari</option>
-      <option>Madurese</option>
-      <option>Navajo</option>
-      <option>Nepali</option>
-      <option>Northern Min</option>
-      <option>Norwegian</option>
-      <option>Odia</option>
-      <option>Oromo</option>
-      <option>Pashto</option>
-      <option>Persian (Farsi)</option>
-      <option>Polish</option>
-      <option>Portuguese</option>
-      <option>Punjabi</option>
-      <option>Romanian</option>
-      <option>Russian</option>
-      <option>Saraiki</option>
-      <option>Serbo-Croatian</option>
-      <option>Sindhi</option>
-      <option>Sinhalese</option>
-      <option>Slovak</option>
-      <option>Somali</option>
-      <option>Southern Min</option>
-      <option>Spanish</option>
-      <option>Sundanese</option>
-      <option>Sylheti</option>
-      <option>Tagalog (Filipino)</option>
-      <option>Tamil</option>
-      <option>Telugu</option>
-      <option>Thai</option>
-      <option>Turkish</option>
-      <option>Turkmen</option>
-      <option>Ukrainian</option>
-      <option>Urdu</option>
-      <option>Uzbek</option>
-      <option>Vietnamese</option>
-      <option>Wu Chinese</option>
-      <option>Xiang Chinese</option>
-      <option>Yoruba</option>
-      <option>Yue Chinese (Cantonese)</option>
-      <option>Zhuang</option>
-      <option>Zulu</option>
+      <option>Akan</option><option>Amharic</option><option>Arabic</option><option>Assamese</option>
+      <option>Awadhi</option><option>Azerbaijani</option><option>Bengali</option><option>Bhojpuri</option>
+      <option>Bulgarian</option><option>Burmese</option><option>Cebuano</option><option>Chhattisgarhi</option>
+      <option>Chewa</option><option>Chittagonian</option><option>Czech</option><option>Danish</option>
+      <option>Deccan</option><option>Dutch</option><option>English</option><option>Finnish</option>
+      <option>French</option><option>Fula</option><option>Gan Chinese</option><option>German</option>
+      <option>Greek</option><option>Gujarati</option><option>Haitian Creole</option><option>Hakka Chinese</option>
+      <option>Haryanvi</option><option>Hausa</option><option>Hebrew</option><option>Hindi</option>
+      <option>Hungarian</option><option>Igbo</option><option>Italian</option><option>Japanese</option>
+      <option>Javanese</option><option>Jin Chinese</option><option>Kannada</option><option>Kazakh</option>
+      <option>Khmer</option><option>Kinyarwanda</option><option>Korean</option><option>Kurdish</option>
+      <option>Magahi</option><option>Maithili</option><option>Malagasy</option><option>Malay</option>
+      <option>Malayalam</option><option>Mandarin Chinese</option><option>Marathi</option><option>Marwari</option>
+      <option>Madurese</option><option>Navajo</option><option>Nepali</option><option>Northern Min</option>
+      <option>Norwegian</option><option>Odia</option><option>Oromo</option><option>Pashto</option>
+      <option>Persian (Farsi)</option><option>Polish</option><option>Portuguese</option><option>Punjabi</option>
+      <option>Romanian</option><option>Russian</option><option>Saraiki</option><option>Serbo-Croatian</option>
+      <option>Sindhi</option><option>Sinhalese</option><option>Slovak</option><option>Somali</option>
+      <option>Southern Min</option><option>Spanish</option><option>Sundanese</option><option>Sylheti</option>
+      <option>Tagalog (Filipino)</option><option>Tamil</option><option>Telugu</option><option>Thai</option>
+      <option>Turkish</option><option>Turkmen</option><option>Ukrainian</option><option>Urdu</option>
+      <option>Uzbek</option><option>Vietnamese</option><option>Wu Chinese</option><option>Xiang Chinese</option>
+      <option>Yoruba</option><option>Yue Chinese (Cantonese)</option><option>Zhuang</option><option>Zulu</option>
     </select>
 
     <!-- TRANSLATION -->
@@ -183,62 +119,55 @@
       <h3>The Multi-Industry Translation Test</h3>
       <p>Translate each passage into your native language using the correct tone and terminology.</p>
 
-      <div class="section">
-        <h3>1. Software & IT</h3>
-        <textarea name="answer1"></textarea>
-      </div>
-
-      <div class="section">
-        <h3>2. Legal & Compliance</h3>
-        <textarea name="answer2"></textarea>
-      </div>
-
-      <div class="section">
-        <h3>3. Medical & Scientific</h3>
-        <textarea name="answer3"></textarea>
-      </div>
-
-      <div class="section">
-        <h3>4. Marketing & Retail</h3>
-        <textarea name="answer4"></textarea>
-      </div>
+      <div class="section"><h3>1. Software & IT</h3><textarea name="answer1"></textarea></div>
+      <div class="section"><h3>2. Legal & Compliance</h3><textarea name="answer2"></textarea></div>
+      <div class="section"><h3>3. Medical & Scientific</h3><textarea name="answer3"></textarea></div>
+      <div class="section"><h3>4. Marketing & Retail</h3><textarea name="answer4"></textarea></div>
     </div>
 
     <!-- INTERPRETATION -->
     <div id="interpretationTest" style="display:none;">
 
+      <!-- AUDIO 1 -->
       <div class="section">
         <h3>Audio 1</h3>
         <audio controls src="{{ url_for('static', filename='audio/audio1.mp3') }}"></audio><br>
         <button type="button" onclick="startRecording(1)">Start</button>
         <button type="button" onclick="stopRecording(1)">Stop</button>
+        <p id="recordingStatus1" class="recording"></p>
         <audio id="playback1" controls></audio>
         <input type="hidden" name="audio1" id="audioData1">
       </div>
 
+      <!-- AUDIO 2 -->
       <div class="section">
         <h3>Audio 2</h3>
         <audio controls src="{{ url_for('static', filename='audio/audio2.mp3') }}"></audio><br>
         <button type="button" onclick="startRecording(2)">Start</button>
         <button type="button" onclick="stopRecording(2)">Stop</button>
+        <p id="recordingStatus2" class="recording"></p>
         <audio id="playback2" controls></audio>
         <input type="hidden" name="audio2" id="audioData2">
       </div>
 
+      <!-- AUDIO 3 -->
       <div class="section">
         <h3>Audio 3</h3>
         <audio controls src="{{ url_for('static', filename='audio/audio3.mp3') }}"></audio><br>
         <button type="button" onclick="startRecording(3)">Start</button>
         <button type="button" onclick="stopRecording(3)">Stop</button>
+        <p id="recordingStatus3" class="recording"></p>
         <audio id="playback3" controls></audio>
         <input type="hidden" name="audio3" id="audioData3">
       </div>
 
+      <!-- AUDIO 4 -->
       <div class="section">
         <h3>Audio 4</h3>
         <audio controls src="{{ url_for('static', filename='audio/audio4.mp3') }}"></audio><br>
         <button type="button" onclick="startRecording(4)">Start</button>
         <button type="button" onclick="stopRecording(4)">Stop</button>
+        <p id="recordingStatus4" class="recording"></p>
         <audio id="playback4" controls></audio>
         <input type="hidden" name="audio4" id="audioData4">
       </div>
@@ -275,6 +204,7 @@ function filterLanguages() {
 
 let recorders = {};
 let chunks = {};
+let playbackCount = {};
 
 async function startRecording(id) {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -282,19 +212,41 @@ async function startRecording(id) {
   recorders[id] = new MediaRecorder(stream);
   chunks[id] = [];
 
+  let indicator = document.getElementById("recordingStatus" + id);
+  indicator.innerText = "🔴 Recording...";
+  indicator.style.color = "red";
+
+  let playback = document.getElementById("playback" + id);
+  playback.controls = false;
+
   recorders[id].ondataavailable = e => chunks[id].push(e.data);
 
   recorders[id].onstop = () => {
     const blob = new Blob(chunks[id], { type: 'audio/webm' });
     const url = URL.createObjectURL(blob);
 
-    document.getElementById("playback" + id).src = url;
+    playback.src = url;
+    playback.controls = true;
+
+    playbackCount[id] = 0;
+
+    playback.onplay = () => {
+      playbackCount[id]++;
+      if (playbackCount[id] > 2) {
+        alert("You can only play this recording 2 times.");
+        playback.pause();
+        playback.currentTime = 0;
+      }
+    };
 
     const reader = new FileReader();
     reader.readAsDataURL(blob);
     reader.onloadend = () => {
       document.getElementById("audioData" + id).value = reader.result;
     };
+
+    indicator.innerText = "✅ Recording saved";
+    indicator.style.color = "lightgreen";
   };
 
   recorders[id].start();
