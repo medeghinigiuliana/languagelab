@@ -22,12 +22,23 @@ import sqlite3
 
 app = Flask(__name__)
 
-@app.route("/")
+@app.route("/", methods=["GET", "HEAD"])
 def home():
+    if request.method == "HEAD":
+        return "", 200  # prevents Render crash
+
     token = request.args.get("token")
+
+    if not token:
+        return "Access denied (no token)"
 
     conn = sqlite3.connect("db.db")
     c = conn.cursor()
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS invites
+        (email TEXT, token TEXT, expires TEXT)
+    """)
 
     c.execute("SELECT * FROM invites WHERE token=?", (token,))
     invite = c.fetchone()
@@ -35,10 +46,9 @@ def home():
     conn.close()
 
     if not invite:
-        return "Access denied"
+        return "Access denied (invalid token)"
 
     return render_template("test.html")
-
 @app.route("/submit", methods=["POST"])
 def submit():
     email = request.form["email"]
