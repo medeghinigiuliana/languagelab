@@ -49,20 +49,25 @@
     }
 
     textarea {
-      min-height: 90px;
+      min-height: 100px;
     }
 
     .section {
       margin-top: 25px;
       padding: 20px;
       border-radius: 10px;
-      background: #0f172a;
+      background: #020617;
       border-left: 4px solid #6366f1;
     }
 
     .section h3 {
       margin-top: 0;
       color: #818cf8;
+    }
+
+    .section p {
+      line-height: 1.6;
+      color: #e2e8f0;
     }
 
     .brief {
@@ -119,6 +124,7 @@
         <option>Mandarin</option>
       </select>
 
+      <!-- TRANSLATION TEST -->
       <div id="translationTest" style="display:none;">
 
         <div class="brief">
@@ -126,27 +132,55 @@
           <strong>Focus:</strong> Accuracy, terminology, and tone adaptation per industry.
         </div>
 
+        <!-- SOFTWARE -->
         <div class="section">
           <h3>💻 Software & IT</h3>
-          <p>Error 404: Endpoint not found. The API gateway timed out while trying to fetch the JSON payload...</p>
+          <p>
+          Error 404: Endpoint not found. The API gateway timed out while trying to fetch the JSON payload. 
+          To resolve this issue, please flush your DNS cache, verify your firewall configurations, and ensure your current OAuth token has not expired. 
+          If the bug persists, open a ticket with the DevOps team.
+          </p>
+
+          <p><strong>UI Button (max 15 characters):</strong> Retry Connection</p>
+
           <textarea name="answer1" placeholder="Your translation..." required></textarea>
         </div>
 
+        <!-- LEGAL -->
         <div class="section">
           <h3>⚖️ Legal & Compliance</h3>
-          <p>Notwithstanding any prior agreements to the contrary, the Licensee agrees to indemnify...</p>
+          <p>
+          Notwithstanding any prior agreements to the contrary, the Licensee agrees to indemnify, defend, 
+          and hold harmless the Licensor against any and all claims, liabilities, or punitive damages arising 
+          out of a material breach of this Non-Disclosure Agreement. In the event of force majeure, 
+          this stipulation is rendered null and void. The governing law shall be the jurisdiction of the defendant.
+          </p>
+
           <textarea name="answer2" required></textarea>
         </div>
 
+        <!-- MEDICAL -->
         <div class="section">
           <h3>🧬 Medical & Scientific</h3>
-          <p>The 54-year-old patient presented with symptoms indicative of an acute myocardial infarction...</p>
+          <p>
+          The 54-year-old patient presented with symptoms indicative of an acute myocardial infarction, 
+          preceded by acute dyspnea and profuse diaphoresis. Intravenous administration of a thrombolytic agent 
+          is strictly contraindicated due to a recent history of a hemorrhagic stroke. Immediate referral to the 
+          catheterization lab for percutaneous coronary intervention (PCI) is highly recommended.
+          </p>
+
           <textarea name="answer3" required></textarea>
         </div>
 
+        <!-- MARKETING -->
         <div class="section">
           <h3>🛍️ Marketing & Retail</h3>
-          <p>Upgrade your everyday carry with our premium, full-grain leather tote...</p>
+          <p>
+          Upgrade your everyday carry with our premium, full-grain leather tote. Built for modern trailblazers, 
+          it seamlessly transitions from the boardroom to the boardwalk. We've ditched the middlemen to bring you 
+          unparalleled craftsmanship at a fraction of the cost. Don't miss out on our limited-time BOGO sale—grab yours before they're gone for good!
+          </p>
+
           <textarea name="answer4" required></textarea>
         </div>
 
