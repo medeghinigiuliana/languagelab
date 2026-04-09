@@ -10,13 +10,12 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 app = Flask(__name__)
 
 # ---------------------------
-# INIT DB (VERY IMPORTANT)
+# INIT DB
 # ---------------------------
 def init_db():
     conn = sqlite3.connect("db.db")
     c = conn.cursor()
 
-    # INVITES TABLE
     c.execute("""
         CREATE TABLE IF NOT EXISTS invites (
             email TEXT,
@@ -25,7 +24,6 @@ def init_db():
         )
     """)
 
-    # RESULTS TABLE
     c.execute("""
         CREATE TABLE IF NOT EXISTS results (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,9 +44,7 @@ def init_db():
     conn.close()
 
 
-# Run DB init on startup (IMPORTANT for Render)
 init_db()
-
 
 # ---------------------------
 # CREATE INVITE
@@ -111,9 +107,7 @@ def submit():
         test_type = request.form.get("test_type")
         language = request.form.get("language")
 
-        # ---------------------------
         # TRANSLATION
-        # ---------------------------
         answer1 = request.form.get("answer1")
         answer2 = request.form.get("answer2")
         answer3 = request.form.get("answer3")
@@ -131,8 +125,8 @@ def submit():
 
         score = "N/A"
 
-        # 🤖 AI SCORING (ONLY IF THERE IS CONTENT)
-        if test_type in ["translation", "both"] and answer1:
+        # ✅ FIXED CONDITION (THIS IS THE ONLY CHANGE)
+        if test_type in ["translation", "both"] and any([answer1, answer2, answer3, answer4]):
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
@@ -182,17 +176,13 @@ MARKETING:
 
             score = response.choices[0].message.content.strip()
 
-        # ---------------------------
         # INTERPRETATION (AUDIO)
-        # ---------------------------
         audio1 = request.form.get("audio1")
         audio2 = request.form.get("audio2")
         audio3 = request.form.get("audio3")
         audio4 = request.form.get("audio4")
 
-        # ---------------------------
-        # SAVE TO DB
-        # ---------------------------
+        # SAVE
         conn = sqlite3.connect("db.db")
         c = conn.cursor()
 
@@ -222,7 +212,7 @@ MARKETING:
 
 
 # ---------------------------
-# INVITE LINK
+# INVITE
 # ---------------------------
 @app.route("/invite")
 def invite():
@@ -259,7 +249,7 @@ def dashboard():
 
 
 # ---------------------------
-# RUN APP
+# RUN
 # ---------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))

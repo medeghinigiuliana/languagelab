@@ -1,23 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Novox Dashboard</title>
+  <title>Candidate Dashboard</title>
 
   <style>
     body {
+      margin: 0;
       font-family: 'Segoe UI', sans-serif;
       background: #0f172a;
       color: white;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 40px auto;
       padding: 20px;
-    }
-
-    .logo {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .logo img {
-      max-width: 200px;
     }
 
     h1 {
@@ -25,44 +22,53 @@
       margin-bottom: 20px;
     }
 
+    img {
+      display: block;
+      margin: 0 auto 20px auto;
+      max-width: 200px;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      background: white;
-      color: black;
+      background: #1e293b;
       border-radius: 10px;
       overflow: hidden;
     }
 
     th {
       background: #6366f1;
-      color: white;
       padding: 12px;
+      text-align: left;
     }
 
     td {
-      padding: 10px;
-      border-bottom: 1px solid #e2e8f0;
-      font-size: 13px;
+      padding: 12px;
+      background: #e5e7eb;
+      color: #111827;
+      vertical-align: top;
     }
 
-    tr:hover {
-      background: #f1f5f9;
+    tr:nth-child(even) td {
+      background: #d1d5db;
     }
 
     .score {
+      color: green;
       font-weight: bold;
-      color: #16a34a;
+    }
+
+    .audio {
+      font-size: 14px;
     }
   </style>
 </head>
 
 <body>
 
-  <div class="logo">
-    <img src="{{ url_for('static', filename='logo.png') }}">
-  </div>
+<div class="container">
 
+  <img src="{{ url_for('static', filename='logo.png') }}">
   <h1>Candidate Dashboard</h1>
 
   <table>
@@ -71,19 +77,47 @@
       <th>Test</th>
       <th>Language</th>
       <th>Answers</th>
+      <th>Audio</th>
       <th>Score</th>
     </tr>
 
     {% for row in data %}
     <tr>
-      <td>{{ row[0] }}</td>
       <td>{{ row[1] }}</td>
       <td>{{ row[2] }}</td>
-      <td style="white-space: pre-wrap;">{{ row[3] }}</td>
-      <td class="score">{{ row[4] }}</td>
+      <td>{{ row[3] }}</td>
+
+      <!-- ANSWERS -->
+      <td>
+        {% if row[4] != "N/A" %}
+          {{ row[4].replace('\n', '<br>') | safe }}
+        {% else %}
+          ❌ No translation
+        {% endif %}
+      </td>
+
+      <!-- AUDIO STATUS -->
+      <td class="audio">
+        A1: {{ "✔️" if row[6] else "❌" }}<br>
+        A2: {{ "✔️" if row[7] else "❌" }}<br>
+        A3: {{ "✔️" if row[8] else "❌" }}<br>
+        A4: {{ "✔️" if row[9] else "❌" }}
+      </td>
+
+      <!-- SCORE -->
+      <td class="score">
+        {% if row[5] != "N/A" %}
+          {{ row[5].replace('\n', '<br>') | safe }}
+        {% else %}
+          ❌ No score
+        {% endif %}
+      </td>
     </tr>
     {% endfor %}
+
   </table>
+
+</div>
 
 </body>
 </html>
