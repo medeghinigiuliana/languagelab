@@ -82,16 +82,29 @@ def submit():
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a professional language evaluator. Score translations from 1 to 10. Only return the score."
+                    "content": "Evaluate each answer separately from 1 to 10 and give a final average."
                 },
                 {
                     "role": "user",
-                    "content": f"Evaluate this translation:\n{answer}"
-                }
-            ]
-        )
+                    "content": f"""
+         Evaluate:
 
-        score = response.choices[0].message.content.strip()
+         Q1: {answer1}
+         Q2: {answer2}
+         Q3: {answer3}
+
+         Return:
+         Q1 score:
+         Q2 score:
+         Q3 score:
+         Final score:
+         Short feedback:
+         """
+                 }
+             ]
+         )
+
+         score = response.choices[0].message.content.strip()
 
         print(email, test_type, language, answer, score)
 
