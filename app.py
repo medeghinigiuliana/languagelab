@@ -100,20 +100,23 @@ def invite():
     return f"Invite link: {link}"
 @app.route("/dashboard")
 def dashboard():
-    conn = sqlite3.connect("db.db")
-    c = conn.cursor()
+    try:
+        conn = sqlite3.connect("db.db")
+        c = conn.cursor()
 
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS results 
-        (email TEXT, test_type TEXT, language TEXT, answer TEXT)
-    """)
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS results 
+            (email TEXT, test_type TEXT, language TEXT, answer TEXT)
+        """)
 
-    c.execute("SELECT * FROM results")
-    data = c.fetchall()
+        c.execute("SELECT * FROM results")
+        data = c.fetchall()
 
-    conn.close()
+        conn.close()
 
-    return render_template("dashboard.html", data=data)
-if __name__ == "__main__":
+        return render_template("dashboard.html", data=data)
+
+    except Exception as e:
+        return f"Error: {str(e)}"if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
 # force update
