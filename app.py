@@ -84,6 +84,7 @@ def invite():
     link = f"https://languagelab.onrender.com/?token={token}"
 
     return f"Invite link: {link}"
+
 @app.route("/invite")
 def invite():
     email = request.args.get("email")
@@ -96,3 +97,4 @@ def invite():
     link = f"https://languagelab-7wou.onrender.com/?token={token}"
 
     return f"Invite link: {link}"
+# force update
