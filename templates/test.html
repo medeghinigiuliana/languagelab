@@ -2,87 +2,95 @@
 <html>
 <head>
   <title>LanguageLab</title>
-
   <style>
     body {
-      font-family: Arial;
-      background: #f4f6f9;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 40px;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #1e293b;
     }
 
-    .card {
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
       background: white;
       padding: 30px;
-      border-radius: 10px;
-      width: 700px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
 
-    h2 {
+    h1 {
       text-align: center;
+      color: #0f172a;
     }
 
-    h3 {
-      margin-top: 20px;
+    .subtitle {
+      text-align: center;
+      color: #64748b;
+      margin-bottom: 20px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      font-size: 14px;
     }
 
     textarea {
-      width: 100%;
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      min-height: 80px;
+      min-height: 90px;
     }
 
-    input, select, button {
-      width: 100%;
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+    .section {
+      margin-top: 25px;
+      padding: 15px;
+      border-left: 4px solid #6366f1;
+      background: #f8fafc;
+      border-radius: 8px;
     }
 
-    button {
-      background: #4CAF50;
+    .section h3 {
+      margin: 0 0 10px 0;
+      color: #1e293b;
+    }
+
+    .button {
+      margin-top: 25px;
+      background: #6366f1;
       color: white;
+      padding: 14px;
       border: none;
-      margin-top: 20px;
+      border-radius: 8px;
+      font-weight: bold;
       cursor: pointer;
     }
 
-    button:hover {
-      background: #45a049;
+    .button:hover {
+      background: #4f46e5;
     }
-
-    hr {
-      margin: 20px 0;
-    }
-
   </style>
 </head>
 
 <body>
 
-  <div class="card">
-    <h2>LanguageLab Assessment</h2>
+  <div class="container">
+    <h1>LanguageLab</h1>
+    <p class="subtitle">Professional Language Assessment</p>
 
     <form method="POST" action="/submit">
 
-      <input name="email" placeholder="Enter your email" required>
+      <input name="email" placeholder="Your email" required>
 
-      <select name="test_type" id="testType" required onchange="showTest()">
+      <select name="test_type" id="testType" onchange="showTest()" required>
         <option value="">Select Test Type</option>
         <option value="translation">Translation</option>
-        <option value="interpretation">Interpretation</option>
         <option value="both">Both</option>
       </select>
 
       <select name="language" required>
-        <option value="">Select Language</option>
+        <option value="">Target Language</option>
         <option>Spanish</option>
         <option>French</option>
         <option>Portuguese</option>
@@ -90,62 +98,44 @@
         <option>Mandarin</option>
       </select>
 
-      <!-- ========================= -->
-      <!-- TRANSLATION TEST -->
-      <!-- ========================= -->
-
       <div id="translationTest" style="display:none;">
 
-        <h3>The Brief</h3>
-        <p><strong>Task:</strong> Translate the following four passages into your native language.</p>
-        <p><strong>Context:</strong> Each section belongs to a different industry and requires specific tone and vocabulary.</p>
+        <div class="section">
+          <h3>💻 Software & IT</h3>
+          <p>Error 404: Endpoint not found. The API gateway timed out...</p>
+          <textarea name="answer1" required></textarea>
+        </div>
 
-        <hr>
+        <div class="section">
+          <h3>⚖️ Legal & Compliance</h3>
+          <p>Notwithstanding any prior agreements to the contrary...</p>
+          <textarea name="answer2" required></textarea>
+        </div>
 
-        <h4>1. Software & IT</h4>
-        <p>Error 404: Endpoint not found. The API gateway timed out while trying to fetch the JSON payload. To resolve this issue, please flush your DNS cache, verify your firewall configurations, and ensure your current OAuth token has not expired. If the bug persists, open a ticket with the DevOps team.</p>
-        <p><strong>[UI Button Constraint - Max 15 characters]:</strong> Retry Connection</p>
-        <textarea name="answer1" placeholder="Your translation..." required></textarea>
+        <div class="section">
+          <h3>🧬 Medical & Scientific</h3>
+          <p>The 54-year-old patient presented with symptoms indicative...</p>
+          <textarea name="answer3" required></textarea>
+        </div>
 
-        <hr>
-
-        <h4>2. Legal & Compliance</h4>
-        <p>Notwithstanding any prior agreements to the contrary, the Licensee agrees to indemnify, defend, and hold harmless the Licensor against any and all claims, liabilities, or punitive damages arising out of a material breach of this Non-Disclosure Agreement.</p>
-        <textarea name="answer2" required></textarea>
-
-        <hr>
-
-        <h4>3. Medical & Scientific</h4>
-        <p>The 54-year-old patient presented with symptoms indicative of an acute myocardial infarction, preceded by acute dyspnea and profuse diaphoresis. Intravenous administration of a thrombolytic agent is strictly contraindicated.</p>
-        <textarea name="answer3" required></textarea>
-
-        <hr>
-
-        <h4>4. Marketing & Retail</h4>
-        <p>Upgrade your everyday carry with our premium, full-grain leather tote. Built for modern trailblazers, it seamlessly transitions from the boardroom to the boardwalk.</p>
-        <textarea name="answer4" required></textarea>
+        <div class="section">
+          <h3>🛍️ Marketing & Retail</h3>
+          <p>Upgrade your everyday carry with our premium leather tote...</p>
+          <textarea name="answer4" required></textarea>
+        </div>
 
       </div>
 
-      <button type="submit">Start Test</button>
+      <button class="button">Submit Test</button>
 
     </form>
   </div>
 
-  <!-- ========================= -->
-  <!-- JAVASCRIPT -->
-  <!-- ========================= -->
-
   <script>
     function showTest() {
       var type = document.getElementById("testType").value;
-      var translation = document.getElementById("translationTest");
-
-      if (type === "translation" || type === "both") {
-        translation.style.display = "block";
-      } else {
-        translation.style.display = "none";
-      }
+      document.getElementById("translationTest").style.display =
+        (type === "translation" || type === "both") ? "block" : "none";
     }
   </script>
 
