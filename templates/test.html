@@ -102,7 +102,17 @@
 
 <div class="container">
 
-<h2>Novox Lab</h2>
+   <div style="text-align:center; margin-bottom:20px;">
+   <img src="{{ url_for('static', filename='images/logo.png') }}"
+       alt="Novox Lab"
+       style="height:70px; object-fit:contain;">
+</div>
+
+<h2 style="text-align:center; margin-top:10px;">Novox Lab</h2>
+
+<p style="text-align:center; opacity:0.6; font-size:14px;">
+    Language Assessment Platform
+  </p>
 
 <form method="POST" action="/submit">
 
@@ -216,10 +226,10 @@
   <p id="timer2" class="timer">Time left: 10s</p>
 
   <div class="controls">
-  <button type="button" class="btn-start" onclick="startRecording(1)">
+  <button type="button" class="btn-start" onclick="startRecording(2)">
     🔴 Start
   </button>
-  <button type="button" class="btn-stop" onclick="stopRecording(1)">
+  <button type="button" class="btn-stop" onclick="stopRecording(2)">
     ⏹ Stop
   </button>
 </div>
@@ -240,10 +250,10 @@
   <p id="timer3" class="timer">Time left: 10s</p>
 
   <div class="controls">
-  <button type="button" class="btn-start" onclick="startRecording(1)">
+  <button type="button" class="btn-start" onclick="startRecording(3)">
     🔴 Start
   </button>
-  <button type="button" class="btn-stop" onclick="stopRecording(1)">
+  <button type="button" class="btn-stop" onclick="stopRecording(3)">
     ⏹ Stop
   </button>
 </div>
@@ -264,10 +274,10 @@
   <p id="timer4" class="timer">Time left: 10s</p>
 
   <div class="controls">
-  <button type="button" class="btn-start" onclick="startRecording(1)">
+  <button type="button" class="btn-start" onclick="startRecording(4)">
     🔴 Start
   </button>
-  <button type="button" class="btn-stop" onclick="stopRecording(1)">
+  <button type="button" class="btn-stop" onclick="stopRecording(4)">
     ⏹ Stop
   </button>
 </div>
