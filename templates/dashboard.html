@@ -1,147 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Candidate Dashboard</title>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #0f172a;
-      color: white;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 40px auto;
-      padding: 20px;
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #1e293b;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    th {
-      background: #6366f1;
-      padding: 12px;
-      text-align: left;
-    }
-
-    td {
-      padding: 12px;
-      background: #e5e7eb;
-      color: #111827;
-      vertical-align: top;
-    }
-
-    tr:nth-child(even) td {
-      background: #d1d5db;
-    }
-
-    .score {
-      color: green;
-      font-weight: bold;
-    }
-
-    audio {
-      width: 180px;
-      margin-bottom: 6px;
-    }
-
-    .small {
-      font-size: 13px;
-      opacity: 0.85;
-    }
-
-    strong {
-      color: #111827;
-    }
-  </style>
+  <title>Dashboard</title>
 </head>
-
 <body>
 
-<div class="container">
+<h2>Results</h2>
 
-  <h1>Candidate Dashboard</h1>
+<table border="1">
+<tr>
+  <th>Email</th>
+  <th>Test</th>
+  <th>Language</th>
+  <th>Answers</th>
+  <th>Translation Score</th>
+  <th>Interpretation Score</th>
+</tr>
 
-  <table>
-    <tr>
-      <th>Email</th>
-      <th>Test</th>
-      <th>Language</th>
-      <th>Answers</th>
-      <th>Recordings</th>
-      <th>Transcription</th>
-      <th>Score</th>
-    </tr>
+{% for row in data %}
+<tr>
+  <td>{{ row[0] }}</td>
+  <td>{{ row[1] }}</td>
+  <td>{{ row[2] }}</td>
+  <td>{{ row[3] }}</td>
 
-    {% for row in data %}
-    <tr>
+  <td>{{ row[4].replace('\n','<br>')|safe if row[4] else "-" }}</td>
+  <td>{{ row[5].replace('\n','<br>')|safe if row[5] else "-" }}</td>
+</tr>
+{% endfor %}
 
-      <!-- BASIC INFO -->
-      <td>{{ row[0] }}</td>
-      <td>{{ row[1] }}</td>
-      <td>{{ row[2] }}</td>
-
-      <!-- ANSWERS (IMPROVED FORMAT) -->
-      <td class="small">
-        {% if row[3] != "N/A" %}
-          {{ row[3]
-            .replace('Q1:', '<br><strong>Q1:</strong>')
-            .replace('Q2:', '<br><strong>Q2:</strong>')
-            .replace('Q3:', '<br><strong>Q3:</strong>')
-            .replace('Q4:', '<br><strong>Q4:</strong>')
-            | safe }}
-        {% else %}
-          ❌ No translation
-        {% endif %}
-      </td>
-
-      <!-- AUDIO -->
-      <td>
-        {% if row[5] %}<audio controls src="{{ row[5] }}"></audio>{% endif %}
-        {% if row[6] %}<audio controls src="{{ row[6] }}"></audio>{% endif %}
-        {% if row[7] %}<audio controls src="{{ row[7] }}"></audio>{% endif %}
-        {% if row[8] %}<audio controls src="{{ row[8] }}"></audio>{% endif %}
-
-        {% if not row[5] and not row[6] and not row[7] and not row[8] %}
-          ❌ No recordings
-        {% endif %}
-      </td>
-
-      <!-- TRANSCRIPTION -->
-      <td class="small">
-        T1: {{ row[9] or "—" }}<br>
-        T2: {{ row[10] or "—" }}<br>
-        T3: {{ row[11] or "—" }}<br>
-        T4: {{ row[12] or "—" }}
-      </td>
-
-      <!-- SCORE -->
-      <td class="score">
-        {% if row[4] != "N/A" %}
-          {{ row[4].replace('\n', '<br>') | safe }}
-        {% else %}
-          ❌ No score
-        {% endif %}
-      </td>
-
-    </tr>
-    {% endfor %}
-
-  </table>
-
-</div>
+</table>
 
 </body>
 </html>

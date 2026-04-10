@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 import os
 from openai import OpenAI
 
-# AUDIO
 import base64
 import io
 
@@ -35,22 +34,26 @@ def init_db():
         test_type TEXT,
         language TEXT,
         answer TEXT,
-        score TEXT,
+
+        translation_score TEXT,
+        interpretation_score TEXT,
+
         audio1 TEXT,
         audio2 TEXT,
         audio3 TEXT,
         audio4 TEXT,
+
         transcription1 TEXT,
         transcription2 TEXT,
         transcription3 TEXT,
         transcription4 TEXT,
+
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
 
     conn.commit()
     conn.close()
-
 
 init_db()
 
@@ -74,10 +77,8 @@ def decode_audio(base64_audio):
     except:
         return None
 
-
 def convert_to_wav(audio_bytes):
     return io.BytesIO(audio_bytes)
-
 
 def transcribe_audio(file_obj):
     try:
@@ -91,7 +92,6 @@ def transcribe_audio(file_obj):
         print("Transcription error:", e)
         return ""
 
-
 def process_audio(base64_audio):
     if not base64_audio:
         return ""
@@ -101,11 +101,7 @@ def process_audio(base64_audio):
         return ""
 
     wav_file = convert_to_wav(audio_bytes)
-    if not wav_file:
-        return ""
-
     return transcribe_audio(wav_file)
-
 
 # ---------------------------
 # INTERPRETATION SCORING
@@ -124,16 +120,12 @@ def score_interpretation(original_text, interpreted_text, language):
 
 The candidate interpreted into: {language}
 
-TASK:
-1. Understand the interpreted text (may not be English)
-2. Translate it mentally into English
-3. Compare with original
+Compare meaning accuracy.
 
-SCORING RULES:
-- Missing meaning → heavy penalty
+SCORING:
 - Wrong meaning → 1–3
-- Partial meaning → 4–6
-- Accurate meaning → 7–9
+- Partial → 4–6
+- Accurate → 7–9
 - Perfect → 10
 
 Return ONLY:
@@ -161,7 +153,6 @@ INTERPRETED:
         print("Interpretation scoring error:", e)
         return ""
 
-
 # ---------------------------
 # CREATE INVITE
 # ---------------------------
@@ -180,7 +171,6 @@ def create_invite(email):
 
     return token
 
-
 # ---------------------------
 # HOME
 # ---------------------------
@@ -192,26 +182,18 @@ def home():
     token = request.args.get("token")
 
     if not token:
-        return "Access denied (no token)"
+        return "Access denied"
 
     conn = sqlite3.connect("db.db")
     c = conn.cursor()
-
     c.execute("SELECT * FROM invites WHERE token=?", (token,))
     invite = c.fetchone()
-
     conn.close()
 
     if not invite:
-        return "Access denied (invalid token)"
-
-    expires = datetime.strptime(invite[2], "%Y-%m-%d %H:%M:%S.%f")
-
-    if datetime.now() > expires:
-        return "This link has expired"
+        return "Invalid token"
 
     return render_template("test.html")
-
 
 # ---------------------------
 # SUBMIT
@@ -229,164 +211,74 @@ def submit():
         answer3 = (request.form.get("answer3") or "").strip()
         answer4 = (request.form.get("answer4") or "").strip()
 
-        if test_type in ["translation", "both"]:
-            answer = (
-                f"Q1: {answer1}\n"
-                f"Q2: {answer2}\n"
-                f"Q3: {answer3}\n"
-                f"Q4: {answer4}"
-            )
-        else:
-            answer = "N/A"
+        answer = f"Q1: {answer1}\nQ2: {answer2}\nQ3: {answer3}\nQ4: {answer4}"
 
-        score = "N/A"
+        translation_score = "N/A"
+        interpretation_score = "N/A"
 
-        # ---------------------------
         # TRANSLATION SCORING
-        # ---------------------------
-        if test_type in ["translation", "both"] and all([
-            answer1 != "", answer2 != "", answer3 != "", answer4 != ""
-        ]):
-
+        if test_type in ["translation", "both"] and all([answer1, answer2, answer3, answer4]):
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {
-                        "role": "system",
-                        "content": f"""You are a STRICT professional translation evaluator.
-
-The candidate translated into: {language}
-
-SCORING RULES:
-- Incomplete → max 5
-- Wrong terminology → penalize
-- Wrong tone → penalize
-- Natural + accurate → high score
-
-Return ONLY:
-
-IT_SCORE: X/10
-LEGAL_SCORE: X/10
-MEDICAL_SCORE: X/10
-MARKETING_SCORE: X/10
-FINAL_SCORE: X/10
-FEEDBACK: short explanation
-"""
-                    },
-                    {
-                        "role": "user",
-                        "content": f"""
-IT:
-{answer1}
-
-LEGAL:
-{answer2}
-
-MEDICAL:
-{answer3}
-
-MARKETING:
-{answer4}
-"""
-                    }
+                    {"role": "system", "content": f"Strictly evaluate translation into {language}."},
+                    {"role": "user", "content": answer}
                 ]
             )
+            translation_score = response.choices[0].message.content.strip()
 
-            score = response.choices[0].message.content.strip()
-
-        # ---------------------------
         # AUDIO
-        # ---------------------------
         audio1 = request.form.get("audio1")
         audio2 = request.form.get("audio2")
         audio3 = request.form.get("audio3")
         audio4 = request.form.get("audio4")
 
-        # TRANSCRIPTION
-        transcription1 = process_audio(audio1)
-        transcription2 = process_audio(audio2)
-        transcription3 = process_audio(audio3)
-        transcription4 = process_audio(audio4)
+        t1 = process_audio(audio1)
+        t2 = process_audio(audio2)
+        t3 = process_audio(audio3)
+        t4 = process_audio(audio4)
 
-        # ---------------------------
         # INTERPRETATION SCORING
-        # ---------------------------
         if test_type in ["interpretation", "both"]:
-            interp_score1 = score_interpretation(ORIGINAL_AUDIO_TEXTS[0], transcription1, language)
-            interp_score2 = score_interpretation(ORIGINAL_AUDIO_TEXTS[1], transcription2, language)
-            interp_score3 = score_interpretation(ORIGINAL_AUDIO_TEXTS[2], transcription3, language)
-            interp_score4 = score_interpretation(ORIGINAL_AUDIO_TEXTS[3], transcription4, language)
+            interpretation_score = f"""
+Audio 1:
+{score_interpretation(ORIGINAL_AUDIO_TEXTS[0], t1, language)}
 
-            score += f"""
+Audio 2:
+{score_interpretation(ORIGINAL_AUDIO_TEXTS[1], t2, language)}
 
---- INTERPRETATION ---
+Audio 3:
+{score_interpretation(ORIGINAL_AUDIO_TEXTS[2], t3, language)}
 
-AUDIO 1:
-{interp_score1}
-
-AUDIO 2:
-{interp_score2}
-
-AUDIO 3:
-{interp_score3}
-
-AUDIO 4:
-{interp_score4}
+Audio 4:
+{score_interpretation(ORIGINAL_AUDIO_TEXTS[3], t4, language)}
 """
 
-        # ---------------------------
         # SAVE
-        # ---------------------------
         conn = sqlite3.connect("db.db")
         c = conn.cursor()
 
         c.execute("""
         INSERT INTO results 
-        (email, test_type, language, answer, score,
+        (email, test_type, language, answer,
+         translation_score, interpretation_score,
          audio1, audio2, audio3, audio4,
          transcription1, transcription2, transcription3, transcription4)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """, (
-            email,
-            test_type,
-            language,
-            answer,
-            score,
-            audio1,
-            audio2,
-            audio3,
-            audio4,
-            transcription1,
-            transcription2,
-            transcription3,
-            transcription4
+            email, test_type, language, answer,
+            translation_score, interpretation_score,
+            audio1, audio2, audio3, audio4,
+            t1, t2, t3, t4
         ))
 
         conn.commit()
         conn.close()
 
-        return "✅ Test submitted successfully!"
+        return "Submitted"
 
     except Exception as e:
-        return f"❌ Error: {str(e)}"
-
-
-# ---------------------------
-# INVITE
-# ---------------------------
-@app.route("/invite")
-def invite():
-    email = request.args.get("email")
-
-    if not email:
-        return "Missing email"
-
-    token = create_invite(email)
-
-    link = f"https://languagelab-7wou.onrender.com/?token={token}"
-
-    return f"Invite link: {link}"
-
+        return str(e)
 
 # ---------------------------
 # DASHBOARD
@@ -397,7 +289,8 @@ def dashboard():
     c = conn.cursor()
 
     c.execute("""
-    SELECT email, test_type, language, answer, score,
+    SELECT email, test_type, language, answer,
+           translation_score, interpretation_score,
            audio1, audio2, audio3, audio4,
            transcription1, transcription2, transcription3, transcription4
     FROM results
@@ -408,7 +301,6 @@ def dashboard():
     conn.close()
 
     return render_template("dashboard.html", data=data)
-
 
 # ---------------------------
 # RUN
