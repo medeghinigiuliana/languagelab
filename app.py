@@ -69,17 +69,14 @@ def decode_audio(base64_audio):
 
 def convert_to_wav(audio_bytes):
     try:
-        audio = AudioSegment.from_file(io.BytesIO(audio_bytes), format="webm")
-        wav_io = io.BytesIO()
-        audio.export(wav_io, format="wav")
-        wav_io.seek(0)
-        return wav_io
+        return io.BytesIO(audio_bytes)  # 👈 skip conversion
     except:
         return None
 
 
 def transcribe_audio(file_obj):
     try:
+        file_obj.name = "audio.webm"  # 👈 important for OpenAI
         response = client.audio.transcriptions.create(
             file=file_obj,
             model="gpt-4o-transcribe"
