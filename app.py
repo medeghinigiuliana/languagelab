@@ -8,7 +8,6 @@ from openai import OpenAI
 # 🔥 NEW IMPORTS
 import base64
 import io
-from pydub import AudioSegment
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -68,11 +67,7 @@ def decode_audio(base64_audio):
 
 
 def convert_to_wav(audio_bytes):
-    try:
-        return io.BytesIO(audio_bytes)  # 👈 skip conversion
-    except:
-        return None
-
+    return io.BytesIO(audio_bytes)
 
 def transcribe_audio(file_obj):
     try:
