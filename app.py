@@ -98,18 +98,23 @@ def process_audio(base64_audio):
 # INTERPRETATION SCORING
 # ---------------------------
 def score_interpretation(original, interpreted, language):
-    if not interpreted:
-        return "SCORE: 0/10\nFEEDBACK: No interpretation provided"
+    try:
+        if not interpreted or interpreted.strip() == "":
+            return "SCORE: 0/10\nFEEDBACK: No interpretation provided"
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": f"Evaluate interpreter accuracy into {language}. Return SCORE and FEEDBACK."},
-            {"role": "user", "content": f"ORIGINAL:\n{original}\n\nINTERPRETED:\n{interpreted}"}
-        ]
-    )
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": f"Evaluate interpreter accuracy into {language}. Return SCORE and FEEDBACK."},
+                {"role": "user", "content": f"ORIGINAL:\n{original}\n\nINTERPRETED:\n{interpreted}"}
+            ]
+        )
 
-    return response.choices[0].message.content.strip()
+        return response.choices[0].message.content.strip()
+
+    except Exception as e:
+        print("OpenAI error:", e)
+        return "SCORE: 0/10\nFEEDBACK: Error evaluating interpretation"
 
 # ---------------------------
 # ROUTES
@@ -174,19 +179,23 @@ def submit():
 
         # INTERPRETATION
         if test_type in ["interpretation","both"]:
-            interpretation_score = f"""
+    try:
+        interpretation_score = f"""
 A1:
-{score_interpretation(ORIGINAL_AUDIO_TEXTS[0], t1, language)}
+{score_interpretation(ORIGINAL_AUDIO_TEXTS[0], t1 or "", language)}
 
 A2:
-{score_interpretation(ORIGINAL_AUDIO_TEXTS[1], t2, language)}
+{score_interpretation(ORIGINAL_AUDIO_TEXTS[1], t2 or "", language)}
 
 A3:
-{score_interpretation(ORIGINAL_AUDIO_TEXTS[2], t3, language)}
+{score_interpretation(ORIGINAL_AUDIO_TEXTS[2], t3 or "", language)}
 
 A4:
-{score_interpretation(ORIGINAL_AUDIO_TEXTS[3], t4, language)}
+{score_interpretation(ORIGINAL_AUDIO_TEXTS[3], t4 or "", language)}
 """
+    except Exception as e:
+        print("Interpretation scoring error:", e)
+        interpretation_score = "ERROR during interpretation scoring"
 
         # PASS / FAIL
         t_score = extract_score(translation_score) if translation_score!="N/A" else 10
