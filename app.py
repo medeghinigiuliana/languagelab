@@ -159,7 +159,8 @@ def score_interpretation(original, interpreted, language):
 # ---------------------------
 @app.route("/")
 def home():
-    return render_template("test.html")
+    success = request.args.get("success")
+    return render_template("test.html", success=success)
 
 # ---------------------------
 # SUBMIT
@@ -244,7 +245,7 @@ def submit():
         conn.close()
 
 
-        return redirect(url_for("home"))
+        return redirect(url_for("home", success=1))
 
     except Exception as e:
             return str(e)
