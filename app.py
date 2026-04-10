@@ -256,4 +256,46 @@ def submit():
 # ---------------------------
 @app.route("/dashboard")
 def dashboard():
-    return "Dashboard coming next 😉"
+    conn = sqlite3.connect("db.db")
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    search = request.args.get("search", "")
+    status_filter = request.args.get("status", "")
+
+    query = "SELECT * FROM results WHERE 1=1"
+    params = []
+
+    if search:
+        query += " AND email LIKE ?"
+        params.append(f"%{search}%")
+
+    if status_filter:
+        query += " AND status = ?"
+        params.append(status_filter)
+
+    query += " ORDER BY created_at DESC"
+
+    c.execute(query, params)
+    results = c.fetchall()
+
+    conn.close()
+
+    return render_template("dashboard.html", results=results)
+@app.route("/download")
+def download_csv():
+    conn = sqlite3.connect("db.db")
+    c = conn.cursor()
+
+    c.execute("SELECT email, language, test_type, status, created_at FROM results")
+    rows = c.fetchall()
+
+    conn.close()
+
+    def generate():
+        yield "Email,Language,Test Type,Status,Date\n"
+        for r in rows:
+            yield f"{r[0]},{r[1]},{r[2]},{r[3]},{r[4]}\n"
+
+    return Response(generate(), mimetype="text/csv",
+                    headers={"Content-Disposition": "attachment;filename=results.csv"})

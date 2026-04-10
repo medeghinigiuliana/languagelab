@@ -1,161 +1,135 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Dashboard</title>
+  <title>Dashboard</title>
 
-<style>
-body {
-  margin: 0;
-  font-family: 'Inter', sans-serif;
-  background: #0b0f19;
-  color: #e5e7eb;
-  padding: 20px;
-}
+  <style>
+    body {
+      background: #0b0f19;
+      color: #e5e7eb;
+      font-family: Arial;
+    }
 
-h2 {
-  text-align: center;
-  margin-top: 10px;
-}
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+    }
 
-.top {
-  text-align: center;
-  margin-bottom: 25px;
-}
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
 
-button {
-  background: linear-gradient(135deg, #6366f1, #4f46e5);
-  border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
-  color: white;
-  cursor: pointer;
-}
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #1f2937;
+      text-align: left;
+    }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #111827;
-  border-radius: 10px;
-  overflow: hidden;
-}
+    th {
+      color: #9ca3af;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
 
-th {
-  background: #1f2937;
-  padding: 12px;
-}
+    .status-pass {
+      color: #22c55e;
+      font-weight: bold;
+    }
 
-td {
-  padding: 12px;
-  border-top: 1px solid #1f2937;
-}
+    .status-fail {
+      color: #ef4444;
+      font-weight: bold;
+    }
 
-tr:hover td {
-  background: #0f172a;
-}
-</style>
+    .button {
+      background: #6366f1;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      text-decoration: none;
+    }
 
+    input, select {
+      padding: 8px;
+      margin-right: 10px;
+      background: #020617;
+      border: 1px solid #374151;
+      color: white;
+      border-radius: 6px;
+    }
+  </style>
 </head>
 
-<script>
-
-const searchInput = document.getElementById("searchInput");
-const statusFilter = document.getElementById("statusFilter");
-
-function filterTable() {
-  const searchValue = searchInput.value.toLowerCase();
-  const filterValue = statusFilter.value;
-
-  const rows = document.querySelectorAll(".candidate-row");
-
-  rows.forEach(row => {
-    const email = row.children[0].innerText.toLowerCase();
-    const status = row.children[6].innerText.trim();
-
-    let matchSearch = email.includes(searchValue);
-    let matchFilter = (filterValue === "ALL" || status === filterValue);
-
-    if (matchSearch && matchFilter) {
-      row.style.display = "";
-    } else {
-      row.style.display = "none";
-    }
-  });
-}
-
-searchInput.addEventListener("keyup", filterTable);
-statusFilter.addEventListener("change", filterTable);
-
-</script>
 <body>
 
-<div class="top">
+<div class="container">
 
-  <img src="{{ url_for('static', filename='images/logo.png') }}"
-       style="height:90px; object-fit:contain;">
-
-  <h2>Candidate Dashboard</h2>
-
-  <div style="margin-top:15px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
-
-    <!-- 🔍 SEARCH -->
-    <input type="text" id="searchInput" placeholder="Search by email..."
-           style="padding:10px; border-radius:8px; border:1px solid #374151; background:#020617; color:white;">
-
-    <!-- 🎯 FILTER -->
-    <select id="statusFilter"
-            style="padding:10px; border-radius:8px; border:1px solid #374151; background:#020617; color:white;">
-      <option value="ALL">All</option>
-      <option value="PASS">PASS</option>
-      <option value="FAIL">FAIL</option>
-    </select>
-
-    <!-- 📥 EXPORT -->
-    <a href="/export?password=admin123">
-      <button>Download CSV</button>
-    </a>
-
-  </div>
-
+<!-- HEADER -->
+<div style="text-align:center; margin-bottom:20px;">
+  <img src="{{ url_for('static', filename='images/logo.png') }}" style="height:100px;">
+  <h2>Candidate Results</h2>
 </div>
 
+<!-- FILTERS -->
+<form method="GET">
+  <input type="text" name="search" placeholder="Search email">
+  
+  <select name="status">
+    <option value="">All Status</option>
+    <option value="STRONG PASS">STRONG PASS</option>
+    <option value="BORDERLINE">BORDERLINE</option>
+    <option value="FAIL">FAIL</option>
+  </select>
+
+  <button class="button">Filter</button>
+  <a href="/download" class="button">Download CSV</a>
+</form>
+
+<!-- TABLE -->
 <table>
+  <tr>
+    <th>Email</th>
+    <th>Language</th>
+    <th>Test Type</th>
+    <th>Date</th>
+    <th>Total Score</th>
+    <th>Summary</th>
+    <th>Status</th>
+    <th>Details</th>
+  </tr>
 
-<tr>
-<th>Email</th>
-<th>Test</th>
-<th>Language</th>
-<th>Answers</th>
-<th>Translation</th>
-<th>Interpretation</th>
-<th>Status</th>
-</tr>
+  {% for r in results %}
+  <tr>
+    <td>{{ r.email }}</td>
+    <td>{{ r.language }}</td>
+    <td>{{ r.test_type }}</td>
+    <td>{{ r.created_at }}</td>
+    <td>
+      {% if r.translation_score != "N/A" %}
+        {{ r.translation_score }}
+      {% else %}
+        {{ r.interpretation_score }}
+      {% endif %}
+    </td>
+    <td>{{ r.status }}</td>
 
-{% for r in data %}
-<tr class="candidate-row">
-<td>{{r[0]}}</td>
-<td>{{r[1]}}</td>
-<td>{{r[2]}}</td>
-<td>{{r[3]}}</td>
+    <td class="
+      {% if 'PASS' in r.status %}status-pass{% else %}status-fail{% endif %}
+    ">
+      {{ r.status }}
+    </td>
 
-<td>{{r[4]|safe}}</td>
-<td>{{r[5]|safe}}</td>
-
-<td>
-{% if r[6]=="PASS" %}
-<span style="background:#065f46; color:#34d399; padding:4px 8px; border-radius:6px; font-weight:bold;">
-PASS
-</span>
-{% else %}
-<span style="background:#7f1d1d; color:#f87171; padding:4px 8px; border-radius:6px; font-weight:bold;">
-FAIL
-</span>
-{% endif %}
-</td>
-
-</tr>
-{% endfor %}
+    <td>
+      <a href="/result/{{ r.id }}" class="button">View</a>
+    </td>
+  </tr>
+  {% endfor %}
 
 </table>
+
+</div>
 
 </body>
 </html>
