@@ -218,13 +218,10 @@ def dashboard():
     conn = sqlite3.connect("db.db")
     c = conn.cursor()
 
-    c.execute("""
-    SELECT email,test_type,language,answer,
-           translation_score,interpretation_score,status
-    FROM results
-    ORDER BY created_at DESC
-    """)
+    c.execute("SELECT * FROM results")
+    data = c.fetchall()
 
+    return str(data)
     data = c.fetchall()
     conn.close()
 
