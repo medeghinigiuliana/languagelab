@@ -105,8 +105,7 @@ def score_interpretation(original, interpreted, language):
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": f"""
- You are a STRICT professional interpreter evaluator.
+                {"role": "system", "content": f"""You are a STRICT professional interpreter evaluator.
 
  Evaluate interpretation into {language}.
 
@@ -118,11 +117,14 @@ def score_interpretation(original, interpreted, language):
  Return ONLY:
 
  SCORE: X/10
- FEEDBACK: short explanation
- """},
-                 {"role": "user", "content": f"ORIGINAL:\n{original}\n\nINTERPRETED:\n{interpreted[:500]}"}
-             ]
-         )
+ FEEDBACK: short explanation"""
+                 },
+                 {
+                     "role": "user", 
+                     "content": f"ORIGINAL:\n{original}\n\nINTERPRETED:\n{interpreted[:500]}"
+                 }
+            ]
+        )
 
          return response.choices[0].message.content.strip()
 
