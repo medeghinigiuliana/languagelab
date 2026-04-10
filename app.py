@@ -1,12 +1,9 @@
 from flask import Flask, render_template, request, Response
 import sqlite3
-import uuid
-from datetime import datetime, timedelta
 import os
 from openai import OpenAI
 import base64
 import io
-import csv
 import re
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -19,14 +16,6 @@ app = Flask(__name__)
 def init_db():
     conn = sqlite3.connect("db.db")
     c = conn.cursor()
-
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS invites (
-            email TEXT,
-            token TEXT,
-            expires TEXT
-        )
-    """)
 
     c.execute("""
     CREATE TABLE IF NOT EXISTS results (
@@ -86,9 +75,6 @@ def decode_audio(base64_audio):
     except:
         return None
 
-def convert_to_wav(audio_bytes):
-    return io.BytesIO(audio_bytes)
-
 def transcribe_audio(file_obj):
     try:
         file_obj.name = "audio.webm"
@@ -97,8 +83,7 @@ def transcribe_audio(file_obj):
             model="gpt-4o-transcribe"
         )
         return response.text
-    except Exception as e:
-        print("Transcription error:", e)
+    except:
         return ""
 
 def process_audio(base64_audio):
@@ -107,45 +92,35 @@ def process_audio(base64_audio):
     audio_bytes = decode_audio(base64_audio)
     if not audio_bytes or len(audio_bytes) < 1000:
         return ""
-    return transcribe_audio(convert_to_wav(audio_bytes))
+    return transcribe_audio(io.BytesIO(audio_bytes))
 
 # ---------------------------
 # INTERPRETATION SCORING
 # ---------------------------
-def score_interpretation(original_text, interpreted_text, language):
-    try:
-        if not interpreted_text:
-            return "SCORE: 0/10\nFEEDBACK: No interpretation provided"
+def score_interpretation(original, interpreted, language):
+    if not interpreted:
+        return "SCORE: 0/10\nFEEDBACK: No interpretation provided"
 
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": f"""Evaluate interpreter accuracy into {language}.
-Return:
-SCORE: X/10
-FEEDBACK: short explanation"""
-                },
-                {
-                    "role": "user",
-                    "content": f"ORIGINAL:\n{original_text}\n\nINTERPRETED:\n{interpreted_text}"
-                }
-            ]
-        )
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": f"Evaluate interpreter accuracy into {language}. Return SCORE and FEEDBACK."},
+            {"role": "user", "content": f"ORIGINAL:\n{original}\n\nINTERPRETED:\n{interpreted}"}
+        ]
+    )
 
-        return response.choices[0].message.content.strip()
-    except Exception as e:
-        print(e)
-        return ""
+    return response.choices[0].message.content.strip()
 
 # ---------------------------
 # ROUTES
 # ---------------------------
-@app.route("/", methods=["GET"])
+@app.route("/")
 def home():
     return render_template("test.html")
 
+# ---------------------------
+# SUBMIT
+# ---------------------------
 @app.route("/submit", methods=["POST"])
 def submit():
     try:
@@ -169,7 +144,7 @@ def submit():
             r = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {"role":"system","content":f"Strictly evaluate translation into {language} and give FINAL_SCORE X/10"},
+                    {"role":"system","content":f"Strictly evaluate translation into {language} and return FINAL_SCORE X/10"},
                     {"role":"user","content":answer}
                 ]
             )
@@ -225,13 +200,21 @@ A4:
         conn.commit()
         conn.close()
 
-        return "Submitted"
+        return "✅ Test submitted successfully!"
 
     except Exception as e:
         return str(e)
 
+# ---------------------------
+# DASHBOARD (PASSWORD PROTECTED)
+# ---------------------------
 @app.route("/dashboard")
 def dashboard():
+    password = request.args.get("password")
+
+    if password != "admin123":
+        return "Access denied"
+
     conn = sqlite3.connect("db.db")
     c = conn.cursor()
 
@@ -247,8 +230,16 @@ def dashboard():
 
     return render_template("dashboard.html", data=data)
 
+# ---------------------------
+# EXPORT CSV
+# ---------------------------
 @app.route("/export")
 def export():
+    password = request.args.get("password")
+
+    if password != "admin123":
+        return "Access denied"
+
     conn = sqlite3.connect("db.db")
     c = conn.cursor()
 
@@ -264,12 +255,15 @@ def export():
     def generate():
         yield "Email,Test,Language,Translation,Interpretation,Status\n"
         for r in rows:
-            clean_row = [str(i).replace(",", " ").replace("\n", " ") for i in r]
-            yield ",".join(clean_row) + "\n"
+            clean = [str(i).replace(","," ").replace("\n"," ") for i in r]
+            yield ",".join(clean) + "\n"
 
     return Response(generate(),
         mimetype="text/csv",
         headers={"Content-Disposition":"attachment; filename=results.csv"})
 
+# ---------------------------
+# RUN
+# ---------------------------
 if __name__ == "__main__":
     app.run(debug=True)
