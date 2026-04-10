@@ -19,20 +19,6 @@
       border-radius: 12px;
     }
 
-    input, select, textarea {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      border-radius: 8px;
-      border: none;
-      background: #020617;
-      color: white;
-    }
-
-    textarea {
-      min-height: 120px;
-    }
-
     .section {
       margin-top: 25px;
       padding: 20px;
@@ -41,30 +27,23 @@
       border-radius: 10px;
     }
 
-    .button {
-      margin-top: 25px;
-      background: #6366f1;
-      padding: 14px;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .recording {
-      font-weight: bold;
-      margin-top: 10px;
+    .locked {
+      opacity: 0.4;
+      pointer-events: none;
     }
 
     .plays {
       font-size: 13px;
-      opacity: 0.7;
-      margin-top: 5px;
+      opacity: 0.8;
     }
 
-    .language-box {
-      margin-top: 15px;
+    button {
+      margin-top: 10px;
+    }
+
+    .timer {
+      font-weight: bold;
+      margin-top: 5px;
     }
   </style>
 </head>
@@ -73,206 +52,208 @@
 
 <div class="container">
 
-  <h2>Novox Lab</h2>
+<h2>Novox Lab - Interpretation Test</h2>
 
-  <form method="POST" action="/submit">
+<form method="POST" action="/submit">
 
-    <input name="email" placeholder="Your email" required>
+<!-- AUDIO 1 -->
+<div class="section" id="section1">
+  <h3>Audio 1</h3>
+  <audio id="audio1" controls controlsList="nodownload" oncontextmenu="return false;">
+    <source src="{{ url_for('static', filename='audio/audio1.mp3') }}">
+  </audio>
+  <p id="count1" class="plays">Plays left: 2</p>
+  <p id="timer1" class="timer">Time left: 10s</p>
 
-    <select name="test_type" id="testType" onchange="showTest()" required>
-      <option value="">Select Test Type</option>
-      <option value="translation">Translation</option>
-      <option value="interpretation">Interpretation</option>
-      <option value="both">Both</option>
-    </select>
+  <button type="button" onclick="startRecording(1)">Start</button>
+  <button type="button" onclick="stopRecording(1)">Stop</button>
 
-    <div class="language-box">
-      <input type="text" id="languageSearch" placeholder="Search language..." onkeyup="filterLanguages()">
+  <p id="status1"></p>
+  <input type="hidden" name="audio1" id="audioData1">
+</div>
 
-      <select name="language" id="languageSelect" size="5" required>
-        <option>Spanish</option>
-        <option>English</option>
-        <option>French</option>
-        <option>Arabic</option>
-        <option>Portuguese</option>
-        <option>Russian</option>
-        <option>Hindi</option>
-      </select>
-    </div>
+<!-- AUDIO 2 -->
+<div class="section locked" id="section2">
+  <h3>Audio 2</h3>
+  <audio id="audio2" controls controlsList="nodownload" oncontextmenu="return false;">
+    <source src="{{ url_for('static', filename='audio/audio2.mp3') }}">
+  </audio>
+  <p id="count2" class="plays">Plays left: 2</p>
+  <p id="timer2" class="timer">Time left: 10s</p>
 
-    <!-- INTERPRETATION -->
-    <div id="interpretationTest" style="display:none;">
+  <button type="button" onclick="startRecording(2)">Start</button>
+  <button type="button" onclick="stopRecording(2)">Stop</button>
 
-      <!-- AUDIO BLOCK TEMPLATE -->
-      <div class="section">
-        <h3>Audio 1</h3>
-        <audio id="testAudio1" controls controlsList="nodownload" oncontextmenu="return false;">
-          <source src="{{ url_for('static', filename='audio/audio1.mp3') }}">
-        </audio>
-        <p id="testAudio1-count" class="plays">Plays left: 2</p>
+  <p id="status2"></p>
+  <input type="hidden" name="audio2" id="audioData2">
+</div>
 
-        <button type="button" onclick="startRecording(1)">Start</button>
-        <button type="button" onclick="stopRecording(1)">Stop</button>
+<!-- AUDIO 3 -->
+<div class="section locked" id="section3">
+  <h3>Audio 3</h3>
+  <audio id="audio3" controls controlsList="nodownload" oncontextmenu="return false;">
+    <source src="{{ url_for('static', filename='audio/audio3.mp3') }}">
+  </audio>
+  <p id="count3" class="plays">Plays left: 2</p>
+  <p id="timer3" class="timer">Time left: 10s</p>
 
-        <p id="recordingStatus1" class="recording"></p>
-        <audio id="playback1"></audio>
-        <input type="hidden" name="audio1" id="audioData1">
-      </div>
+  <button type="button" onclick="startRecording(3)">Start</button>
+  <button type="button" onclick="stopRecording(3)">Stop</button>
 
-      <!-- Repeat for all audios -->
+  <p id="status3"></p>
+  <input type="hidden" name="audio3" id="audioData3">
+</div>
 
-      <div class="section">
-        <h3>Audio 2</h3>
-        <audio id="testAudio2" controls controlsList="nodownload" oncontextmenu="return false;">
-          <source src="{{ url_for('static', filename='audio/audio2.mp3') }}">
-        </audio>
-        <p id="testAudio2-count" class="plays">Plays left: 2</p>
+<!-- AUDIO 4 -->
+<div class="section locked" id="section4">
+  <h3>Audio 4</h3>
+  <audio id="audio4" controls controlsList="nodownload" oncontextmenu="return false;">
+    <source src="{{ url_for('static', filename='audio/audio4.mp3') }}">
+  </audio>
+  <p id="count4" class="plays">Plays left: 2</p>
+  <p id="timer4" class="timer">Time left: 10s</p>
 
-        <button type="button" onclick="startRecording(2)">Start</button>
-        <button type="button" onclick="stopRecording(2)">Stop</button>
+  <button type="button" onclick="startRecording(4)">Start</button>
+  <button type="button" onclick="stopRecording(4)">Stop</button>
 
-        <p id="recordingStatus2" class="recording"></p>
-        <audio id="playback2"></audio>
-        <input type="hidden" name="audio2" id="audioData2">
-      </div>
+  <p id="status4"></p>
+  <input type="hidden" name="audio4" id="audioData4">
+</div>
 
-      <div class="section">
-        <h3>Audio 3</h3>
-        <audio id="testAudio3" controls controlsList="nodownload" oncontextmenu="return false;">
-          <source src="{{ url_for('static', filename='audio/audio3.mp3') }}">
-        </audio>
-        <p id="testAudio3-count" class="plays">Plays left: 2</p>
+<br>
+<button type="submit">Submit</button>
 
-        <button type="button" onclick="startRecording(3)">Start</button>
-        <button type="button" onclick="stopRecording(3)">Stop</button>
-
-        <p id="recordingStatus3" class="recording"></p>
-        <audio id="playback3"></audio>
-        <input type="hidden" name="audio3" id="audioData3">
-      </div>
-
-      <div class="section">
-        <h3>Audio 4</h3>
-        <audio id="testAudio4" controls controlsList="nodownload" oncontextmenu="return false;">
-          <source src="{{ url_for('static', filename='audio/audio4.mp3') }}">
-        </audio>
-        <p id="testAudio4-count" class="plays">Plays left: 2</p>
-
-        <button type="button" onclick="startRecording(4)">Start</button>
-        <button type="button" onclick="stopRecording(4)">Stop</button>
-
-        <p id="recordingStatus4" class="recording"></p>
-        <audio id="playback4"></audio>
-        <input type="hidden" name="audio4" id="audioData4">
-      </div>
-
-    </div>
-
-    <button class="button">Submit</button>
-
-  </form>
+</form>
 
 </div>
 
 <script>
-function showTest() {
-  let type = document.getElementById("testType").value;
 
-  document.getElementById("interpretationTest").style.display =
-    (type === "interpretation" || type === "both") ? "block" : "none";
-}
-
-function filterLanguages() {
-  let input = document.getElementById("languageSearch").value.toLowerCase();
-  let options = document.getElementById("languageSelect").options;
-
-  for (let i = 0; i < options.length; i++) {
-    let txt = options[i].text.toLowerCase();
-    options[i].style.display = txt.includes(input) ? "" : "none";
-  }
-}
-
-// 🔒 AUDIO CONTROL
+// --------------------
+// SETTINGS
+// --------------------
 const MAX_PLAYS = 2;
-let playCounts = {
-  testAudio1: 0,
-  testAudio2: 0,
-  testAudio3: 0,
-  testAudio4: 0
-};
+const TIME_LIMIT = 10;
 
+// --------------------
+// STATE
+// --------------------
+let playCount = {1:0,2:0,3:0,4:0};
 let isRecording = false;
-
-function attachLimit(id) {
-  const audio = document.getElementById(id);
-  const counter = document.getElementById(id + "-count");
-
-  audio.addEventListener("play", () => {
-
-    if (isRecording) {
-      audio.pause();
-      alert("You cannot play audio while recording.");
-      return;
-    }
-
-    if (playCounts[id] >= MAX_PLAYS) {
-      audio.pause();
-      audio.currentTime = 0;
-      alert("Maximum plays reached (2).");
-      return;
-    }
-
-    playCounts[id]++;
-    counter.innerText = "Plays left: " + (MAX_PLAYS - playCounts[id]);
-  });
-}
-
-["testAudio1","testAudio2","testAudio3","testAudio4"].forEach(attachLimit);
-
-// 🎤 RECORDING
+let timers = {};
+let timeLeft = {1:10,2:10,3:10,4:10};
 let recorders = {};
 let chunks = {};
 
-async function startRecording(id) {
+// --------------------
+// PLAY LIMIT
+// --------------------
+function attachPlayLimit(id){
+  const audio = document.getElementById("audio"+id);
+
+  audio.addEventListener("play", () => {
+
+    if(isRecording){
+      audio.pause();
+      alert("Cannot play audio while recording");
+      return;
+    }
+
+    if(playCount[id] >= MAX_PLAYS){
+      audio.pause();
+      audio.currentTime = 0;
+      alert("Max plays reached (2)");
+      return;
+    }
+
+    playCount[id]++;
+    document.getElementById("count"+id).innerText =
+      "Plays left: " + (MAX_PLAYS - playCount[id]);
+  });
+}
+
+[1,2,3,4].forEach(attachPlayLimit);
+
+// --------------------
+// TIMER
+// --------------------
+function startTimer(id){
+  timeLeft[id] = TIME_LIMIT;
+
+  timers[id] = setInterval(()=>{
+    timeLeft[id]--;
+
+    let el = document.getElementById("timer"+id);
+    el.innerText = "Time left: " + timeLeft[id] + "s";
+
+    if(timeLeft[id] <= 3){
+      el.style.color = "red";
+    }
+
+    if(timeLeft[id] <= 0){
+      clearInterval(timers[id]);
+      stopRecording(id);
+    }
+
+  },1000);
+}
+
+// --------------------
+// RECORDING
+// --------------------
+async function startRecording(id){
   isRecording = true;
 
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  startTimer(id);
 
+  const stream = await navigator.mediaDevices.getUserMedia({audio:true});
   recorders[id] = new MediaRecorder(stream);
   chunks[id] = [];
 
-  let indicator = document.getElementById("recordingStatus" + id);
-  indicator.innerText = "🔴 Recording...";
-  indicator.style.color = "red";
+  document.getElementById("status"+id).innerText = "🔴 Recording...";
 
   recorders[id].ondataavailable = e => chunks[id].push(e.data);
 
   recorders[id].onstop = () => {
     isRecording = false;
+    clearInterval(timers[id]);
 
-    const blob = new Blob(chunks[id], { type: 'audio/webm' });
-    const url = URL.createObjectURL(blob);
-
-    let playback = document.getElementById("playback" + id);
-    playback.src = url;
-    playback.controls = true;
-
+    const blob = new Blob(chunks[id], {type:"audio/webm"});
     const reader = new FileReader();
+
     reader.readAsDataURL(blob);
     reader.onloadend = () => {
-      document.getElementById("audioData" + id).value = reader.result;
+      document.getElementById("audioData"+id).value = reader.result;
     };
 
-    indicator.innerText = "✅ Recording saved";
-    indicator.style.color = "lightgreen";
+    document.getElementById("status"+id).innerText = "✅ Saved";
+
+    unlockNext(id);
   };
 
   recorders[id].start();
 }
 
-function stopRecording(id) {
-  recorders[id].stop();
+function stopRecording(id){
+  if(recorders[id]){
+    recorders[id].stop();
+  }
 }
+
+// --------------------
+// LOCK FLOW + AUTOPLAY
+// --------------------
+function unlockNext(id){
+  const next = id + 1;
+
+  if(next <= 4){
+    document.getElementById("section"+next).classList.remove("locked");
+
+    const nextAudio = document.getElementById("audio"+next);
+    nextAudio.play();
+  }
+}
+
 </script>
 
 </body>
