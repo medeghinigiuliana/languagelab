@@ -108,7 +108,20 @@
 </div>
 
 <h2 style="text-align:center; margin-top:5px;">Novox Lab</h2>
-
+<div style="margin:20px 0;">
+  <div style="background:#1f2937; border-radius:10px; height:10px;">
+    <div id="progressBar" style="
+      height:10px;
+      width:0%;
+      background: linear-gradient(90deg,#6366f1,#22c55e);
+      border-radius:10px;
+      transition: width 0.4s;
+    "></div>
+  </div>
+  <p id="progressText" style="font-size:12px; opacity:0.7; margin-top:5px;">
+    Step 0 of 4
+  </p>
+</div>
 <p style="text-align:center; opacity:0.6; font-size:14px;">
     Language Assessment Platform
   </p>
@@ -136,6 +149,7 @@
 
 </div>
 {% endif %}
+{% if not success %}
 <form method="POST" action="/submit">
 
 <!-- EMAIL -->
@@ -315,6 +329,7 @@
 <button class="button">Submit</button>
 
 </form>
+{% endif %}
 
 </div>
 
@@ -437,13 +452,45 @@ function unlockNext(id){
   const next = id + 1;
 
   if(next <= 4){
-    document.getElementById("section"+next).classList.remove("locked");
+    const nextSection = document.getElementById("section"+next);
+
+    nextSection.classList.remove("locked");
+
+    // ✅ ADD THIS (you were missing it)
+    updateProgress(id);
+
+    // highlight
+    nextSection.style.border = "2px solid #22c55e";
 
     const nextAudio = document.getElementById("audio"+next);
     nextAudio.play();
+
+    // optional auto-record
+    nextAudio.onended = () => {
+      startRecording(next);
+    };
+
+    // scroll
+    setTimeout(() => {
+      nextSection.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 400);
+
+  } else {
+    // ✅ ALSO add this for final step
+    updateProgress(4);
+
+    setTimeout(() => {
+      document.querySelector(".button").scrollIntoView({ behavior: "smooth" });
+    }, 400);
   }
 }
+function updateProgress(step){
+  const percent = (step / 4) * 100;
 
+  document.getElementById("progressBar").style.width = percent + "%";
+  document.getElementById("progressText").innerText =
+    "Step " + step + " of 4";
+}
 </script>
 
 </body>
