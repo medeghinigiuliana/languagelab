@@ -56,17 +56,66 @@ tr:hover td {
 
 </head>
 
+<script>
+
+const searchInput = document.getElementById("searchInput");
+const statusFilter = document.getElementById("statusFilter");
+
+function filterTable() {
+  const searchValue = searchInput.value.toLowerCase();
+  const filterValue = statusFilter.value;
+
+  const rows = document.querySelectorAll(".candidate-row");
+
+  rows.forEach(row => {
+    const email = row.children[0].innerText.toLowerCase();
+    const status = row.children[6].innerText.trim();
+
+    let matchSearch = email.includes(searchValue);
+    let matchFilter = (filterValue === "ALL" || status === filterValue);
+
+    if (matchSearch && matchFilter) {
+      row.style.display = "";
+    } else {
+      row.style.display = "none";
+    }
+  });
+}
+
+searchInput.addEventListener("keyup", filterTable);
+statusFilter.addEventListener("change", filterTable);
+
+</script>
 <body>
 
 <div class="top">
+
   <img src="{{ url_for('static', filename='images/logo.png') }}"
        style="height:90px; object-fit:contain;">
 
   <h2>Candidate Dashboard</h2>
 
-  <a href="/export?password=admin123">
-    <button>Download CSV</button>
-  </a>
+  <div style="margin-top:15px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+
+    <!-- 🔍 SEARCH -->
+    <input type="text" id="searchInput" placeholder="Search by email..."
+           style="padding:10px; border-radius:8px; border:1px solid #374151; background:#020617; color:white;">
+
+    <!-- 🎯 FILTER -->
+    <select id="statusFilter"
+            style="padding:10px; border-radius:8px; border:1px solid #374151; background:#020617; color:white;">
+      <option value="ALL">All</option>
+      <option value="PASS">PASS</option>
+      <option value="FAIL">FAIL</option>
+    </select>
+
+    <!-- 📥 EXPORT -->
+    <a href="/export?password=admin123">
+      <button>Download CSV</button>
+    </a>
+
+  </div>
+
 </div>
 
 <table>
@@ -82,7 +131,7 @@ tr:hover td {
 </tr>
 
 {% for r in data %}
-<tr>
+<tr class="candidate-row">
 <td>{{r[0]}}</td>
 <td>{{r[1]}}</td>
 <td>{{r[2]}}</td>
