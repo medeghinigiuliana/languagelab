@@ -105,38 +105,21 @@ def score_interpretation(original, interpreted, language):
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": f"""You are a STRICT professional interpreter evaluator.
-
- Evaluate interpretation into {language}.
-
- Focus on:
- - Meaning accuracy
- - Completeness
- - Natural phrasing
-
- Return ONLY:
-
- SCORE: X/10
- FEEDBACK: short explanation"""
-                 },
-                 {
-                     "role": "user", 
-                     "content": f"ORIGINAL:\n{original}\n\nINTERPRETED:\n{interpreted[:500]}"
-                 }
+                {
+                    "role": "system",
+                    "content": f"You are a professional interpreter evaluator. Evaluate interpretation into {language}. Return SCORE and FEEDBACK."
+                },
+                {
+                    "role": "user",
+                    "content": f"ORIGINAL:\n{original}\n\nINTERPRETED:\n{interpreted[:500]}"
+                }
             ]
         )
-
-         return response.choices[0].message.content.strip()
-
-     except Exception as e:
-         print("Interpretation error:", str(e))
-         return "SCORE: 0/10\nFEEDBACK: Error evaluating interpretation"
-         )
 
         return response.choices[0].message.content.strip()
 
     except Exception as e:
-        print("OpenAI error:", e)
+        print("Interpretation error:", str(e))
         return "SCORE: 0/10\nFEEDBACK: Error evaluating interpretation"
 
 # ---------------------------
