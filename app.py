@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import os
 from openai import OpenAI
 
-# 🔥 NEW IMPORTS
+# AUDIO
 import base64
 import io
 
@@ -28,7 +28,6 @@ def init_db():
         )
     """)
 
-    # 🔥 UPDATED TABLE (with transcription)
     c.execute("""
     CREATE TABLE IF NOT EXISTS results (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,6 +55,16 @@ def init_db():
 init_db()
 
 # ---------------------------
+# ORIGINAL AUDIO TEXTS
+# ---------------------------
+ORIGINAL_AUDIO_TEXTS = [
+    "They are holding a public meeting on the new community pool.",
+    "Visiting professors can be boring.",
+    "The execution of the document was witnessed by the clerk.",
+    "The doctor decided to let the patient go."
+]
+
+# ---------------------------
 # AUDIO HELPERS
 # ---------------------------
 def decode_audio(base64_audio):
@@ -69,9 +78,10 @@ def decode_audio(base64_audio):
 def convert_to_wav(audio_bytes):
     return io.BytesIO(audio_bytes)
 
+
 def transcribe_audio(file_obj):
     try:
-        file_obj.name = "audio.webm"  # 👈 important for OpenAI
+        file_obj.name = "audio.webm"
         response = client.audio.transcriptions.create(
             file=file_obj,
             model="gpt-4o-transcribe"
@@ -95,6 +105,61 @@ def process_audio(base64_audio):
         return ""
 
     return transcribe_audio(wav_file)
+
+
+# ---------------------------
+# INTERPRETATION SCORING
+# ---------------------------
+def score_interpretation(original_text, interpreted_text, language):
+    try:
+        if not interpreted_text:
+            return "SCORE: 0/10\nFEEDBACK: No interpretation provided"
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": f"""You are a professional interpreter evaluator.
+
+The candidate interpreted into: {language}
+
+TASK:
+1. Understand the interpreted text (may not be English)
+2. Translate it mentally into English
+3. Compare with original
+
+SCORING RULES:
+- Missing meaning → heavy penalty
+- Wrong meaning → 1–3
+- Partial meaning → 4–6
+- Accurate meaning → 7–9
+- Perfect → 10
+
+Return ONLY:
+
+SCORE: X/10
+FEEDBACK: short explanation
+"""
+                },
+                {
+                    "role": "user",
+                    "content": f"""
+ORIGINAL:
+{original_text}
+
+INTERPRETED:
+{interpreted_text}
+"""
+                }
+            ]
+        )
+
+        return response.choices[0].message.content.strip()
+
+    except Exception as e:
+        print("Interpretation scoring error:", e)
+        return ""
 
 
 # ---------------------------
@@ -149,7 +214,7 @@ def home():
 
 
 # ---------------------------
-# SUBMIT TEST
+# SUBMIT
 # ---------------------------
 @app.route("/submit", methods=["POST"])
 def submit():
@@ -158,9 +223,7 @@ def submit():
         test_type = request.form.get("test_type")
         language = request.form.get("language")
 
-        # ---------------------------
         # TRANSLATION
-        # ---------------------------
         answer1 = (request.form.get("answer1") or "").strip()
         answer2 = (request.form.get("answer2") or "").strip()
         answer3 = (request.form.get("answer3") or "").strip()
@@ -178,41 +241,41 @@ def submit():
 
         score = "N/A"
 
-        # ✅ TRANSLATION SCORING
-        if test_type in ["translation", "both"] and any([
+        # ---------------------------
+        # TRANSLATION SCORING
+        # ---------------------------
+        if test_type in ["translation", "both"] and all([
             answer1 != "", answer2 != "", answer3 != "", answer4 != ""
         ]):
+
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
                     {
                         "role": "system",
-                        "content": f"""You are a professional translation evaluator.
+                        "content": f"""You are a STRICT professional translation evaluator.
 
 The candidate translated into: {language}
 
-Evaluate based on:
-- Accuracy
-- Terminology
-- Tone adaptation
-- Natural fluency in {language}
+SCORING RULES:
+- Incomplete → max 5
+- Wrong terminology → penalize
+- Wrong tone → penalize
+- Natural + accurate → high score
 
-Return ONLY in this format:
+Return ONLY:
 
 IT_SCORE: X/10
 LEGAL_SCORE: X/10
 MEDICAL_SCORE: X/10
 MARKETING_SCORE: X/10
 FINAL_SCORE: X/10
-FEEDBACK: short professional feedback in English
-
-Be strict but fair."""
+FEEDBACK: short explanation
+"""
                     },
                     {
                         "role": "user",
                         "content": f"""
-Evaluate this translation into {language}:
-
 IT:
 {answer1}
 
@@ -232,18 +295,44 @@ MARKETING:
             score = response.choices[0].message.content.strip()
 
         # ---------------------------
-        # INTERPRETATION (AUDIO)
+        # AUDIO
         # ---------------------------
         audio1 = request.form.get("audio1")
         audio2 = request.form.get("audio2")
         audio3 = request.form.get("audio3")
         audio4 = request.form.get("audio4")
 
-        # 🔥 TRANSCRIPTION
+        # TRANSCRIPTION
         transcription1 = process_audio(audio1)
         transcription2 = process_audio(audio2)
         transcription3 = process_audio(audio3)
         transcription4 = process_audio(audio4)
+
+        # ---------------------------
+        # INTERPRETATION SCORING
+        # ---------------------------
+        if test_type in ["interpretation", "both"]:
+            interp_score1 = score_interpretation(ORIGINAL_AUDIO_TEXTS[0], transcription1, language)
+            interp_score2 = score_interpretation(ORIGINAL_AUDIO_TEXTS[1], transcription2, language)
+            interp_score3 = score_interpretation(ORIGINAL_AUDIO_TEXTS[2], transcription3, language)
+            interp_score4 = score_interpretation(ORIGINAL_AUDIO_TEXTS[3], transcription4, language)
+
+            score += f"""
+
+--- INTERPRETATION ---
+
+AUDIO 1:
+{interp_score1}
+
+AUDIO 2:
+{interp_score2}
+
+AUDIO 3:
+{interp_score3}
+
+AUDIO 4:
+{interp_score4}
+"""
 
         # ---------------------------
         # SAVE
@@ -304,26 +393,21 @@ def invite():
 # ---------------------------
 @app.route("/dashboard")
 def dashboard():
-    try:
-        conn = sqlite3.connect("db.db")
-        c = conn.cursor()
+    conn = sqlite3.connect("db.db")
+    c = conn.cursor()
 
-        c.execute("""
-        SELECT email, test_type, language, answer, score,
-               audio1, audio2, audio3, audio4,
-               transcription1, transcription2, transcription3, transcription4
-        FROM results
-        ORDER BY created_at DESC
-        """)
+    c.execute("""
+    SELECT email, test_type, language, answer, score,
+           audio1, audio2, audio3, audio4,
+           transcription1, transcription2, transcription3, transcription4
+    FROM results
+    ORDER BY created_at DESC
+    """)
 
-        data = c.fetchall()
+    data = c.fetchall()
+    conn.close()
 
-        conn.close()
-
-        return render_template("dashboard.html", data=data)
-
-    except Exception as e:
-        return f"Error: {str(e)}"
+    return render_template("dashboard.html", data=data)
 
 
 # ---------------------------
