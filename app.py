@@ -101,58 +101,56 @@ def process_audio(base64_audio):
         return ""
     return transcribe_audio(io.BytesIO(audio_bytes))
 
-def validate_transcription(original, transcription):
-    try:
-        if not transcription.strip():
-            return 0
-
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "Score how accurately the transcription matches the original. Return ONLY: SCORE: X/10"
-                },
-                {
-                    "role": "user",
-                    "content": f"ORIGINAL:\n{original}\n\nTRANSCRIPTION:\n{transcription}"
-                }
-            ]
-        )
-
-        score_text = response.choices[0].message.content
-        return extract_score(score_text)
-
-    except:
-        return 0
-
 # ---------------------------
-# INTERPRETATION SCORING
+# SCORING
 # ---------------------------
 def score_interpretation(original, interpreted, language):
     try:
-        if not interpreted or interpreted.strip() == "":
-            return "SCORE: 0/10\nFEEDBACK: No interpretation provided"
+        if not interpreted.strip():
+            return "SCORE: 0/10"
 
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {
-                    "role": "system",
-                    "content": f"You are a professional interpreter evaluator. Evaluate interpretation into {language}. Return SCORE and FEEDBACK."
-                },
-                {
-                    "role": "user",
-                    "content": f"ORIGINAL:\n{original}\n\nINTERPRETED:\n{interpreted[:500]}"
-                }
+                {"role": "system", "content": f"Evaluate interpretation into {language}. Return SCORE X/10."},
+                {"role": "user", "content": f"{original}\n{interpreted}"}
             ]
         )
-
         return response.choices[0].message.content.strip()
+    except:
+        return "SCORE: 0/10"
 
-    except Exception as e:
-        print("Interpretation error:", str(e))
-        return "SCORE: 0/10\nFEEDBACK: Error evaluating interpretation"
+def score_editing(original, edited):
+    try:
+        if not edited.strip():
+            return "SCORE: 0/10"
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "Evaluate editing. Return FINAL_SCORE: X/10"},
+                {"role": "user", "content": f"{original}\n{edited}"}
+            ]
+        )
+        return response.choices[0].message.content.strip()
+    except:
+        return "SCORE: 0/10"
+
+def score_post_edit(mt_text, edited):
+    try:
+        if not edited.strip():
+            return "SCORE: 0/10"
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "Evaluate post-editing. Return FINAL_SCORE: X/10"},
+                {"role": "user", "content": f"{mt_text}\n{edited}"}
+            ]
+        )
+        return response.choices[0].message.content.strip()
+    except:
+        return "SCORE: 0/10"
 
 # ---------------------------
 # ROUTES
@@ -176,12 +174,17 @@ def submit():
         a2 = request.form.get("answer2","")
         a3 = request.form.get("answer3","")
         a4 = request.form.get("answer4","")
+        edit1 = request.form.get("edit1","")
+        mt1 = request.form.get("mt1","")
 
         answer = f"Q1:{a1}\nQ2:{a2}\nQ3:{a3}\nQ4:{a4}"
 
         translation_score = "N/A"
         interpretation_score = "N/A"
+        editing_score = "N/A"
+        post_edit_score = "N/A"
 
+        # TRANSLATION
         if test_type in ["translation","both"] and any([a1,a2,a3,a4]):
             r = client.chat.completions.create(
                 model="gpt-4o-mini",
@@ -192,37 +195,57 @@ def submit():
             )
             translation_score = r.choices[0].message.content.strip()
 
-        t1 = process_audio(request.form.get("audio1")) if request.form.get("audio1") else ""
-        t2 = process_audio(request.form.get("audio2")) if request.form.get("audio2") else ""
-        t3 = process_audio(request.form.get("audio3")) if request.form.get("audio3") else ""
-        t4 = process_audio(request.form.get("audio4")) if request.form.get("audio4") else ""
+        # EDITING
+        if test_type == "editing" and edit1:
+            editing_score = score_editing(
+                "The company dont have enough informations to take a decision about the proyect.",
+                edit1
+            )
 
+        # POST-MT
+        if test_type == "post_editing" and mt1:
+            post_edit_score = score_post_edit(
+                "The system present many errors and it is not working correct in all devices.",
+                mt1
+            )
+
+        # AUDIO
+        t1 = process_audio(request.form.get("audio1"))
+        t2 = process_audio(request.form.get("audio2"))
+        t3 = process_audio(request.form.get("audio3"))
+        t4 = process_audio(request.form.get("audio4"))
+
+        # INTERPRETATION
         if test_type in ["interpretation","both"]:
-            part1 = score_interpretation(ORIGINAL_AUDIO_TEXTS[0], t1, language) if t1 else "SCORE: 0/10"
-            part2 = score_interpretation(ORIGINAL_AUDIO_TEXTS[1], t2, language) if t2 else "SCORE: 0/10"
-            part3 = score_interpretation(ORIGINAL_AUDIO_TEXTS[2], t3, language) if t3 else "SCORE: 0/10"
-            part4 = score_interpretation(ORIGINAL_AUDIO_TEXTS[3], t4, language) if t4 else "SCORE: 0/10"
+            parts = [
+                score_interpretation(ORIGINAL_AUDIO_TEXTS[i], t, language)
+                for i, t in enumerate([t1, t2, t3, t4])
+            ]
+            interpretation_score = "\n".join(parts)
 
-            interpretation_score = f"{part1}\n{part2}\n{part3}\n{part4}"
+        # SCORES
+        def get_score(text):
+            scores = extract_all_scores(text)
+            return scores[-1] if scores else 0
 
-        t_scores = extract_all_scores(translation_score)
-        t_score = t_scores[0] if t_scores else 0
-
-        i_scores = extract_all_scores(interpretation_score)
-        i_score = int(sum(i_scores)/len(i_scores)) if i_scores else 0
+        t_score = get_score(translation_score)
+        i_score = get_score(interpretation_score)
+        e_score = get_score(editing_score)
+        p_score = get_score(post_edit_score)
 
         def get_status(score):
-            if score >= 8:
-                return "STRONG PASS"
-            elif score >= 6:
-                return "BORDERLINE"
-            else:
-                return "FAIL"
+            if score >= 8: return "STRONG PASS"
+            elif score >= 6: return "BORDERLINE"
+            else: return "FAIL"
 
         if test_type == "translation":
             status = get_status(t_score)
         elif test_type == "interpretation":
             status = get_status(i_score)
+        elif test_type == "editing":
+            status = get_status(e_score)
+        elif test_type == "post_editing":
+            status = get_status(p_score)
         else:
             status = get_status((t_score + i_score) / 2)
 
@@ -244,12 +267,10 @@ def submit():
         conn.commit()
         conn.close()
 
-
         return redirect(url_for("home", success=1))
 
     except Exception as e:
-            return str(e)
-
+        return str(e)
 
 # ---------------------------
 # DASHBOARD
@@ -282,6 +303,7 @@ def dashboard():
     conn.close()
 
     return render_template("dashboard.html", results=results)
+
 @app.route("/download")
 def download_csv():
     conn = sqlite3.connect("db.db")
@@ -289,7 +311,6 @@ def download_csv():
 
     c.execute("SELECT email, language, test_type, status, created_at FROM results")
     rows = c.fetchall()
-
     conn.close()
 
     def generate():
@@ -299,6 +320,7 @@ def download_csv():
 
     return Response(generate(), mimetype="text/csv",
                     headers={"Content-Disposition": "attachment;filename=results.csv"})
+
 @app.route("/result/<int:id>")
 def result_detail(id):
     conn = sqlite3.connect("db.db")
@@ -307,7 +329,6 @@ def result_detail(id):
 
     c.execute("SELECT * FROM results WHERE id = ?", (id,))
     result = c.fetchone()
-
     conn.close()
 
     return render_template("result.html", r=result)
