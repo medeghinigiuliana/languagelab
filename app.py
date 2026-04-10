@@ -5,6 +5,7 @@ from openai import OpenAI
 import base64
 import io
 import re
+from nltk.translate.gleu_score import sentence_gleu
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -72,6 +73,16 @@ ORIGINAL_AUDIO_TEXTS = [
 # ---------------------------
 # HELPERS
 # ---------------------------
+def calculate_gleu(reference, candidate):
+    try:
+        ref_tokens = reference.split()
+        cand_tokens = candidate.split()
+
+        score = sentence_gleu([ref_tokens], cand_tokens)
+        return round(score, 2)
+    except:
+        return 0
+
 def extract_score(text):
     try:
         match = re.search(r'(\d+)/10', text)
@@ -217,6 +228,11 @@ def submit():
         if test_type == "post_editing" and mt1:
             post_edit_score = score_post_edit(
                 "The system present many errors and it is not working correct in all devices.",
+                mt1
+            )
+
+            gleu_score = calculate_gleu(
+                "The system presents many errors and does not work correctly on all devices.",
                 mt1
             )
 
