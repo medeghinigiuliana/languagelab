@@ -2,19 +2,74 @@
 <html>
 <head>
 <title>Dashboard</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: #0b0f19;
+  color: #e5e7eb;
+  padding: 20px;
+}
+
+h2 {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.top {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+button {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #111827;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+th {
+  background: #1f2937;
+  padding: 12px;
+}
+
+td {
+  padding: 12px;
+  border-top: 1px solid #1f2937;
+}
+
+tr:hover td {
+  background: #0f172a;
+}
+</style>
+
 </head>
 
 <body>
 
-<h2>Candidate Results</h2>
+<div class="top">
+  <img src="{{ url_for('static', filename='images/logo.png') }}"
+       style="height:90px; object-fit:contain;">
 
-<a href="/export?password=admin123">
-<button>Download CSV</button>
-</a>
+  <h2>Candidate Dashboard</h2>
 
-<br><br>
+  <a href="/export?password=admin123">
+    <button>Download CSV</button>
+  </a>
+</div>
 
-<table border="1">
+<table>
 
 <tr>
 <th>Email</th>
@@ -38,9 +93,13 @@
 
 <td>
 {% if r[6]=="PASS" %}
-<span style="color:green;font-weight:bold;">PASS</span>
+<span style="background:#065f46; color:#34d399; padding:4px 8px; border-radius:6px; font-weight:bold;">
+PASS
+</span>
 {% else %}
-<span style="color:red;font-weight:bold;">FAIL</span>
+<span style="background:#7f1d1d; color:#f87171; padding:4px 8px; border-radius:6px; font-weight:bold;">
+FAIL
+</span>
 {% endif %}
 </td>
 
