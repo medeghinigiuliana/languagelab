@@ -113,6 +113,29 @@
     Language Assessment Platform
   </p>
 
+{% if success %}
+<div style="
+    background-color: #1e293b;
+    border: 1px solid #22c55e;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    text-align: center;
+">
+
+    <img src="{{ url_for('static', filename='novox.png') }}" 
+         style="width:140px; margin-bottom:15px;">
+
+    <h2 style="color:#22c55e; margin-bottom:10px;">
+        Test Submitted
+    </h2>
+
+    <p style="color:#cbd5e1;">
+        A recruiter will be in contact with you shortly.
+    </p>
+
+</div>
+{% endif %}
 <form method="POST" action="/submit">
 
 <!-- EMAIL -->

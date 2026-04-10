@@ -61,12 +61,12 @@ ORIGINAL_AUDIO_TEXTS = [
 # ---------------------------
 # HELPERS
 # ---------------------------
-def extract_score(text):
+def extract_all_scores(text):
     try:
-        match = re.search(r'(\d+)/10', text)
-        return int(match.group(1)) if match else 0
+        matches = re.findall(r'(\d+)/10', text)
+        return [int(m) for m in matches]
     except:
-        return 0
+        return []
 
 def decode_audio(base64_audio):
     try:
@@ -93,6 +93,30 @@ def process_audio(base64_audio):
     if not audio_bytes or len(audio_bytes) < 1000:
         return ""
     return transcribe_audio(io.BytesIO(audio_bytes))
+def validate_transcription(original, transcription):
+    try:
+        if not transcription.strip():
+            return 0
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Score how accurately the transcription matches the original. Return ONLY: SCORE: X/10"
+                },
+                {
+                    "role": "user",
+                    "content": f"ORIGINAL:\n{original}\n\nTRANSCRIPTION:\n{transcription}"
+                }
+            ]
+        )
+
+        score_text = response.choices[0].message.content
+        return extract_score(score_text)
+
+    except:
+        return 0
 
 # ---------------------------
 # INTERPRETATION SCORING
@@ -206,6 +230,12 @@ def submit():
         t2 = process_audio(request.form.get("audio2")) if request.form.get("audio2") else ""
         t3 = process_audio(request.form.get("audio3")) if request.form.get("audio3") else ""
         t4 = process_audio(request.form.get("audio4")) if request.form.get("audio4") else ""
+        
+        # Validate transcription quality
+        v1 = validate_transcription(ORIGINAL_AUDIO_TEXTS[0], t1)
+        v2 = validate_transcription(ORIGINAL_AUDIO_TEXTS[1], t2)
+        v3 = validate_transcription(ORIGINAL_AUDIO_TEXTS[2], t3)
+        v4 = validate_transcription(ORIGINAL_AUDIO_TEXTS[3], t4)
 
         # INTERPRETATION
         # INTERPRETATION
@@ -237,17 +267,32 @@ def submit():
         A4: SCORE: 0/10"""
 
         # PASS / FAIL
-        t_score = extract_score(translation_score) if translation_score!="N/A" else 10
-        i_score = extract_score(interpretation_score) if interpretation_score!="N/A" else 10
+
+        # Translation score
+        t_scores = extract_all_scores(translation_score)
+        t_score = t_scores[0] if t_scores else 0
+
+        # Interpretation score (average of all 4)
+        i_scores = extract_all_scores(interpretation_score)
+        i_score = int(sum(i_scores)/len(i_scores)) if i_scores else 0
+
+        def get_status(score):
+            if score >= 8:
+                return "STRONG PASS"
+            elif score >= 6:
+                return "BORDERLINE"
+            else:
+                return "FAIL"
 
         if test_type == "translation":
-            status = "PASS" if t_score >= 6 else "FAIL"
+            status = get_status(t_score)
 
         elif test_type == "interpretation":
-            status = "PASS" if i_score >= 6 else "FAIL"
+            status = get_status(i_score)
 
         else:  # BOTH
-            status = "PASS" if (t_score >= 6 and i_score >= 6) else "FAIL"
+            combined = (t_score + i_score) / 2
+            status = get_status(combined)
 
         # SAVE
         print("SAVING RESULT...")
@@ -278,7 +323,7 @@ def submit():
         print("✅ SAVED SUCCESSFULLY")
         conn.close()
 
-        return "✅ Test submitted successfully!"
+        return render_template("test.html", success=True)
 
     except Exception as e:
         return str(e)
