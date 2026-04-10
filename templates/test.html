@@ -3,62 +3,99 @@
 <head>
   <title>Novox Lab</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #0f172a;
-      color: white;
-    }
+      <style>
+      body {
+        margin: 0;
+        font-family: 'Inter', sans-serif;
+        background: #0b0f19;
+        color: #e5e7eb;
+      }
 
-    .container {
-      max-width: 900px;
-      margin: 40px auto;
-      background: #1e293b;
-      padding: 30px;
-      border-radius: 12px;
-    }
+      .container {
+        max-width: 900px;
+        margin: 40px auto;
+        background: #111827;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 0 40px rgba(0,0,0,0.4);
+      }
 
-    input, select, textarea {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      border-radius: 8px;
-      border: none;
-      background: #020617;
-      color: white;
-    }
+      input, select, textarea {
+        width: 100%;
+        padding: 12px;
+        margin-top: 10px;
+        border-radius: 10px;
+        border: 1px solid #374151;
+        background: #020617;
+        color: #e5e7eb;
+      }
 
-    textarea { min-height: 120px; }
+      .section {
+        margin-top: 25px;
+        padding: 20px;
+        background: #020617;
+        border: 1px solid #1f2937;
+        border-radius: 12px;
+        transition: 0.3s;
+      }
 
-    .section {
-      margin-top: 25px;
-      padding: 20px;
-      background: #020617;
-      border-left: 4px solid #6366f1;
-      border-radius: 10px;
-    }
+      .section:hover {
+        border-color: #6366f1;
+      }
 
-    .locked {
-      opacity: 0.4;
-      pointer-events: none;
-    }
+      .locked {
+        opacity: 0.35;
+        pointer-events: none;
+      }
 
-    .button {
-      margin-top: 25px;
-      background: #6366f1;
-      padding: 14px;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
+      .button {
+        margin-top: 25px;
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        padding: 14px;
+        border: none;
+        border-radius: 10px;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+      }
 
-    .timer { font-weight: bold; }
-    .plays { font-size: 13px; opacity: 0.8; }
+      .controls {
+        margin-top: 10px;
+        display: flex;
+        gap: 10px;
+      }
 
-  </style>
+      .btn-start {
+        background: #dc2626;
+        padding: 10px 16px;
+        border-radius: 8px;
+        color: white;
+        border: none;
+      }
+
+      .btn-stop {
+        background: #374151;
+        padding: 10px 16px;
+        border-radius: 8px;
+        color: white;
+        border: none;
+      }
+
+      .subtitle {
+        font-size: 13px;
+        opacity: 0.7;
+        margin-top: 5px;
+      }
+
+      .timer {
+        font-weight: bold;
+      }
+
+      .recording {
+        color: #f87171;
+        font-weight: bold;
+      }
+      </style>
 </head>
 
 <body>
@@ -154,8 +191,16 @@
   <p id="count1" class="plays">Plays left: 2</p>
   <p id="timer1" class="timer">Time left: 10s</p>
 
-  <button type="button" onclick="startRecording(1)">Start</button>
-  <button type="button" onclick="stopRecording(1)">Stop</button>
+  <div class="controls">
+  <button type="button" class="btn-start" onclick="startRecording(1)">
+    🔴 Start
+  </button>
+  <button type="button" class="btn-stop" onclick="stopRecording(1)">
+    ⏹ Stop
+  </button>
+</div>
+
+<p class="subtitle">Click Start to begin recording your interpretation.</p>
 
   <p id="status1"></p>
   <input type="hidden" name="audio1" id="audioData1">
@@ -170,8 +215,16 @@
   <p id="count2" class="plays">Plays left: 2</p>
   <p id="timer2" class="timer">Time left: 10s</p>
 
-  <button type="button" onclick="startRecording(2)">Start</button>
-  <button type="button" onclick="stopRecording(2)">Stop</button>
+  <div class="controls">
+  <button type="button" class="btn-start" onclick="startRecording(1)">
+    🔴 Start
+  </button>
+  <button type="button" class="btn-stop" onclick="stopRecording(1)">
+    ⏹ Stop
+  </button>
+</div>
+
+<p class="subtitle">Click Start to begin recording your interpretation.</p>
 
   <p id="status2"></p>
   <input type="hidden" name="audio2" id="audioData2">
@@ -186,8 +239,16 @@
   <p id="count3" class="plays">Plays left: 2</p>
   <p id="timer3" class="timer">Time left: 10s</p>
 
-  <button type="button" onclick="startRecording(3)">Start</button>
-  <button type="button" onclick="stopRecording(3)">Stop</button>
+  <div class="controls">
+  <button type="button" class="btn-start" onclick="startRecording(1)">
+    🔴 Start
+  </button>
+  <button type="button" class="btn-stop" onclick="stopRecording(1)">
+    ⏹ Stop
+  </button>
+</div>
+
+<p class="subtitle">Click Start to begin recording your interpretation.</p>
 
   <p id="status3"></p>
   <input type="hidden" name="audio3" id="audioData3">
@@ -202,8 +263,16 @@
   <p id="count4" class="plays">Plays left: 2</p>
   <p id="timer4" class="timer">Time left: 10s</p>
 
-  <button type="button" onclick="startRecording(4)">Start</button>
-  <button type="button" onclick="stopRecording(4)">Stop</button>
+  <div class="controls">
+  <button type="button" class="btn-start" onclick="startRecording(1)">
+    🔴 Start
+  </button>
+  <button type="button" class="btn-stop" onclick="stopRecording(1)">
+    ⏹ Stop
+  </button>
+</div>
+
+<p class="subtitle">Click Start to begin recording your interpretation.</p>
 
   <p id="status4"></p>
   <input type="hidden" name="audio4" id="audioData4">
