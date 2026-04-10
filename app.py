@@ -185,7 +185,7 @@ def submit():
         post_edit_score = "N/A"
 
         # TRANSLATION
-        if test_type in ["translation","both"] and any([a1,a2,a3,a4]):
+        if test_type == "translation":
             r = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
@@ -216,7 +216,7 @@ def submit():
         t4 = process_audio(request.form.get("audio4"))
 
         # INTERPRETATION
-        if test_type in ["interpretation","both"]:
+        if test_type == "interpretation":
             parts = [
                 score_interpretation(ORIGINAL_AUDIO_TEXTS[i], t, language)
                 for i, t in enumerate([t1, t2, t3, t4])
@@ -246,8 +246,7 @@ def submit():
             status = get_status(e_score)
         elif test_type == "post_editing":
             status = get_status(p_score)
-        else:
-            status = get_status((t_score + i_score) / 2)
+       
 
         conn = sqlite3.connect("db.db")
         c = conn.cursor()

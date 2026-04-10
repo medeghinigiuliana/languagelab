@@ -174,7 +174,7 @@
   <option value="editing">Editing</option>
   <option value="post_editing">Post-MT Editing</option>
   <option value="interpretation">Interpretation</option>
-  <option value="both">Full Test</option>
+  
 </select>
 
 <!-- LANGUAGE -->
@@ -470,6 +470,12 @@ function showTest(){
 
   document.getElementById("interpretationTest").style.display =
     (type === "interpretation" || type === "both") ? "block" : "none";
+
+  document.getElementById("editingTest").style.display =
+    (type === "editing") ? "block" : "none";
+
+  document.getElementById("postEditingTest").style.display =
+    (type === "post_editing") ? "block" : "none";
 }
 
 // SETTINGS
