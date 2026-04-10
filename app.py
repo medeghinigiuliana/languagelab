@@ -121,8 +121,7 @@ def score_interpretation(original, interpreted, language):
  FEEDBACK: short explanation
  """},
                  {"role": "user", "content": f"ORIGINAL:\n{original}\n\nINTERPRETED:\n{interpreted[:500]}"}
-             ],
-             timeout=10
+             ]
          )
 
          return response.choices[0].message.content.strip()
