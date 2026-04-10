@@ -179,23 +179,23 @@ def submit():
 
         # INTERPRETATION
         if test_type in ["interpretation","both"]:
-    try:
+            try:
         interpretation_score = f"""
-A1:
-{score_interpretation(ORIGINAL_AUDIO_TEXTS[0], t1 or "", language)}
+        A1:
+        {score_interpretation(ORIGINAL_AUDIO_TEXTS[0], t1 or "", language)}
 
-A2:
-{score_interpretation(ORIGINAL_AUDIO_TEXTS[1], t2 or "", language)}
+        A2:
+        {score_interpretation(ORIGINAL_AUDIO_TEXTS[1], t2 or "", language)}
 
-A3:
-{score_interpretation(ORIGINAL_AUDIO_TEXTS[2], t3 or "", language)}
+        A3:
+        {score_interpretation(ORIGINAL_AUDIO_TEXTS[2], t3 or "", language)}
 
-A4:
-{score_interpretation(ORIGINAL_AUDIO_TEXTS[3], t4 or "", language)}
-"""
-    except Exception as e:
-        print("Interpretation scoring error:", e)
-        interpretation_score = "ERROR during interpretation scoring"
+        A4:
+        {score_interpretation(ORIGINAL_AUDIO_TEXTS[3], t4 or "", language)}
+        """
+            except Exception as e:
+                print("Interpretation scoring error:", e)
+                interpretation_score = "ERROR during interpretation scoring"
 
         # PASS / FAIL
         t_score = extract_score(translation_score) if translation_score!="N/A" else 10
