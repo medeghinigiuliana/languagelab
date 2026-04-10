@@ -208,20 +208,26 @@ def submit():
         t4 = process_audio(request.form.get("audio4")) if request.form.get("audio4") else ""
 
         # INTERPRETATION
+        # INTERPRETATION
         if test_type in ["interpretation","both"]:
             try:
+                part1 = score_interpretation(ORIGINAL_AUDIO_TEXTS[0], t1, language) if t1 else "SCORE: 0/10\nFEEDBACK: No response"
+                part2 = score_interpretation(ORIGINAL_AUDIO_TEXTS[1], t2, language) if t2 else "SCORE: 0/10\nFEEDBACK: No response"
+                part3 = score_interpretation(ORIGINAL_AUDIO_TEXTS[2], t3, language) if t3 else "SCORE: 0/10\nFEEDBACK: No response"
+                part4 = score_interpretation(ORIGINAL_AUDIO_TEXTS[3], t4, language) if t4 else "SCORE: 0/10\nFEEDBACK: No response"
+
                 interpretation_score = f"""
         A1:
-        {score_interpretation(ORIGINAL_AUDIO_TEXTS[0], t1 or "", language)}
+        {part1}
 
         A2:
-        {score_interpretation(ORIGINAL_AUDIO_TEXTS[1], t2 or "", language)}
+        {part2}
 
         A3:
-        {score_interpretation(ORIGINAL_AUDIO_TEXTS[2], t3 or "", language)}
+        {part3}
 
         A4:
-        {score_interpretation(ORIGINAL_AUDIO_TEXTS[3], t4 or "", language)}
+        {part4}
         """
             except Exception as e:
                 print("Interpretation block error:", str(e))
