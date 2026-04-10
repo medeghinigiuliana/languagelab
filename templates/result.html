@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Candidate Detail</title>
+
+  <style>
+    body {
+      background: #0b0f19;
+      color: #e5e7eb;
+      font-family: Arial;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background: #111827;
+      padding: 30px;
+      border-radius: 12px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .block {
+      margin-top: 20px;
+      padding: 15px;
+      background: #020617;
+      border-radius: 10px;
+    }
+
+    audio {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .label {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .button {
+      display: inline-block;
+      margin-top: 20px;
+      background: #6366f1;
+      padding: 10px 15px;
+      border-radius: 8px;
+      color: white;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- HEADER -->
+<div style="text-align:center;">
+  <img src="{{ url_for('static', filename='images/logo.png') }}" style="height:100px;">
+  <h2>Candidate Details</h2>
+</div>
+
+<!-- BASIC INFO -->
+<div class="block">
+  <p><span class="label">Email:</span> {{ r.email }}</p>
+  <p><span class="label">Language:</span> {{ r.language }}</p>
+  <p><span class="label">Test Type:</span> {{ r.test_type }}</p>
+  <p><span class="label">Date:</span> {{ r.created_at }}</p>
+  <p><span class="label">Status:</span> {{ r.status }}</p>
+</div>
+
+<!-- TRANSLATION -->
+<div class="block">
+  <h3>Translation Answers</h3>
+  <pre>{{ r.answer }}</pre>
+</div>
+
+<!-- SCORES -->
+<div class="block">
+  <h3>Scores</h3>
+  <p><strong>Translation:</strong> {{ r.translation_score }}</p>
+  <p><strong>Interpretation:</strong> {{ r.interpretation_score }}</p>
+</div>
+
+<!-- TRANSCRIPTIONS -->
+<div class="block">
+  <h3>Transcriptions</h3>
+  <p>{{ r.transcription1 }}</p>
+  <p>{{ r.transcription2 }}</p>
+  <p>{{ r.transcription3 }}</p>
+  <p>{{ r.transcription4 }}</p>
+</div>
+
+<!-- AUDIO -->
+<div class="block">
+  <h3>Audio Responses</h3>
+
+  {% if r.audio1 %}
+  <audio controls src="{{ r.audio1 }}"></audio>
+  {% endif %}
+
+  {% if r.audio2 %}
+  <audio controls src="{{ r.audio2 }}"></audio>
+  {% endif %}
+
+  {% if r.audio3 %}
+  <audio controls src="{{ r.audio3 }}"></audio>
+  {% endif %}
+
+  {% if r.audio4 %}
+  <audio controls src="{{ r.audio4 }}"></audio>
+  {% endif %}
+
+</div>
+
+<a href="/dashboard" class="button">⬅ Back to Dashboard</a>
+
+</div>
+
+</body>
+</html>

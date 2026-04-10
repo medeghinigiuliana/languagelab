@@ -299,3 +299,15 @@ def download_csv():
 
     return Response(generate(), mimetype="text/csv",
                     headers={"Content-Disposition": "attachment;filename=results.csv"})
+@app.route("/result/<int:id>")
+def result_detail(id):
+    conn = sqlite3.connect("db.db")
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    c.execute("SELECT * FROM results WHERE id = ?", (id,))
+    result = c.fetchone()
+
+    conn.close()
+
+    return render_template("result.html", r=result)
