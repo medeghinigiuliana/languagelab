@@ -250,7 +250,10 @@ def submit():
             status = "PASS" if (t_score >= 6 and i_score >= 6) else "FAIL"
 
         # SAVE
-        conn = sqlite3.connect("db.db")
+        print("SAVING RESULT...")
+        print("EMAIL:", email)
+        print("TYPE:", test_type)
+        print("TRANSCRIPTION:", t1, t2, t3, t4)conn = sqlite3.connect("db.db")
         c = conn.cursor()
 
         c.execute("""
@@ -263,12 +266,15 @@ def submit():
         """,(
             email,test_type,language,answer,
             translation_score,interpretation_score,status,
-            request.form.get("audio1"),request.form.get("audio2"),
-            request.form.get("audio3"),request.form.get("audio4"),
+            request.form.get("audio1")[:1000] if request.form.get("audio1") else None,
+            request.form.get("audio2")[:1000] if request.form.get("audio2") else None,
+            request.form.get("audio3")[:1000] if request.form.get("audio3") else None,
+            request.form.get("audio4")[:1000] if request.form.get("audio4") else None,
             t1,t2,t3,t4
         ))
 
         conn.commit()
+        print("✅ SAVED SUCCESSFULLY")
         conn.close()
 
         return "✅ Test submitted successfully!"
