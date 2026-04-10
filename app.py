@@ -106,38 +106,31 @@ def score_interpretation(original, interpreted, language):
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": f"""
-                You are a STRICT professional interpreter evaluator.
+ You are a STRICT professional interpreter evaluator.
 
-                Evaluate interpretation into {language}.
+ Evaluate interpretation into {language}.
 
-                CRITERIA:
+ Focus on:
+ - Meaning accuracy
+ - Completeness
+ - Natural phrasing
 
-                1. ACCURACY
-                - Meaning must match original exactly
+ Return ONLY:
 
-                2. COMPLETENESS
-                - No missing ideas
+ SCORE: X/10
+ FEEDBACK: short explanation
+ """},
+                 {"role": "user", "content": f"ORIGINAL:\n{original}\n\nINTERPRETED:\n{interpreted[:500]}"}
+             ],
+             timeout=10
+         )
 
-                3. TERMINOLOGY
-                - Correct word choice
+         return response.choices[0].message.content.strip()
 
-                4. NATURAL DELIVERY
-                - Sounds like a native speaker
-
-                SCORING:
-                9–10 = Accurate and natural  
-                7–8 = Minor issues  
-                6 = Understandable but flawed  
-                ≤5 = Missing or incorrect meaning  
-
-                Return EXACTLY:
-
-                SCORE: X/10
-                FEEDBACK: short explanation
-                """},
-                {"role": "user", "content": f"ORIGINAL:\n{original}\n\nINTERPRETED:\n{interpreted}"}
-            ]
-        )
+     except Exception as e:
+         print("Interpretation error:", str(e))
+         return "SCORE: 0/10\nFEEDBACK: Error evaluating interpretation"
+         )
 
         return response.choices[0].message.content.strip()
 
@@ -225,10 +218,10 @@ def submit():
             translation_score = r.choices[0].message.content.strip()
 
         # AUDIO
-        t1 = process_audio(request.form.get("audio1"))
-        t2 = process_audio(request.form.get("audio2"))
-        t3 = process_audio(request.form.get("audio3"))
-        t4 = process_audio(request.form.get("audio4"))
+        t1 = process_audio(request.form.get("audio1")) if request.form.get("audio1") else ""
+        t2 = process_audio(request.form.get("audio2")) if request.form.get("audio2") else ""
+        t3 = process_audio(request.form.get("audio3")) if request.form.get("audio3") else ""
+        t4 = process_audio(request.form.get("audio4")) if request.form.get("audio4") else ""
 
         # INTERPRETATION
         if test_type in ["interpretation","both"]:
@@ -247,8 +240,11 @@ def submit():
         {score_interpretation(ORIGINAL_AUDIO_TEXTS[3], t4 or "", language)}
         """
             except Exception as e:
-                print("Interpretation scoring error:", e)
-        interpretation_score = "ERROR during interpretation scoring"
+                print("Interpretation block error:", str(e))
+                interpretation_score = """A1: SCORE: 0/10
+        A2: SCORE: 0/10
+        A3: SCORE: 0/10
+        A4: SCORE: 0/10"""
 
         # PASS / FAIL
         t_score = extract_score(translation_score) if translation_score!="N/A" else 10
