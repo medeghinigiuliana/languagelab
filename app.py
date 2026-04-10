@@ -140,11 +140,27 @@ def submit():
         interpretation_score = "N/A"
 
         # TRANSLATION SCORING
-        if test_type in ["translation","both"] and all([a1,a2,a3,a4]):
+        if test_type in ["translation","both"] and any([a1,a2,a3,a4]):
             r = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {"role":"system","content":f"Strictly evaluate translation into {language} and return FINAL_SCORE X/10"},
+                    {"role":"system","content":f"""
+            You are a STRICT professional translation evaluator.
+
+            The candidate translated into: {language}
+
+            RULES:
+            - If ANY section is missing or incomplete → MAX score = 5/10
+            - Penalize incorrect terminology
+            - Penalize wrong tone (legal, medical, etc.)
+            - Reward accuracy and natural fluency
+
+            Return ONLY:
+
+            FINAL_SCORE: X/10
+            FEEDBACK: short explanation
+            """
+                    },
                     {"role":"user","content":answer}
                 ]
             )
