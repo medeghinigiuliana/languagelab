@@ -59,7 +59,11 @@
 
     .small {
       font-size: 13px;
-      opacity: 0.8;
+      opacity: 0.85;
+    }
+
+    strong {
+      color: #111827;
     }
   </style>
 </head>
@@ -84,14 +88,20 @@
     {% for row in data %}
     <tr>
 
+      <!-- BASIC INFO -->
       <td>{{ row[0] }}</td>
       <td>{{ row[1] }}</td>
       <td>{{ row[2] }}</td>
 
-      <!-- TRANSLATION -->
-      <td>
+      <!-- ANSWERS (IMPROVED FORMAT) -->
+      <td class="small">
         {% if row[3] != "N/A" %}
-          {{ row[3].replace('\n', '<br>') | safe }}
+          {{ row[3]
+            .replace('Q1:', '<br><strong>Q1:</strong>')
+            .replace('Q2:', '<br><strong>Q2:</strong>')
+            .replace('Q3:', '<br><strong>Q3:</strong>')
+            .replace('Q4:', '<br><strong>Q4:</strong>')
+            | safe }}
         {% else %}
           ❌ No translation
         {% endif %}

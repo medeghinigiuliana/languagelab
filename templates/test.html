@@ -65,6 +65,22 @@
       font-weight: bold;
       margin-top: 10px;
     }
+
+    /* 🔍 Language UI fix */
+    .language-box {
+      margin-top: 15px;
+    }
+
+    #languageSearch {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    #languageSelect {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+      max-height: 150px;
+    }
   </style>
 </head>
 
@@ -86,89 +102,135 @@
     </select>
 
     <!-- 🔍 SEARCHABLE LANGUAGE -->
-    <input type="text" id="languageSearch" placeholder="Search language..." onkeyup="filterLanguages()" required>
+    <div class="language-box">
+      <input type="text" id="languageSearch" placeholder="Search language..." onkeyup="filterLanguages()" required>
 
-    <select name="language" id="languageSelect" size="6" required>
-      <option>Akan</option><option>Amharic</option><option>Arabic</option><option>Assamese</option>
-      <option>Awadhi</option><option>Azerbaijani</option><option>Bengali</option><option>Bhojpuri</option>
-      <option>Bulgarian</option><option>Burmese</option><option>Cebuano</option><option>Chhattisgarhi</option>
-      <option>Chewa</option><option>Chittagonian</option><option>Czech</option><option>Danish</option>
-      <option>Deccan</option><option>Dutch</option><option>English</option><option>Finnish</option>
-      <option>French</option><option>Fula</option><option>Gan Chinese</option><option>German</option>
-      <option>Greek</option><option>Gujarati</option><option>Haitian Creole</option><option>Hakka Chinese</option>
-      <option>Haryanvi</option><option>Hausa</option><option>Hebrew</option><option>Hindi</option>
-      <option>Hungarian</option><option>Igbo</option><option>Italian</option><option>Japanese</option>
-      <option>Javanese</option><option>Jin Chinese</option><option>Kannada</option><option>Kazakh</option>
-      <option>Khmer</option><option>Kinyarwanda</option><option>Korean</option><option>Kurdish</option>
-      <option>Magahi</option><option>Maithili</option><option>Malagasy</option><option>Malay</option>
-      <option>Malayalam</option><option>Mandarin Chinese</option><option>Marathi</option><option>Marwari</option>
-      <option>Madurese</option><option>Navajo</option><option>Nepali</option><option>Northern Min</option>
-      <option>Norwegian</option><option>Odia</option><option>Oromo</option><option>Pashto</option>
-      <option>Persian (Farsi)</option><option>Polish</option><option>Portuguese</option><option>Punjabi</option>
-      <option>Romanian</option><option>Russian</option><option>Saraiki</option><option>Serbo-Croatian</option>
-      <option>Sindhi</option><option>Sinhalese</option><option>Slovak</option><option>Somali</option>
-      <option>Southern Min</option><option>Spanish</option><option>Sundanese</option><option>Sylheti</option>
-      <option>Tagalog (Filipino)</option><option>Tamil</option><option>Telugu</option><option>Thai</option>
-      <option>Turkish</option><option>Turkmen</option><option>Ukrainian</option><option>Urdu</option>
-      <option>Uzbek</option><option>Vietnamese</option><option>Wu Chinese</option><option>Xiang Chinese</option>
-      <option>Yoruba</option><option>Yue Chinese (Cantonese)</option><option>Zhuang</option><option>Zulu</option>
-    </select>
+      <select name="language" id="languageSelect" size="5" required>
+        <option>Akan</option>
+        <option>Amharic</option>
+        <option>Arabic</option>
+        <option>Assamese</option>
+        <option>Awadhi</option>
+        <option>Azerbaijani</option>
+        <option>Bengali</option>
+        <option>Bhojpuri</option>
+        <option>Bulgarian</option>
+        <option>Burmese</option>
+        <option>Cebuano</option>
+        <option>Chhattisgarhi</option>
+        <option>Chewa</option>
+        <option>Chittagonian</option>
+        <option>Czech</option>
+        <option>Danish</option>
+        <option>Dutch</option>
+        <option>English</option>
+        <option>French</option>
+        <option>German</option>
+        <option>Greek</option>
+        <option>Gujarati</option>
+        <option>Hausa</option>
+        <option>Hebrew</option>
+        <option>Hindi</option>
+        <option>Italian</option>
+        <option>Japanese</option>
+        <option>Korean</option>
+        <option>Mandarin Chinese</option>
+        <option>Portuguese</option>
+        <option>Russian</option>
+        <option>Spanish</option>
+        <option>Turkish</option>
+        <option>Urdu</option>
+        <option>Vietnamese</option>
+        <option>Yoruba</option>
+        <option>Zulu</option>
+      </select>
+    </div>
 
-    <!-- TRANSLATION -->
+    <!-- TRANSLATION TEST -->
     <div id="translationTest" style="display:none;">
+
       <h3>The Multi-Industry Translation Test</h3>
       <p>Translate each passage into your native language using the correct tone and terminology.</p>
 
-      <div class="section"><h3>1. Software & IT</h3><textarea name="answer1"></textarea></div>
-      <div class="section"><h3>2. Legal & Compliance</h3><textarea name="answer2"></textarea></div>
-      <div class="section"><h3>3. Medical & Scientific</h3><textarea name="answer3"></textarea></div>
-      <div class="section"><h3>4. Marketing & Retail</h3><textarea name="answer4"></textarea></div>
+      <div class="section">
+        <h3>1. Software & IT</h3>
+        <p>
+          Error 404: Endpoint not found. The API gateway timed out while trying to fetch the JSON payload.
+          To resolve this issue, please flush your DNS cache, verify your firewall configurations,
+          and ensure your current OAuth token has not expired.
+        </p>
+        <textarea name="answer1"></textarea>
+      </div>
+
+      <div class="section">
+        <h3>2. Legal & Compliance</h3>
+        <p>
+          Notwithstanding any prior agreements, the Licensee agrees to indemnify and hold harmless the Licensor
+          against any claims arising from a breach of this agreement.
+        </p>
+        <textarea name="answer2"></textarea>
+      </div>
+
+      <div class="section">
+        <h3>3. Medical & Scientific</h3>
+        <p>
+          The patient presented symptoms of acute myocardial infarction, including dyspnea and diaphoresis.
+          Immediate intervention is recommended.
+        </p>
+        <textarea name="answer3"></textarea>
+      </div>
+
+      <div class="section">
+        <h3>4. Marketing & Retail</h3>
+        <p>
+          Upgrade your everyday carry with our premium leather tote.
+          Don’t miss our limited-time offer!
+        </p>
+        <textarea name="answer4"></textarea>
+      </div>
+
     </div>
 
-    <!-- INTERPRETATION -->
+    <!-- INTERPRETATION TEST -->
     <div id="interpretationTest" style="display:none;">
 
-      <!-- AUDIO 1 -->
       <div class="section">
         <h3>Audio 1</h3>
         <audio controls src="{{ url_for('static', filename='audio/audio1.mp3') }}"></audio><br>
         <button type="button" onclick="startRecording(1)">Start</button>
         <button type="button" onclick="stopRecording(1)">Stop</button>
         <p id="recordingStatus1" class="recording"></p>
-        <audio id="playback1" controls></audio>
+        <audio id="playback1"></audio>
         <input type="hidden" name="audio1" id="audioData1">
       </div>
 
-      <!-- AUDIO 2 -->
       <div class="section">
         <h3>Audio 2</h3>
         <audio controls src="{{ url_for('static', filename='audio/audio2.mp3') }}"></audio><br>
         <button type="button" onclick="startRecording(2)">Start</button>
         <button type="button" onclick="stopRecording(2)">Stop</button>
         <p id="recordingStatus2" class="recording"></p>
-        <audio id="playback2" controls></audio>
+        <audio id="playback2"></audio>
         <input type="hidden" name="audio2" id="audioData2">
       </div>
 
-      <!-- AUDIO 3 -->
       <div class="section">
         <h3>Audio 3</h3>
         <audio controls src="{{ url_for('static', filename='audio/audio3.mp3') }}"></audio><br>
         <button type="button" onclick="startRecording(3)">Start</button>
         <button type="button" onclick="stopRecording(3)">Stop</button>
         <p id="recordingStatus3" class="recording"></p>
-        <audio id="playback3" controls></audio>
+        <audio id="playback3"></audio>
         <input type="hidden" name="audio3" id="audioData3">
       </div>
 
-      <!-- AUDIO 4 -->
       <div class="section">
         <h3>Audio 4</h3>
         <audio controls src="{{ url_for('static', filename='audio/audio4.mp3') }}"></audio><br>
         <button type="button" onclick="startRecording(4)">Start</button>
         <button type="button" onclick="stopRecording(4)">Stop</button>
         <p id="recordingStatus4" class="recording"></p>
-        <audio id="playback4" controls></audio>
+        <audio id="playback4"></audio>
         <input type="hidden" name="audio4" id="audioData4">
       </div>
 
@@ -193,8 +255,7 @@ function showTest() {
 
 function filterLanguages() {
   let input = document.getElementById("languageSearch").value.toLowerCase();
-  let select = document.getElementById("languageSelect");
-  let options = select.options;
+  let options = document.getElementById("languageSelect").options;
 
   for (let i = 0; i < options.length; i++) {
     let txt = options[i].text.toLowerCase();
