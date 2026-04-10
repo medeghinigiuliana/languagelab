@@ -1,12 +1,12 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, Response
 import sqlite3
 import uuid
 from datetime import datetime, timedelta
 import os
 from openai import OpenAI
-
 import base64
 import io
+import csv
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -176,11 +176,7 @@ def create_invite(email):
 # ---------------------------
 @app.route("/", methods=["GET", "HEAD"])
 def home():
-    if request.method == "HEAD":
-        return "", 200
-
     token = request.args.get("token")
-
     if not token:
         return "Access denied"
 
@@ -301,6 +297,34 @@ def dashboard():
     conn.close()
 
     return render_template("dashboard.html", data=data)
+
+# ---------------------------
+# EXPORT CSV
+# ---------------------------
+@app.route("/export")
+def export_csv():
+    conn = sqlite3.connect("db.db")
+    c = conn.cursor()
+
+    c.execute("""
+    SELECT email, test_type, language,
+           translation_score, interpretation_score,
+           transcription1, transcription2, transcription3, transcription4
+    FROM results
+    ORDER BY created_at DESC
+    """)
+
+    rows = c.fetchall()
+    conn.close()
+
+    def generate():
+        yield "Email,Test Type,Language,Translation Score,Interpretation Score,T1,T2,T3,T4\n"
+        for r in rows:
+            line = [str(i).replace(",", " ") if i else "" for i in r]
+            yield ",".join(line) + "\n"
+
+    return Response(generate(), mimetype="text/csv",
+                    headers={"Content-Disposition": "attachment; filename=results.csv"})
 
 # ---------------------------
 # RUN
