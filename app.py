@@ -331,3 +331,22 @@ def result_detail(id):
     conn.close()
 
     return render_template("result.html", r=result)
+@app.route("/fix-columns")
+def fix_columns():
+    conn = sqlite3.connect("db.db")
+    c = conn.cursor()
+
+    try:
+        c.execute("ALTER TABLE results ADD COLUMN editing_score TEXT")
+    except Exception as e:
+        print("editing_score exists")
+
+    try:
+        c.execute("ALTER TABLE results ADD COLUMN post_edit_score TEXT")
+    except Exception as e:
+        print("post_edit_score exists")
+
+    conn.commit()
+    conn.close()
+
+    return "Columns fixed"
