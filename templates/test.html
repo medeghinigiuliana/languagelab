@@ -104,7 +104,7 @@
 
 <div style="text-align:center; margin-bottom:20px;">
   <img src="{{ url_for('static', filename='images/logo.png') }}"
-       style="height:140px;">
+       style="max-height:150px; width:auto;">
 </div>
 
 <h2 style="text-align:center; margin-top:5px;">Novox Lab</h2>
@@ -170,10 +170,11 @@
 
 <!-- TEST TYPE -->
 <select name="test_type" id="testType" onchange="showTest()" required>
-  <option value="">Select Test Type</option>
   <option value="translation">Translation</option>
+  <option value="editing">Editing</option>
+  <option value="post_editing">Post-MT Editing</option>
   <option value="interpretation">Interpretation</option>
-  <option value="both">Both</option>
+  <option value="both">Full Test</option>
 </select>
 
 <!-- LANGUAGE -->
@@ -314,6 +315,37 @@
       Don’t miss out on our limited-time offer!
     </p>
     <textarea name="answer4"></textarea>
+  </div>
+
+</div>
+
+
+<!-- ================= EDITING ================= -->
+<div id="editingTest" style="display:none;">
+
+  <h3>Editing Test</h3>
+
+  <div class="section">
+    <p>
+      The company dont have enough informations to take a decision about the proyect.
+    </p>
+    <textarea name="edit1" placeholder="Correct and improve this text"></textarea>
+  </div>
+
+</div>
+
+
+<!-- ================= POST-MT EDITING ================= -->
+<div id="postEditingTest" style="display:none;">
+
+  <h3>Post-MT Editing</h3>
+
+  <div class="section">
+    <p><strong>Machine Translation:</strong></p>
+    <p>
+      The system present many errors and it is not working correct in all devices.
+    </p>
+    <textarea name="mt1" placeholder="Improve this translation"></textarea>
   </div>
 
 </div>
