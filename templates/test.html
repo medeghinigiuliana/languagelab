@@ -102,19 +102,9 @@
 
 <div class="container">
 
-<div style="
-    width:80px;
-    height:80px;
-    margin: 0 auto 20px auto;
-    background: rgba(34,197,94,0.15);
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:40px;
-    color:#22c55e;
-">
-    ✓
+<div style="text-align:center; margin-bottom:20px;">
+  <img src="{{ url_for('static', filename='images/logo.png') }}"
+       style="height:90px;">
 </div>
 
 <h2 style="text-align:center; margin-top:5px;">Novox Lab</h2>
@@ -570,9 +560,7 @@ function unlockNext(id){
     nextAudio.play();
 
     // optional auto-record
-    nextAudio.onended = () => {
-      startRecording(next);
-    };
+    
 
     // scroll
     setTimeout(() => {
