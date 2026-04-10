@@ -253,7 +253,8 @@ def submit():
         print("SAVING RESULT...")
         print("EMAIL:", email)
         print("TYPE:", test_type)
-        print("TRANSCRIPTION:", t1, t2, t3, t4)conn = sqlite3.connect("db.db")
+        print("TRANSCRIPTION:", t1, t2, t3, t4)
+        conn = sqlite3.connect("db.db")
         c = conn.cursor()
 
         c.execute("""
