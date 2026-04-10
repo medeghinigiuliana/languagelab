@@ -105,7 +105,36 @@ def score_interpretation(original, interpreted, language):
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": f"Evaluate interpreter accuracy into {language}. Return SCORE and FEEDBACK."},
+                {"role": "system", "content": f"""
+                You are a STRICT professional interpreter evaluator.
+
+                Evaluate interpretation into {language}.
+
+                CRITERIA:
+
+                1. ACCURACY
+                - Meaning must match original exactly
+
+                2. COMPLETENESS
+                - No missing ideas
+
+                3. TERMINOLOGY
+                - Correct word choice
+
+                4. NATURAL DELIVERY
+                - Sounds like a native speaker
+
+                SCORING:
+                9–10 = Accurate and natural  
+                7–8 = Minor issues  
+                6 = Understandable but flawed  
+                ≤5 = Missing or incorrect meaning  
+
+                Return EXACTLY:
+
+                SCORE: X/10
+                FEEDBACK: short explanation
+                """},
                 {"role": "user", "content": f"ORIGINAL:\n{original}\n\nINTERPRETED:\n{interpreted}"}
             ]
         )
@@ -150,21 +179,45 @@ def submit():
                 model="gpt-4o-mini",
                 messages=[
                     {"role":"system","content":f"""
-            You are a STRICT professional translation evaluator.
+                    You are a STRICT professional translation evaluator.
 
-            The candidate translated into: {language}
+                    The candidate translated into: {language}.
 
-            RULES:
-            - If ANY section is missing or incomplete → MAX score = 5/10
-            - Penalize incorrect terminology
-            - Penalize wrong tone (legal, medical, etc.)
-            - Reward accuracy and natural fluency
+                    There are 4 sections:
+                    1. Software & IT
+                    2. Legal
+                    3. Medical
+                    4. Marketing
 
-            Return ONLY:
+                    SCORING RULES:
 
-            FINAL_SCORE: X/10
-            FEEDBACK: short explanation
-            """
+                    1. COMPLETENESS (CRITICAL)
+                    - If ANY section is missing or too short → MAX score = 5/10
+
+                    2. ACCURACY
+                    - Meaning must match original exactly
+                    - No omissions or additions
+
+                    3. TERMINOLOGY
+                    - Use correct domain terminology:
+                      - IT (API, JSON, OAuth)
+                      - Legal (indemnify, breach)
+                      - Medical (myocardial infarction, dyspnea)
+
+                    4. FLUENCY
+                    - Natural, native-level phrasing
+
+                    SCORING SCALE:
+                    9–10 = Excellent, professional quality  
+                    7–8 = Good, minor issues  
+                    6 = Acceptable but flawed  
+                    ≤5 = Incomplete or incorrect  
+
+                    Return EXACTLY:
+
+                    FINAL_SCORE: X/10
+                    FEEDBACK: short explanation
+                    """
                     },
                     {"role":"user","content":answer}
                 ]
@@ -201,7 +254,14 @@ def submit():
         t_score = extract_score(translation_score) if translation_score!="N/A" else 10
         i_score = extract_score(interpretation_score) if interpretation_score!="N/A" else 10
 
-        status = "PASS" if (t_score>=6 and i_score>=6) else "FAIL"
+        if test_type == "translation":
+            status = "PASS" if t_score >= 6 else "FAIL"
+
+        elif test_type == "interpretation":
+            status = "PASS" if i_score >= 6 else "FAIL"
+
+        else:  # BOTH
+            status = "PASS" if (t_score >= 6 and i_score >= 6) else "FAIL"
 
         # SAVE
         conn = sqlite3.connect("db.db")
