@@ -264,7 +264,8 @@ def export():
     def generate():
         yield "Email,Test,Language,Translation,Interpretation,Status\n"
         for r in rows:
-            yield ",".join([str(i).replace(","," ") for i in r])+"\n"
+            clean_row = [str(i).replace(",", " ").replace("\n", " ") for i in r]
+            yield ",".join(clean_row) + "\n"
 
     return Response(generate(),
         mimetype="text/csv",
