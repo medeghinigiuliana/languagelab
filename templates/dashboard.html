@@ -1,37 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dashboard</title>
+<title>Dashboard</title>
 </head>
+
 <body>
 
-<h2>Candidate Results</h2>
+<h2>Results</h2>
 
 <a href="/export">
-  <button>Download CSV</button>
+<button>Download CSV</button>
 </a>
 
 <br><br>
 
 <table border="1">
+
 <tr>
-  <th>Email</th>
-  <th>Test</th>
-  <th>Language</th>
-  <th>Answers</th>
-  <th>Translation Score</th>
-  <th>Interpretation Score</th>
+<th>Email</th>
+<th>Test</th>
+<th>Language</th>
+<th>Answers</th>
+<th>Translation</th>
+<th>Interpretation</th>
+<th>Status</th>
 </tr>
 
-{% for row in data %}
+{% for r in data %}
 <tr>
-  <td>{{ row[0] }}</td>
-  <td>{{ row[1] }}</td>
-  <td>{{ row[2] }}</td>
-  <td>{{ row[3] }}</td>
+<td>{{r[0]}}</td>
+<td>{{r[1]}}</td>
+<td>{{r[2]}}</td>
+<td>{{r[3]}}</td>
+<td>{{r[4]|safe}}</td>
+<td>{{r[5]|safe}}</td>
 
-  <td>{{ row[4].replace('\n','<br>')|safe if row[4] else "-" }}</td>
-  <td>{{ row[5].replace('\n','<br>')|safe if row[5] else "-" }}</td>
+<td>
+{% if r[6]=="PASS" %}
+<span style="color:green;font-weight:bold;">PASS</span>
+{% else %}
+<span style="color:red;font-weight:bold;">FAIL</span>
+{% endif %}
+</td>
+
 </tr>
 {% endfor %}
 
