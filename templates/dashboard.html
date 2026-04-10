@@ -104,16 +104,34 @@
   <tr>
     <td>{{ r.email }}</td>
     <td>{{ r.language }}</td>
-    <td>{{ r.test_type }}</td>
+    <td>
+      {% if r.test_type == "post_editing" %}
+        Post-MT Editing
+      {% else %}
+        {{ r.test_type|capitalize }}
+      {% endif %}
+</td>
     <td>{{ r.created_at }}</td>
     <td>
-      {% if r.translation_score != "N/A" %}
+      {% if r.test_type == "translation" %}
         {{ r.translation_score }}
-      {% else %}
+
+      {% elif r.test_type == "interpretation" %}
         {{ r.interpretation_score }}
+
+      {% elif r.test_type == "editing" %}
+        {{ r.editing_score }}
+
+      {% elif r.test_type == "post_editing" %}
+        {{ r.post_edit_score }}
+
+      {% else %}
+        N/A
       {% endif %}
-    </td>
-    <td>{{ r.status }}</td>
+</td>
+<td>
+  {{ r.test_type|capitalize }} test completed
+</td>
 
     <td class="
       {% if 'PASS' in r.status %}status-pass{% else %}status-fail{% endif %}
