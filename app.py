@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, Response
+from flask import Flask, render_template, request, Response, redirect, url_for
 import sqlite3
 import os
 from openai import OpenAI
@@ -243,10 +243,9 @@ def submit():
         conn.commit()
         conn.close()
 
-        return {"status": status}
 
-    except Exception as e:
-        return str(e)
+        return redirect(url_for("home"))
+
 
 # ---------------------------
 # DASHBOARD
