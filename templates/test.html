@@ -169,7 +169,7 @@
 <input name="email" placeholder="Your email" required>
 
 <!-- TEST TYPE -->
-<select name="test_type" id="testType" onchange="showTest()" required>
+<select name="test_type" id="testType" onchange="showTest(); toggleLanguage();" required>
   <option value="translation">Translation</option>
   <option value="editing">Editing</option>
   <option value="post_editing">Post-MT Editing</option>
@@ -178,7 +178,9 @@
 </select>
 
 <!-- LANGUAGE -->
-<input list="languages" name="language" placeholder="Select or type language" required>
+<div id="languageWrapper">
+<input list="languages" name="language" id="languageInput" placeholder="Select or type language">
+</div>
 
 <datalist id="languages">
   <option value="Afrikaans">
@@ -621,6 +623,30 @@ function updateProgress(step){
   document.getElementById("progressText").innerText =
     "Step " + step + " of 4";
 }
+// LANGUAGE TOGGLE (FIXED)
+document.addEventListener("DOMContentLoaded", function () {
+
+  const testTypeSelect = document.getElementById("testType");
+  const languageInput = document.getElementById("languageInput");
+  const languageWrapper = document.getElementById("languageWrapper");
+
+  function toggleLanguage() {
+    const type = testTypeSelect.value;
+
+    if (type === "editing" || type === "post_editing") {
+      languageWrapper.style.display = "none";
+      languageInput.value = "";
+    } else {
+      languageWrapper.style.display = "block";
+    }
+  }
+
+  testTypeSelect.addEventListener("change", toggleLanguage);
+
+  // run on load
+  toggleLanguage();
+
+});
 </script>
 
 </body>
