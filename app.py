@@ -7,7 +7,11 @@ import io
 import re
 from nltk.translate.gleu_score import sentence_gleu
 import nltk
-nltk.download('punkt')
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt')
+from nltk.translate.bleu_score import sentence_bleu
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -78,6 +82,16 @@ ORIGINAL_AUDIO_TEXTS = [
 # ---------------------------
 # HELPERS
 # ---------------------------
+def calculate_bleu(reference, candidate):
+    try:
+        ref_tokens = reference.split()
+        cand_tokens = candidate.split()
+
+        score = sentence_bleu([ref_tokens], cand_tokens)
+        return round(score, 2)
+    except:
+        return 0
+
 def combine_scores(ai_score, gleu_score):
     try:
         # ai_score is from 0–10
@@ -107,7 +121,6 @@ def calculate_gleu(reference, candidate):
     except:
         return 0
 
-def extract_score(text):
     try:
         match = re.search(r'(\d+)/10', text)
         return int(match.group(1)) if match else 0
@@ -209,9 +222,11 @@ def home():
 # ---------------------------
 # SUBMIT
 # ---------------------------
+
 @app.route("/submit", methods=["POST"])
 def submit():
     try:
+        gleu_score = None
         email = request.form.get("email")
         test_type = request.form.get("test_type")
         language = request.form.get("language")
@@ -241,12 +256,22 @@ def submit():
             )
             translation_score = r.choices[0].message.content.strip()
 
+        bleu_improvement = 0
+
         # EDITING
         if test_type == "editing" and edit1:
-            editing_score = score_editing(
-                "The company dont have enough informations to take a decision about the proyect.",
-                edit1
-            )
+            original_text = "The company dont have enough informations to take a decision about the proyect."
+            reference_text = "The company doesn't have enough information to make a decision about the project."
+
+            # AI score
+            editing_score = score_editing(original_text, edit1)
+
+            # BLEU scores
+            bleu_original = calculate_bleu(reference_text, original_text)
+            bleu_edited = calculate_bleu(reference_text, edit1)
+
+            # Improvement
+            bleu_improvement = round(bleu_edited - bleu_original, 2)
 
         # POST-MT
         if test_type == "post_editing" and mt1:
@@ -282,10 +307,16 @@ def submit():
         t_score = get_score(translation_score)
         i_score = get_score(interpretation_score)
         e_score = get_score(editing_score)
+
+        editing_final_score = e_score
+
+        if test_type == "editing" and bleu_improvement > 0:
+            editing_final_score = (e_score * 0.7) + (bleu_improvement * 10 * 0.3)
+
         p_score = get_score(post_edit_score)
-        final_post_edit_score = p_score
         final_score = None
-        status = get_status(final_score if final_score is not None else 0)
+
+
 
         if test_type == "post_editing" and gleu_score is not None:
             final_score = combine_scores(p_score, gleu_score)
@@ -294,7 +325,9 @@ def submit():
         elif test_type == "interpretation":
             final_score = i_score
         elif test_type == "editing":
-           final_score = e_score
+            final_score = editing_final_score
+
+        status = get_status(final_score if final_score is not None else 0)
        
 
         conn = sqlite3.connect("db.db")
