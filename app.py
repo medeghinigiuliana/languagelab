@@ -7,6 +7,7 @@ import io
 import re
 from nltk.translate.gleu_score import sentence_gleu
 import nltk
+from sacrebleu.metrics import TER
 try:
     nltk.data.find('tokenizers/punkt')
 except LookupError:
@@ -64,6 +65,10 @@ def init_db():
         c.execute("ALTER TABLE results ADD COLUMN post_edit_score TEXT")
     except:
         pass
+    try:
+        c.execute("ALTER TABLE results ADD COLUMN gleu_score REAL")
+    except:
+        pass
 
     conn.commit()
     conn.close()
@@ -82,6 +87,14 @@ ORIGINAL_AUDIO_TEXTS = [
 # ---------------------------
 # HELPERS
 # ---------------------------
+def calculate_ter(reference, candidate):
+    try:
+        ter = TER()
+        score = ter.sentence_score(candidate, [reference]).score
+        return round(score, 2)
+    except:
+        return 100
+
 def calculate_bleu(reference, candidate):
     try:
         ref_tokens = reference.split()
@@ -257,6 +270,10 @@ def submit():
             translation_score = r.choices[0].message.content.strip()
 
         bleu_improvement = 0
+        ter_score = 100
+
+        bleu_improvement = 0
+        ter_score = 100
 
         # EDITING
         if test_type == "editing" and edit1:
@@ -266,12 +283,13 @@ def submit():
             # AI score
             editing_score = score_editing(original_text, edit1)
 
-            # BLEU scores
+            # BLEU
             bleu_original = calculate_bleu(reference_text, original_text)
             bleu_edited = calculate_bleu(reference_text, edit1)
-
-            # Improvement
             bleu_improvement = round(bleu_edited - bleu_original, 2)
+
+            # TER
+            ter_score = calculate_ter(reference_text, edit1)
 
         # POST-MT
         if test_type == "post_editing" and mt1:
@@ -310,8 +328,15 @@ def submit():
 
         editing_final_score = e_score
 
-        if test_type == "editing" and bleu_improvement > 0:
-            editing_final_score = (e_score * 0.7) + (bleu_improvement * 10 * 0.3)
+        if test_type == "editing":
+            ter_scaled = max(0, 10 - (ter_score / 10))
+            bleu_bonus = (bleu_improvement * 10) if bleu_improvement > 0 else 0
+
+            editing_final_score = (
+                e_score * 0.6 +
+                bleu_bonus * 0.2 +
+                ter_scaled * 0.2
+            )
 
         p_score = get_score(post_edit_score)
         final_score = None
