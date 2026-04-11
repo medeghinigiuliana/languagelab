@@ -69,9 +69,19 @@ def init_db():
         c.execute("ALTER TABLE results ADD COLUMN gleu_score REAL")
     except:
         pass
+    try:
+        c.execute("ALTER TABLE results ADD COLUMN bleu_score REAL")
+    except:
+        pass
+
+    try:
+        c.execute("ALTER TABLE results ADD COLUMN ter_score REAL")
+    except:
+        pass
 
     conn.commit()
     conn.close()
+
 init_db()
 
 # ---------------------------
@@ -271,9 +281,7 @@ def submit():
 
         bleu_improvement = 0
         ter_score = 100
-
-        bleu_improvement = 0
-        ter_score = 100
+        bleu_score = None
 
         # EDITING
         if test_type == "editing" and edit1:
@@ -287,6 +295,7 @@ def submit():
             bleu_original = calculate_bleu(reference_text, original_text)
             bleu_edited = calculate_bleu(reference_text, edit1)
             bleu_improvement = round(bleu_edited - bleu_original, 2)
+            bleu_score = bleu_edited
 
             # TER
             ter_score = calculate_ter(reference_text, edit1)
@@ -361,14 +370,16 @@ def submit():
         c.execute("""
         INSERT INTO results 
         (email,test_type,language,answer,
-        translation_score,interpretation_score,editing_score,post_edit_score,gleu_score,final_score,status,
+        translation_score,interpretation_score,editing_score,post_edit_score,
+        gleu_score,bleu_score,ter_score,final_score,status,
         transcription1,transcription2,transcription3,transcription4)
         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """,(
-            email,test_type,language,answer,
-            translation_score,interpretation_score,editing_score,post_edit_score,gleu_score,final_score,status,
-            t1,t2,t3,t4
-        ))
+             email,test_type,language,answer,
+             translation_score,interpretation_score,editing_score,post_edit_score,
+             gleu_score,bleu_score,ter_score,final_score,status,
+             t1,t2,t3,t4
+            ))
 
         conn.commit()
         conn.close()

@@ -98,50 +98,54 @@
     <th>Summary</th>
     <th>Status</th>
     <th>Details</th>
+    <th>BLEU</th>
+    <th>TER</th>
+    <th>GLEU</th>
   </tr>
 
   {% for r in results %}
   <tr>
     <td>{{ r.email }}</td>
     <td>{{ r.language }}</td>
+
     <td>
       {% if r.test_type == "post_editing" %}
         Post-MT Editing
       {% else %}
         {{ r.test_type|capitalize }}
       {% endif %}
-</td>
+    </td>
+
     <td>{{ r.created_at }}</td>
+
+    <td><strong>{{ r.final_score or '-' }}</strong></td>
+
     <td>
       {% if r.test_type == "translation" %}
         {{ r.translation_score }}
-
       {% elif r.test_type == "interpretation" %}
         {{ r.interpretation_score }}
-
       {% elif r.test_type == "editing" %}
         {{ r.editing_score }}
-
       {% elif r.test_type == "post_editing" %}
         {{ r.post_edit_score }}
-
       {% else %}
         N/A
       {% endif %}
-</td>
-<td>
-  {{ r.test_type|capitalize }} test completed
-</td>
+    </td>
 
-    <td class="
-      {% if 'PASS' in r.status %}status-pass{% else %}status-fail{% endif %}
-    ">
+    <td class="{% if 'PASS' in r.status %}status-pass{% else %}status-fail{% endif %}">
       {{ r.status }}
     </td>
 
     <td>
       <a href="/result/{{ r.id }}" class="button">View</a>
     </td>
+
+    <!-- ✅ METRICS -->
+    <td>{{ r.bleu_score or '-' }}</td>
+    <td>{{ r.ter_score or '-' }}</td>
+    <td>{{ r.gleu_score or '-' }}</td>
   </tr>
   {% endfor %}
 
