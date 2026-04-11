@@ -6,6 +6,8 @@ import base64
 import io
 import re
 from nltk.translate.gleu_score import sentence_gleu
+import nltk
+nltk.download('punkt')
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -50,7 +52,10 @@ def init_db():
         c.execute("ALTER TABLE results ADD COLUMN editing_score TEXT")
     except:
         pass
-
+    try:
+        c.execute("ALTER TABLE results ADD COLUMN final_score REAL")
+    except:
+        pass
     try:
         c.execute("ALTER TABLE results ADD COLUMN post_edit_score TEXT")
     except:
@@ -73,6 +78,25 @@ ORIGINAL_AUDIO_TEXTS = [
 # ---------------------------
 # HELPERS
 # ---------------------------
+def combine_scores(ai_score, gleu_score):
+    try:
+        # ai_score is from 0–10
+        # gleu_score is from 0–1 → convert to 0–10
+        gleu_scaled = gleu_score * 10 if gleu_score else 0
+
+        final = (ai_score * 0.7) + (gleu_scaled * 0.3)
+        return round(final, 2)
+    except:
+        return ai_score
+
+def get_status(score):
+    if score >= 8:
+        return "STRONG PASS"
+    elif score >= 6:
+        return "BORDERLINE"
+    else:
+        return "FAIL"
+
 def calculate_gleu(reference, candidate):
     try:
         ref_tokens = reference.split()
@@ -259,20 +283,18 @@ def submit():
         i_score = get_score(interpretation_score)
         e_score = get_score(editing_score)
         p_score = get_score(post_edit_score)
+        final_post_edit_score = p_score
+        final_score = None
+        status = get_status(final_score if final_score is not None else 0)
 
-        def get_status(score):
-            if score >= 8: return "STRONG PASS"
-            elif score >= 6: return "BORDERLINE"
-            else: return "FAIL"
-
-        if test_type == "translation":
-            status = get_status(t_score)
+        if test_type == "post_editing" and gleu_score is not None:
+            final_score = combine_scores(p_score, gleu_score)
+        elif test_type == "translation":
+            final_score = t_score
         elif test_type == "interpretation":
-            status = get_status(i_score)
+            final_score = i_score
         elif test_type == "editing":
-            status = get_status(e_score)
-        elif test_type == "post_editing":
-            status = get_status(p_score)
+           final_score = e_score
        
 
         conn = sqlite3.connect("db.db")
@@ -281,12 +303,12 @@ def submit():
         c.execute("""
         INSERT INTO results 
         (email,test_type,language,answer,
-        translation_score,interpretation_score,editing_score,post_edit_score,status,
+        translation_score,interpretation_score,editing_score,post_edit_score,gleu_score,final_score,status,
         transcription1,transcription2,transcription3,transcription4)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """,(
             email,test_type,language,answer,
-            translation_score,interpretation_score,editing_score,post_edit_score,status,
+            translation_score,interpretation_score,editing_score,post_edit_score,gleu_score,final_score,status,
             t1,t2,t3,t4
         ))
 
