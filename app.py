@@ -106,6 +106,25 @@ ORIGINAL_AUDIO_TEXTS = [
 # ---------------------------
 # HELPERS
 # ---------------------------
+def apply_completion_penalty(original, candidate, score):
+    try:
+        if not candidate:
+            return 0
+
+        ratio = len(candidate.split()) / len(original.split())
+
+        # If less than 50% completed → heavy penalty
+        if ratio < 0.5:
+            return round(score * 0.5, 2)
+
+        # If less than 80% → moderate penalty
+        elif ratio < 0.8:
+            return round(score * 0.75, 2)
+
+        return score
+    except:
+        return score
+
 def calculate_ter(reference, candidate):
     try:
         ter = TER()
@@ -301,6 +320,7 @@ def submit():
 
             # AI score
             editing_score = score_editing(original_text, edit1)
+            editing_score = apply_completion_penalty(original_text, edit1, editing_score)
 
             # BLEU
             bleu_original = calculate_bleu(reference_text, original_text)
@@ -322,6 +342,7 @@ def submit():
                 "The system presents many errors and does not work correctly on all devices.",
                 mt1
             )
+            post_edit_score = apply_completion_penalty(original_text, mt1, post_edit_score)
 
         # AUDIO
         t1 = process_audio(request.form.get("audio1"))
