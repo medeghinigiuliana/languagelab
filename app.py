@@ -78,6 +78,15 @@ def init_db():
         c.execute("ALTER TABLE results ADD COLUMN ter_score REAL")
     except:
         pass
+    try:
+        c.execute("ALTER TABLE results ADD COLUMN first_name TEXT")
+    except:
+        pass
+
+    try:
+        c.execute("ALTER TABLE results ADD COLUMN last_name TEXT")
+    except:
+        pass
 
     conn.commit()
     conn.close()
@@ -251,6 +260,8 @@ def submit():
     try:
         gleu_score = None
         email = request.form.get("email")
+        first_name = request.form.get("first_name")
+        last_name = request.form.get("last_name")
         test_type = request.form.get("test_type")
         language = request.form.get("language")
 
@@ -361,21 +372,22 @@ def submit():
         elif test_type == "editing":
             final_score = editing_final_score
 
-        status = get_status(final_score if final_score is not None else 0)
-       
+        final_score = final_score if final_score is not None else 0
+
+        status = get_status(final_score)
 
         conn = sqlite3.connect("db.db")
         c = conn.cursor()
 
         c.execute("""
         INSERT INTO results 
-        (email,test_type,language,answer,
+        (first_name,last_name,email,test_type,language,answer,
         translation_score,interpretation_score,editing_score,post_edit_score,
         gleu_score,bleu_score,ter_score,final_score,status,
         transcription1,transcription2,transcription3,transcription4)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """,(
-             email,test_type,language,answer,
+             first_name,last_name,email,test_type,language,answer,
              translation_score,interpretation_score,editing_score,post_edit_score,
              gleu_score,bleu_score,ter_score,final_score,status,
              t1,t2,t3,t4

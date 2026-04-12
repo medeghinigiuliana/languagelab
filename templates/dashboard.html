@@ -90,6 +90,7 @@
 <!-- TABLE -->
 <table>
   <tr>
+    <th>Name</th>
     <th>Email</th>
     <th>Language</th>
     <th>Test Type</th>
@@ -105,6 +106,7 @@
 
   {% for r in results %}
   <tr>
+    <td>{{ r.first_name }} {{ r.last_name }}</td>
     <td>{{ r.email }}</td>
     <td>{{ r.language }}</td>
 

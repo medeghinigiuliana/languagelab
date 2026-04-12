@@ -105,6 +105,9 @@
 
 <!-- SUMMARY CARD -->
 <div class="card">
+  <div class="label">Name</div>
+  <div class="value">{{ r.first_name }} {{ r.last_name }}</div>
+
   <div class="label">Email</div>
   <div class="value">{{ r.email }}</div>
 
@@ -157,7 +160,7 @@
 <div class="card">
   <h3>Evaluation Details</h3>
 
-  <{% if r.test_type == "translation" and r.translation_score %}
+  {% if r.test_type == "translation" and r.translation_score %}
 <div class="section">
   <h4>Translation Evaluation</h4>
   <pre>{{ r.translation_score }}</pre>
