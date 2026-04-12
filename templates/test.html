@@ -156,11 +156,11 @@
 
 <!-- TEST TYPE -->
 <select name="test_type" id="testType" onchange="showTest(); toggleLanguage();" required>
+  <option value="">Select Test Type</option>
   <option value="translation">Translation</option>
   <option value="editing">Editing</option>
   <option value="post_editing">Post-MT Editing</option>
   <option value="interpretation">Interpretation</option>
-  
 </select>
 
 <!-- LANGUAGE -->
@@ -467,20 +467,18 @@
 <script>
 
 // SHOW TEST
-function showTest(){
-  let type = document.getElementById("testType").value;
+function showTest() {
+  const type = document.getElementById("testType").value;
 
-  document.getElementById("translationTest").style.display =
-    (type === "translation" || type === "both") ? "block" : "none";
+  // hide all test sections
+  document.querySelectorAll('[id$="Test"]').forEach(el => {
+    el.style.display = "none";
+  });
 
-  document.getElementById("interpretationTest").style.display =
-    (type === "interpretation" || type === "both") ? "block" : "none";
-
-  document.getElementById("editingTest").style.display =
-    (type === "editing") ? "block" : "none";
-
-  document.getElementById("postEditingTest").style.display =
-    (type === "post_editing") ? "block" : "none";
+  // only show if something is selected
+  if (type) {
+    document.getElementById(type + "Test").style.display = "block";
+  }
 }
 
 // SETTINGS
@@ -628,6 +626,11 @@ document.addEventListener("DOMContentLoaded", function () {
   function toggleLanguage() {
     const type = testTypeSelect.value;
 
+    if (!type) {
+      languageWrapper.style.display = "none";
+      return;
+    }
+
     if (type === "editing" || type === "post_editing") {
       languageWrapper.style.display = "none";
       languageInput.value = "";
@@ -638,7 +641,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   testTypeSelect.addEventListener("change", toggleLanguage);
 
-  showTest();
   
   // run on load
   toggleLanguage();
