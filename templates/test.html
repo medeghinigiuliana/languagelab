@@ -313,10 +313,19 @@
 
   <h3>Editing Test</h3>
 
+  <p style="opacity:0.8;">
+    <strong>Instructions:</strong> Correct grammar, improve clarity, and rewrite the text to sound natural and professional.
+  </p>
+
   <div class="section">
     <p>
-      The company dont have enough informations to take a decision about the proyect.
+    The company dont have enough informations to take a decision about the proyect. 
+    Also, the results that we received from the last quarter is not very clear and 
+    there is many inconsistencies that needs to be reviewed carefully before moving forward. 
+    In addition, the team are not aligned with the new strategy and this create confusion 
+    between departments, which affect negatively the overall performance.
     </p>
+
     <textarea name="edit1" placeholder="Correct and improve this text"></textarea>
   </div>
 
@@ -621,6 +630,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   testTypeSelect.addEventListener("change", toggleLanguage);
 
+  showTest();
+  
   // run on load
   toggleLanguage();
 
