@@ -157,22 +157,36 @@
 <div class="card">
   <h3>Evaluation Details</h3>
 
-  <div class="section">
-    <pre>
-{% if r.test_type == "translation" %}
-{{ r.translation_score }}
-
-{% elif r.test_type == "interpretation" %}
-{{ r.interpretation_score }}
-
-{% elif r.test_type == "editing" %}
-{{ r.editing_score }}
-
-{% elif r.test_type == "post_editing" %}
-{{ r.post_edit_score }}
+  <{% if r.test_type == "translation" and r.translation_score %}
+<div class="section">
+  <h4>Translation Evaluation</h4>
+  <pre>{{ r.translation_score }}</pre>
+</div>
 {% endif %}
-    </pre>
-  </div>
+
+{% if r.test_type == "interpretation" and r.interpretation_score %}
+<div class="section">
+  <h4>Interpretation Evaluation</h4>
+  <pre>{{ r.interpretation_score }}</pre>
+</div>
+{% endif %}
+
+{% if r.test_type == "editing" and r.editing_score %}
+<div class="section">
+  <h4>Editing Evaluation</h4>
+  <pre>{{ r.editing_score }}</pre>
+</div>
+{% endif %}
+
+{% if r.test_type == "post_editing" and r.post_edit_score %}
+<div class="section">
+  <h4>Post-MT Editing Evaluation</h4>
+  <pre>{{ r.post_edit_score }}</pre>
+</div>
+{% endif %}
+{% if not r.translation_score and not r.interpretation_score and not r.editing_score and not r.post_edit_score %}
+    <p style="opacity:0.6;">No detailed results available</p>
+  {% endif %}
 </div>
 
 </div>
