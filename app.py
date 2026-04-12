@@ -373,7 +373,7 @@ def submit():
         translation_score,interpretation_score,editing_score,post_edit_score,
         gleu_score,bleu_score,ter_score,final_score,status,
         transcription1,transcription2,transcription3,transcription4)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """,(
              email,test_type,language,answer,
              translation_score,interpretation_score,editing_score,post_edit_score,
