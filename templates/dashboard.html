@@ -118,9 +118,13 @@
 
     <td>{{ r.created_at }}</td>
 
-    <td><strong>{{ r.final_score or '-' }}</strong></td>
-
     <td>
+        <strong style="font-size:16px;">
+          {{ r.final_score or '-' }}
+        </strong>
+    </td>
+
+    <td style="max-width:250px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
       {% if r.test_type == "translation" %}
         {{ r.translation_score }}
       {% elif r.test_type == "interpretation" %}
@@ -129,13 +133,23 @@
         {{ r.editing_score }}
       {% elif r.test_type == "post_editing" %}
         {{ r.post_edit_score }}
-      {% else %}
-        N/A
       {% endif %}
     </td>
 
-    <td class="{% if 'PASS' in r.status %}status-pass{% else %}status-fail{% endif %}">
-      {{ r.status }}
+    <td>
+      {% if "PASS" in r.status %}
+        <span style="background:#064e3b; color:#22c55e; padding:6px 10px; border-radius:8px; font-size:12px;">
+          {{ r.status }}
+        </span>
+      {% elif "BORDERLINE" in r.status %}
+        <span style="background:#78350f; color:#f59e0b; padding:6px 10px; border-radius:8px; font-size:12px;">
+          {{ r.status }}
+        </span>
+      {% else %}
+        <span style="background:#7f1d1d; color:#ef4444; padding:6px 10px; border-radius:8px; font-size:12px;">
+          {{ r.status }}
+        </span>
+      {% endif %}
     </td>
 
     <td>
