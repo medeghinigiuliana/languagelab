@@ -22,6 +22,20 @@ app = Flask(__name__)
 # INIT DB
 # ---------------------------
 def init_db():
+    try:
+        c.execute("ALTER TABLE results ADD COLUMN ai_component REAL")
+    except:
+        pass
+
+    try:
+        c.execute("ALTER TABLE results ADD COLUMN bleu_component REAL")
+    except:
+        pass
+
+    try:
+        c.execute("ALTER TABLE results ADD COLUMN ter_component REAL")
+    except:
+        pass
     conn = sqlite3.connect("db.db")
     c = conn.cursor()
 
@@ -416,6 +430,10 @@ as soon as possible to avoid losing customers."""
             scores = extract_all_scores(text)
             return scores[-1] if scores else 0
 
+        ai_component = None
+        bleu_component = None
+        ter_component = None
+
         t_score = get_score(translation_score)
         i_score = get_score(interpretation_score)
         e_score = get_score(editing_score)
@@ -428,10 +446,14 @@ as soon as possible to avoid losing customers."""
             ter_scaled = max(0, 10 - (ter_score / 10))
             bleu_bonus = min(10, bleu_improvement * 10) if bleu_improvement > 0 else 0
 
+            ai_component = round(e_score * 0.6, 2)
+            bleu_component = round(bleu_bonus * 0.2, 2)
+            ter_component = round(ter_scaled * 0.2, 2)
+            
             editing_final_score = (
-                e_score * 0.6 +
-                bleu_bonus * 0.2 +
-                ter_scaled * 0.2
+                ai_component +
+                bleu_component +
+                ter_component
             )
 
         p_score = get_score(post_edit_score)
@@ -464,12 +486,14 @@ as soon as possible to avoid losing customers."""
         (first_name,last_name,email,test_type,language,answer,
         translation_score,interpretation_score,editing_score,post_edit_score,
         gleu_score,bleu_score,ter_score,final_score,status,
+        ai_component,bleu_component,ter_component,
         transcription1,transcription2,transcription3,transcription4)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """,(
              first_name,last_name,email,test_type,language,answer,
              translation_score,interpretation_score,editing_score,post_edit_score,
              gleu_score,bleu_score,ter_score,final_score,status,
+             ai_component,bleu_component,ter_component,
              t1,t2,t3,t4
             ))
 
