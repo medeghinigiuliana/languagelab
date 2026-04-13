@@ -313,6 +313,18 @@ def submit():
         edit1 = request.form.get("edit1","")
         mt1 = request.form.get("mt1","")
 
+        
+        if test_type == "translation":
+            answer = f"{a1}\n\n{a2}\n\n{a3}\n\n{a4}"
+
+        elif test_type == "editing":
+            answer = edit1
+
+        elif test_type == "post_editing":
+            answer = mt1
+
+        else:
+            answer = ""
 
         translation_score = "N/A"
         interpretation_score = "N/A"
