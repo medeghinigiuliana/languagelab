@@ -176,6 +176,48 @@
   <h4>Interpretation Evaluation</h4>
   <pre>{{ r.interpretation_score or 'No feedback available' }}</pre>
 </div>
+
+<div class="section">
+  <h4>Candidate Speech (Original Language)</h4>
+  <pre>{{ r.transcription1 or '-' }}</pre>
+</div>
+
+<div class="section">
+  <h4>Translated to English</h4>
+  <pre>{{ r.t1_en or '-' }}</pre>
+</div>
+
+<div class="section">
+  <h4>Candidate Speech (Original Language)</h4>
+  <pre>{{ r.transcription2 }}</pre>
+</div>
+
+<div class="section">
+  <h4>Translated to English</h4>
+  <pre>{{ r.t2_en }}</pre>
+</div>
+
+<div class="section">
+  <h4>Candidate Speech (Original Language)</h4>
+  <pre>{{ r.transcription3 }}</pre>
+</div>
+
+<div class="section">
+  <h4>Translated to English</h4>
+  <pre>{{ r.t3_en }}</pre>
+</div>
+
+
+<div class="section">
+  <h4>Candidate Speech (Original Language)</h4>
+  <pre>{{ r.transcription4 }}</pre>
+</div>
+
+<div class="section">
+  <h4>Translated to English</h4>
+  <pre>{{ r.t4_en }}</pre>
+</div>
+
 {% endif %}
 
 {% if r.test_type == "editing" %}
@@ -216,45 +258,6 @@ as soon as possible to avoid losing customers.
   <pre>{{ r.post_edit_score or 'No feedback available' }}</pre>
 </div>
 
-<div class="section">
-  <h4>Candidate Speech (Original Language)</h4>
-  <pre>{{ r.transcription1 }}</pre>
-</div>
-
-<div class="section">
-  <h4>Translated to English</h4>
-  <pre>{{ r.translated1 }}</pre>
-</div>
-
-<div class="section">
-  <h4>Candidate Speech (Original Language)</h4>
-  <pre>{{ r.transcription2 }}</pre>
-</div>
-
-<div class="section">
-  <h4>Translated to English</h4>
-  <pre>{{ r.translated2 }}</pre>
-</div>
-
-<div class="section">
-  <h4>Candidate Speech (Original Language)</h4>
-  <pre>{{ r.transcription3 }}</pre>
-</div>
-
-<div class="section">
-  <h4>Translated to English</h4>
-  <pre>{{ r.translated3 }}</pre>
-</div>
-
-<div class="section">
-  <h4>Candidate Speech (Original Language)</h4>
-  <pre>{{ r.transcription4 }}</pre>
-</div>
-
-<div class="section">
-  <h4>Translated to English</h4>
-  <pre>{{ r.translated4 }}</pre>
-</div>
 
 {% endif %}
 </div>
