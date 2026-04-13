@@ -8,6 +8,9 @@ import re
 from nltk.translate.gleu_score import sentence_gleu
 import nltk
 from sacrebleu.metrics import TER
+from datetime import datetime
+import pytz
+
 try:
     nltk.data.find('tokenizers/punkt')
 except LookupError:
@@ -17,6 +20,7 @@ from nltk.translate.bleu_score import sentence_bleu
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = Flask(__name__)
+
 
 # ---------------------------
 # INIT DB
@@ -50,7 +54,7 @@ def init_db():
         transcription3 TEXT,
         transcription4 TEXT,
 
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TEXT
     )
     """)
 
@@ -492,20 +496,23 @@ as soon as possible to avoid losing customers."""
         final_score = final_score if final_score is not None else 0
 
         status = get_status(final_score)
+        
+        eastern = pytz.timezone("America/New_York")
+        created_at = datetime.now(eastern).strftime("%Y-%m-%d %H:%M:%S")
 
         conn = sqlite3.connect("db.db")
         c = conn.cursor()
 
         c.execute("""
         INSERT INTO results 
-        (first_name,last_name,email,test_type,language,answer,
+        (first_name,last_name,email,test_type,created_at,language,answer,
         translation_score,interpretation_score,editing_score,post_edit_score,
         gleu_score,bleu_score,ter_score,final_score,status,
         ai_component,bleu_component,ter_component,
         transcription1,transcription2,transcription3,transcription4,t1_en, t2_en, t3_en, t4_en)
         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """,(
-             first_name,last_name,email,test_type,language,answer,
+             first_name,last_name,email,test_type,created_at,language,answer,
              translation_score,interpretation_score,editing_score,post_edit_score,
              gleu_score,bleu_score,ter_score,final_score,status,
              ai_component,bleu_component,ter_component,
