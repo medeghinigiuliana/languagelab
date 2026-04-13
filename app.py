@@ -22,20 +22,6 @@ app = Flask(__name__)
 # INIT DB
 # ---------------------------
 def init_db():
-    try:
-        c.execute("ALTER TABLE results ADD COLUMN ai_component REAL")
-    except:
-        pass
-
-    try:
-        c.execute("ALTER TABLE results ADD COLUMN bleu_component REAL")
-    except:
-        pass
-
-    try:
-        c.execute("ALTER TABLE results ADD COLUMN ter_component REAL")
-    except:
-        pass
     conn = sqlite3.connect("db.db")
     c = conn.cursor()
 
@@ -66,45 +52,29 @@ def init_db():
     )
     """)
 
-    # ✅ ADD MISSING COLUMNS SAFELY
-    try:
-        c.execute("ALTER TABLE results ADD COLUMN editing_score TEXT")
-    except:
-        pass
-    try:
-        c.execute("ALTER TABLE results ADD COLUMN final_score REAL")
-    except:
-        pass
-    try:
-        c.execute("ALTER TABLE results ADD COLUMN post_edit_score TEXT")
-    except:
-        pass
-    try:
-        c.execute("ALTER TABLE results ADD COLUMN gleu_score REAL")
-    except:
-        pass
-    try:
-        c.execute("ALTER TABLE results ADD COLUMN bleu_score REAL")
-    except:
-        pass
+    # ✅ ADD ALL EXTRA COLUMNS SAFELY
+    columns = [
+        ("editing_score", "TEXT"),
+        ("final_score", "REAL"),
+        ("post_edit_score", "TEXT"),
+        ("gleu_score", "REAL"),
+        ("bleu_score", "REAL"),
+        ("ter_score", "REAL"),
+        ("first_name", "TEXT"),
+        ("last_name", "TEXT"),
+        ("ai_component", "REAL"),
+        ("bleu_component", "REAL"),
+        ("ter_component", "REAL")
+    ]
 
-    try:
-        c.execute("ALTER TABLE results ADD COLUMN ter_score REAL")
-    except:
-        pass
-    try:
-        c.execute("ALTER TABLE results ADD COLUMN first_name TEXT")
-    except:
-        pass
-
-    try:
-        c.execute("ALTER TABLE results ADD COLUMN last_name TEXT")
-    except:
-        pass
+    for col, col_type in columns:
+        try:
+            c.execute(f"ALTER TABLE results ADD COLUMN {col} {col_type}")
+        except:
+            pass
 
     conn.commit()
     conn.close()
-
 init_db()
 
 # ---------------------------
