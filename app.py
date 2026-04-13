@@ -64,7 +64,11 @@ def init_db():
         ("last_name", "TEXT"),
         ("ai_component", "REAL"),
         ("bleu_component", "REAL"),
-        ("ter_component", "REAL")
+        ("ter_component", "REAL"),
+        ("t1_en", "TEXT"),
+        ("t2_en", "TEXT"),
+        ("t3_en", "TEXT"),
+        ("t4_en", "TEXT")
     ]
 
     for col, col_type in columns:
@@ -187,6 +191,22 @@ def transcribe_audio(file_obj):
     except:
         return ""
 
+def translate_to_english(text):
+    try:
+        if not text.strip():
+            return ""
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "Translate the following text to English."},
+                {"role": "user", "content": text}
+            ]
+        )
+        return response.choices[0].message.content.strip()
+    except:
+        return ""
+
 def process_audio(base64_audio):
     if not base64_audio:
         return ""
@@ -300,6 +320,8 @@ def submit():
         post_edit_score = "N/A"
 
         # TRANSLATION
+
+        
         if test_type == "translation":
             r = client.chat.completions.create(
                 model="gpt-4o-mini",
@@ -373,6 +395,12 @@ as soon as possible to avoid losing customers."""
         t3 = process_audio(request.form.get("audio3"))
         t4 = process_audio(request.form.get("audio4"))
 
+        # TRANSLATE TO ENGLISH
+        t1_en = translate_to_english(t1)
+        t2_en = translate_to_english(t2)
+        t3_en = translate_to_english(t3)
+        t4_en = translate_to_english(t4)
+
         if test_type == "translation":
             answer = f"{a1}\n\n{a2}\n\n{a3}\n\n{a4}"
 
@@ -388,11 +416,13 @@ as soon as possible to avoid losing customers."""
         else:
             answer = ""
 
+
+
         # INTERPRETATION
         if test_type == "interpretation":
             parts = [
-                score_interpretation(ORIGINAL_AUDIO_TEXTS[i], t, language)
-                for i, t in enumerate([t1, t2, t3, t4])
+                score_interpretation(ORIGINAL_AUDIO_TEXTS[i], t_en, language)
+                for i, t_en in enumerate([t1_en, t2_en, t3_en, t4_en])
             ]
             interpretation_score = "\n".join(parts)
 
@@ -458,14 +488,15 @@ as soon as possible to avoid losing customers."""
         translation_score,interpretation_score,editing_score,post_edit_score,
         gleu_score,bleu_score,ter_score,final_score,status,
         ai_component,bleu_component,ter_component,
-        transcription1,transcription2,transcription3,transcription4)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        transcription1,transcription2,transcription3,transcription4,t1_en, t2_en, t3_en, t4_en)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """,(
              first_name,last_name,email,test_type,language,answer,
              translation_score,interpretation_score,editing_score,post_edit_score,
              gleu_score,bleu_score,ter_score,final_score,status,
              ai_component,bleu_component,ter_component,
-             t1,t2,t3,t4
+             t1,t2,t3,t4,
+             t1_en,t2_en,t3_en,t4_en
             ))
 
         conn.commit()
