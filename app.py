@@ -371,7 +371,7 @@ def submit():
 
         if test_type == "editing":
             ter_scaled = max(0, 10 - (ter_score / 10))
-            bleu_bonus = (bleu_improvement * 10) if bleu_improvement > 0 else 0
+            bleu_bonus = min(10, bleu_improvement * 10) if bleu_improvement > 0 else 0
 
             editing_final_score = (
                 e_score * 0.6 +
@@ -383,15 +383,17 @@ def submit():
         final_score = None
 
 
-
         if test_type == "post_editing" and gleu_score is not None:
             final_score = combine_scores(p_score, gleu_score)
-        elif test_type == "translation":
-            final_score = t_score
-        elif test_type == "interpretation":
-            final_score = i_score
+
         elif test_type == "editing":
             final_score = editing_final_score
+
+        elif test_type == "translation":
+            final_score = t_score
+
+        elif test_type == "interpretation":
+            final_score = i_score
 
         final_score = final_score if final_score is not None else 0
 
