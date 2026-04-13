@@ -291,7 +291,7 @@ def submit():
         edit1 = request.form.get("edit1","")
         mt1 = request.form.get("mt1","")
 
-        answer = f"Q1:{a1}\nQ2:{a2}\nQ3:{a3}\nQ4:{a4}"
+        answer = f"{a1}\n\n{a2}\n\n{a3}\n\n{a4}"
 
         translation_score = "N/A"
         interpretation_score = "N/A"
@@ -314,13 +314,19 @@ def submit():
         bleu_score = None
 
         # EDITING
+
+        original_text = ""
+
         if test_type == "editing" and edit1:
-            original_text = "The company dont have enough informations to take a decision about the proyect."
+            original_text = """The company dont have enough informations to take a decision about the proyect.
+Also, the results that we received from the last quarter is not very clear and
+there is many inconsistencies that needs to be reviewed carefully before moving forward.
+In addition, the team are not aligned with the new strategy and this create confusion
+between departments, which affect negatively the overall performance."""
             reference_text = "The company doesn't have enough information to make a decision about the project."
 
             # AI score
             editing_score = score_editing(original_text, edit1)
-            editing_score = apply_completion_penalty(original_text, edit1, editing_score)
 
             # BLEU
             bleu_original = calculate_bleu(reference_text, original_text)
@@ -332,17 +338,24 @@ def submit():
             ter_score = calculate_ter(reference_text, edit1)
 
         # POST-MT
+
+        mt_original = ""
+
         if test_type == "post_editing" and mt1:
-            post_edit_score = score_post_edit(
-                "The system present many errors and it is not working correct in all devices.",
-                mt1
-            )
+            mt_original = """The system present many errors and it is not working correct in all devices.
+Users is reporting that the application crash frequently when they try to upload files,
+and the interface is not intuitive causing confusion. Also, the loading times are too much long
+and this make the experience very frustrating for the clients. It is necessary to make improvements
+as soon as possible to avoid losing customers."""
+
+            post_edit_score = score_post_edit(mt_original, mt1)
 
             gleu_score = calculate_gleu(
-                "The system presents many errors and does not work correctly on all devices.",
-                mt1
+                "The system presents many errors and does not work correctly on all devices. Users are reporting that the application crashes frequently when they try to upload files, and the interface is not intuitive, causing confusion. Also, the loading times are too long, making the experience very frustrating for clients. Improvements must be made as soon as possible to avoid losing customers.",
+                 mt1
             )
-            post_edit_score = apply_completion_penalty(original_text, mt1, post_edit_score)
+
+            
 
         # AUDIO
         t1 = process_audio(request.form.get("audio1"))
@@ -366,6 +379,8 @@ def submit():
         t_score = get_score(translation_score)
         i_score = get_score(interpretation_score)
         e_score = get_score(editing_score)
+        if test_type == "editing" and original_text:
+            e_score = apply_completion_penalty(original_text, edit1, e_score)
 
         editing_final_score = e_score
 
@@ -380,11 +395,13 @@ def submit():
             )
 
         p_score = get_score(post_edit_score)
+        if test_type == "post_editing" and mt_original:
+            p_score = apply_completion_penalty(mt_original, mt1, p_score)
         final_score = None
 
 
-        if test_type == "post_editing" and gleu_score is not None:
-            final_score = combine_scores(p_score, gleu_score)
+        if test_type == "post_editing":
+            final_score = combine_scores(p_score, gleu_score or 0)
 
         elif test_type == "editing":
             final_score = editing_final_score
