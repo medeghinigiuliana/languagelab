@@ -106,7 +106,9 @@
 <!-- SUMMARY CARD -->
 <div class="card">
   <div class="label">Name</div>
-  <div class="value">{{ r.first_name }} {{ r.last_name }}</div>
+  <div class="value">
+  {{ (r.first_name or '') }} {{ (r.last_name or '') }}
+  </div>
 
   <div class="label">Email</div>
   <div class="value">{{ r.email }}</div>
@@ -174,24 +176,55 @@
 </div>
 {% endif %}
 
-{% if r.test_type == "editing" and r.editing_score %}
+{% if r.test_type == "editing" %}
+
 <div class="section">
-  <h4>Editing Evaluation</h4>
+  <h4>Original Text</h4>
+  <pre>
+The company dont have enough informations to take a decision about the proyect. 
+Also, the results that we received from the last quarter is not very clear and 
+there is many inconsistencies that needs to be reviewed carefully before moving forward. 
+In addition, the team are not aligned with the new strategy and this create confusion 
+between departments, which affect negatively the overall performance.
+  </pre>
+</div>
+
+<div class="section">
+  <h4>Candidate Submission</h4>
+  <pre>{{ r.answer }}</pre>
+</div>
+
+<div class="section">
+  <h4>AI Evaluation</h4>
   <pre>{{ r.editing_score }}</pre>
 </div>
+
 {% endif %}
 
-{% if r.test_type == "post_editing" and r.post_edit_score %}
+{% if r.test_type == "post_editing" %}
+
 <div class="section">
-  <h4>Post-MT Editing Evaluation</h4>
+  <h4>Machine Translation (Original)</h4>
+  <pre>
+The system present many errors and it is not working correct in all devices. 
+Users is reporting that the application crash frequently when they try to upload files, 
+and the interface is not intuitive causing confusion. Also, the loading times are too much long 
+and this make the experience very frustrating for the clients. It is necessary to make improvements 
+as soon as possible to avoid losing customers.
+  </pre>
+</div>
+
+<div class="section">
+  <h4>Candidate Post-Edit</h4>
+  <pre>{{ r.answer or 'No submission provided' }}</pre>
+</div>
+
+<div class="section">
+  <h4>Feedback & Score</h4>
   <pre>{{ r.post_edit_score }}</pre>
 </div>
-{% endif %}
-{% if not r.translation_score and not r.interpretation_score and not r.editing_score and not r.post_edit_score %}
-    <p style="opacity:0.6;">No detailed results available</p>
-  {% endif %}
-</div>
 
+{% endif %}
 </div>
 
 </body>
