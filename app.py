@@ -238,7 +238,16 @@ def score_editing(original, edited):
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "Evaluate editing. Return FINAL_SCORE: X/10"},
+                {"role": "system", "content": """Evaluate the edited text.
+
+                1. Check if the FULL text was edited. If parts are missing or only partially edited, clearly state that the response is incomplete.
+                2. Evaluate grammar, clarity, and naturalness.
+                3. Penalize heavily if the response is incomplete.
+
+                Return:
+                FINAL_SCORE: X/10
+                Explanation: Brief explanation including whether the response is complete or incomplete.
+                """},
                 {"role": "user", "content": f"{original}\n{edited}"}
             ]
         )
@@ -254,7 +263,16 @@ def score_post_edit(mt_text, edited):
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "Evaluate post-editing. Return FINAL_SCORE: X/10"},
+                {"role": "system", "content": """Evaluate the post-edited text.
+
+                1. Check if the FULL text was post-edited. If parts are missing or incomplete, clearly state that the response is incomplete.
+                2. Evaluate fluency, accuracy, and corrections.
+                3. Penalize incomplete submissions heavily.
+
+                Return:
+                FINAL_SCORE: X/10
+                Explanation: Explain the quality AND whether the submission is complete or incomplete.
+                """},
                 {"role": "user", "content": f"{mt_text}\n{edited}"}
             ]
         )
@@ -316,7 +334,16 @@ def submit():
             r = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {"role":"system","content":"Evaluate translation. Return FINAL_SCORE: X/10"},
+                    {"role":"system","content":"""Evaluate translation quality.
+
+                    1. Ensure all parts of the text are translated.
+                    2. If any section is missing, clearly state that the translation is incomplete.
+                    3. Evaluate accuracy, fluency, and terminology.
+
+                    Return:
+                    FINAL_SCORE: X/10
+                    Explanation: Include both quality and whether the translation is complete or incomplete.
+                    """},
                     {"role":"user","content":answer}
                 ]
             )
