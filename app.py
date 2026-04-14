@@ -13,10 +13,10 @@ import pytz
 from flask import session
 
 try:
-    try:
-        nltk.data.find('tokenizers/punkt')
-    except LookupError:
-        pass 
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    pass
+
 from nltk.translate.bleu_score import sentence_bleu
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
