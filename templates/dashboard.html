@@ -125,27 +125,18 @@
       <td>{{ r.first_name }} {{ r.last_name }}</td>
       <td>{{ r.email }}</td>
       <td>{{ r.language }}</td>
-      <!-- rest of your columns -->
-    </tr>
-    {% endfor %}
-  </tbody>
 
-</table>
-    <td>{{ r.first_name }} {{ r.last_name }}</td>
-    <td>{{ r.email }}</td>
-    <td>{{ r.language }}</td>
+      <td>
+        {% if r.test_type == "post_editing" %}
+          Post-MT Editing
+        {% else %}
+          {{ r.test_type|capitalize }}
+        {% endif %}
+      </td>
 
-    <td>
-      {% if r.test_type == "post_editing" %}
-        Post-MT Editing
-      {% else %}
-        {{ r.test_type|capitalize }}
-      {% endif %}
-    </td>
+      <td>{{ r.created_at }}</td>
 
-    <td>{{ r.created_at }}</td>
-
-    <td>
+      <td>
         <strong style="font-size:16px;">
           {% if r.final_score is not none %}
             {% if r.final_score >= 8 %}
@@ -159,46 +150,52 @@
             -
           {% endif %}
         </strong>
-    </td>
+      </td>
 
-    <td style="max-width:250px;">
-      <div style="
-        overflow:hidden;
-        text-overflow:ellipsis;
-        white-space:nowrap;
-      ">
-        {% if r.test_type == "translation" %}
-          {{ r.translation_score }}
-        {% elif r.test_type == "interpretation" %}
-          {{ r.interpretation_score }}
-        {% elif r.test_type == "editing" %}
-          {{ r.editing_score }}
-        {% elif r.test_type == "post_editing" %}
-          {{ r.post_edit_score }}
+      <td style="max-width:250px;">
+        <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+          {% if r.test_type == "translation" %}
+            {{ r.translation_score }}
+          {% elif r.test_type == "interpretation" %}
+            {{ r.interpretation_score }}
+          {% elif r.test_type == "editing" %}
+            {{ r.editing_score }}
+          {% elif r.test_type == "post_editing" %}
+            {{ r.post_edit_score }}
+          {% endif %}
+        </div>
+      </td>
+
+      <td>
+        {% if r.status == "STRONG PASS" %}
+          <span style="background:#064e3b; color:#22c55e; padding:6px 10px; border-radius:8px; font-size:12px;">
+            {{ r.status }}
+          </span>
+        {% elif r.status == "BORDERLINE" %}
+          <span style="background:#78350f; color:#f59e0b; padding:6px 10px; border-radius:8px; font-size:12px;">
+            {{ r.status }}
+          </span>
+        {% else %}
+          <span style="background:#7f1d1d; color:#ef4444; padding:6px 10px; border-radius:8px; font-size:12px;">
+            {{ r.status }}
+          </span>
         {% endif %}
-      </div>
-    </td>
+      </td>
 
-    <td>
-      {% if r.status == "STRONG PASS" %}
-        <span style="background:#064e3b; color:#22c55e; padding:6px 10px; border-radius:8px; font-size:12px;">
-          {{ r.status }}
-        </span>
-      {% elif r.status == "BORDERLINE" %}
-        <span style="background:#78350f; color:#f59e0b; padding:6px 10px; border-radius:8px; font-size:12px;">
-          {{ r.status }}
-        </span>
-      {% else %}
-        <span style="background:#7f1d1d; color:#ef4444; padding:6px 10px; border-radius:8px; font-size:12px;">
-          {{ r.status }}
-        </span>
-      {% endif %}
-      
-    </td>
+      <td>
+        <a href="/result/{{ r.id }}" class="button">View</a>
+      </td>
 
-    <td>
-      <a href="/result/{{ r.id }}" class="button">View</a>
-    </td>
+      <!-- METRICS -->
+      <td>{{ r.bleu_score or '-' }}</td>
+      <td>{{ r.ter_score or '-' }}</td>
+      <td>{{ r.gleu_score or '-' }}</td>
+
+    </tr>
+    {% endfor %}
+  </tbody>
+
+</table>
 
     <!-- ✅ METRICS -->
     <td>{{ r.bleu_score or '-' }}</td>
