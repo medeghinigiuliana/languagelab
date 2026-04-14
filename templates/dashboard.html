@@ -194,16 +194,6 @@
     </tr>
     {% endfor %}
   </tbody>
-
-</table>
-
-    <!-- ✅ METRICS -->
-    <td>{{ r.bleu_score or '-' }}</td>
-    <td>{{ r.ter_score or '-' }}</td>
-    <td>{{ r.gleu_score or '-' }}</td>
-  </tr>
-  {% endfor %}
-
 </table>
 
 {% if results|length == 0 %}
