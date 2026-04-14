@@ -12,6 +12,12 @@ from datetime import datetime
 import pytz
 from flask import session
 
+# ---------------------------
+# DATABASE PATH
+# ---------------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "db.db")
+
 try:
     nltk.data.find('tokenizers/punkt')
 except LookupError:
@@ -22,7 +28,7 @@ from nltk.translate.bleu_score import sentence_bleu
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "fallback-key")
+app.secret_key = "super-secret-key"
 RECRUITER_USER = os.getenv("ADMIN_USER", "admin")
 RECRUITER_PASS = os.getenv("ADMIN_PASS", "novox123")
 
@@ -31,7 +37,7 @@ RECRUITER_PASS = os.getenv("ADMIN_PASS", "novox123")
 # INIT DB
 # ---------------------------
 def init_db():
-    conn = sqlite3.connect("db.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
     # Create table if not exists
@@ -497,7 +503,7 @@ as soon as possible to avoid losing customers."""
         eastern = pytz.timezone("America/New_York")
         created_at = datetime.now(eastern).strftime("%Y-%m-%d %H:%M:%S")
 
-        conn = sqlite3.connect("db.db")
+        conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
 
         c.execute("""
@@ -530,20 +536,23 @@ as soon as possible to avoid losing customers."""
 # ---------------------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    if session.get("logged_in"):
-        return redirect(url_for("dashboard"))
-
-    if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
-
-        if username == RECRUITER_USER and password == RECRUITER_PASS:
-            session["logged_in"] = True
+    try:
+        if session.get("logged_in"):
             return redirect(url_for("dashboard"))
-        else:
-            return render_template("login.html", error="Invalid credentials")
 
-    return render_template("login.html")
+        if request.method == "POST":
+            username = request.form.get("username")
+            password = request.form.get("password")
+
+            if username == RECRUITER_USER and password == RECRUITER_PASS:
+                session["logged_in"] = True
+                return redirect(url_for("dashboard"))
+            else:
+                return render_template("login.html", error="Invalid credentials")
+
+        return render_template("login.html")
+    except Exception as e:
+        return str(e)  
 
 # ---------------------------
 # DASHBOARD
@@ -554,7 +563,7 @@ def dashboard():
     if not session.get("logged_in"):
         return redirect(url_for("login"))
 
-    conn = sqlite3.connect("db.db")
+    conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
@@ -589,7 +598,7 @@ def logout():
 
 @app.route("/download")
 def download_csv():
-    conn = sqlite3.connect("db.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
     c.execute("SELECT email, language, test_type, status, created_at FROM results")
@@ -606,7 +615,7 @@ def download_csv():
 
 @app.route("/result/<int:id>")
 def result_detail(id):
-    conn = sqlite3.connect("db.db")
+    conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
