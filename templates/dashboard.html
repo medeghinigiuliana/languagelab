@@ -15,47 +15,24 @@
       margin: 40px auto;
     }
 
+/* TABLE */
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
+      table-layout: fixed;
     }
 
-    th {
-      color: #9ca3af;
-      font-size: 12px;
-      text-transform: uppercase;
-    }
-
-    .status-pass {
-      color: #22c55e;
-      font-weight: bold;
-    }
-
-    .status-fail {
-      color: #ef4444;
-      font-weight: bold;
-    }
-
-    .button {
-      background: #6366f1;
-      color: white;
-      padding: 6px 10px;
-      border-radius: 6px;
-      text-decoration: none;
-    }
-
-    input, select {
-      padding: 8px;
-      margin-right: 10px;
-      background: #020617;
-      border: 1px solid #374151;
-      color: white;
-      border-radius: 6px;
-    }
-
-    tr:hover {
-      background: #111827;
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #1f2937;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     th {
@@ -65,6 +42,41 @@
       position: sticky;
       top: 0;
       background: #0b0f19;
+    }
+
+/* ROW HOVER */
+    tr:hover {
+      background: #111827;
+    }
+
+/* BUTTON */
+    .button {
+      background: #6366f1;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      text-decoration: none;
+    }
+
+/* INPUTS */
+    input, select {
+      padding: 8px;
+      margin-right: 10px;
+      background: #020617;
+      border: 1px solid #374151;
+      color: white;
+      border-radius: 6px;
+    }
+
+/* STATUS COLORS */
+    .status-pass {
+      color: #22c55e;
+      font-weight: bold;
+    }
+
+    .status-fail {
+      color: #ef4444;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -100,6 +112,7 @@
 </form>
 
 <!-- TABLE -->
+<div class="table-wrapper">
 <table>
 
   <thead>
@@ -139,13 +152,17 @@
       <td>
         <strong style="font-size:16px;">
           {% if r.final_score is not none %}
+      
+            {% set score = "%.2f"|format(r.final_score) %}
+
             {% if r.final_score >= 8 %}
-              <span style="color:#22c55e;">{{ r.final_score }}</span>
+              <span style="color:#22c55e;">{{ score }}</span>
             {% elif r.final_score >= 6 %}
-              <span style="color:#f59e0b;">{{ r.final_score }}</span>
+              <span style="color:#f59e0b;">{{ score }}</span>
             {% else %}
-              <span style="color:#ef4444;">{{ r.final_score }}</span>
+              <span style="color:#ef4444;">{{ score }}</span>
             {% endif %}
+
           {% else %}
             -
           {% endif %}
@@ -155,13 +172,13 @@
       <td style="max-width:250px;">
         <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
           {% if r.test_type == "translation" %}
-            {{ r.translation_score }}
+            {{ (r.translation_score or "")[:60] }}...
           {% elif r.test_type == "interpretation" %}
-            {{ r.interpretation_score }}
+            {{ (r.interpretation_score or "")[:60] }}...
           {% elif r.test_type == "editing" %}
-            {{ r.editing_score }}
+            {{ (r.editing_score or "")[:60] }}...
           {% elif r.test_type == "post_editing" %}
-            {{ r.post_edit_score }}
+            {{ (r.post_edit_score or "")[:60] }}...
           {% endif %}
         </div>
       </td>
@@ -195,6 +212,7 @@
     {% endfor %}
   </tbody>
 </table>
+</div>
 
 {% if results|length == 0 %}
         <p style="text-align:center; margin-top:20px; color:#9ca3af;">
