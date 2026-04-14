@@ -10,16 +10,21 @@ import nltk
 from sacrebleu.metrics import TER
 from datetime import datetime
 import pytz
+from flask import session
 
 try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt')
+    try:
+        nltk.data.find('tokenizers/punkt')
+    except LookupError:
+        pass 
 from nltk.translate.bleu_score import sentence_bleu
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY", "fallback-key")
+RECRUITER_USER = os.getenv("ADMIN_USER", "admin")
+RECRUITER_PASS = os.getenv("ADMIN_PASS", "novox123")
 
 
 # ---------------------------
@@ -66,8 +71,6 @@ def init_db():
         ("gleu_score", "REAL"),
         ("bleu_score", "REAL"),
         ("ter_score", "REAL"),
-        ("first_name", "TEXT"),
-        ("last_name", "TEXT"),
         ("ai_component", "REAL"),
         ("bleu_component", "REAL"),
         ("ter_component", "REAL"),
@@ -163,12 +166,6 @@ def calculate_gleu(reference, candidate):
 
         score = sentence_gleu([ref_tokens], cand_tokens)
         return round(score, 2)
-    except:
-        return 0
-
-    try:
-        match = re.search(r'(\d+)/10', text)
-        return int(match.group(1)) if match else 0
     except:
         return 0
 
@@ -529,10 +526,34 @@ as soon as possible to avoid losing customers."""
         return str(e)
 
 # ---------------------------
+# AUTH ROUTES
+# ---------------------------
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if session.get("logged_in"):
+        return redirect(url_for("dashboard"))
+
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        if username == RECRUITER_USER and password == RECRUITER_PASS:
+            session["logged_in"] = True
+            return redirect(url_for("dashboard"))
+        else:
+            return render_template("login.html", error="Invalid credentials")
+
+    return render_template("login.html")
+
+# ---------------------------
 # DASHBOARD
 # ---------------------------
+
 @app.route("/dashboard")
 def dashboard():
+    if not session.get("logged_in"):
+        return redirect(url_for("login"))
+
     conn = sqlite3.connect("db.db")
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
@@ -559,6 +580,12 @@ def dashboard():
     conn.close()
 
     return render_template("dashboard.html", results=results)
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("home"))
+
 
 @app.route("/download")
 def download_csv():
