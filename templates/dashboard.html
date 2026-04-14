@@ -21,12 +21,6 @@
       margin-top: 20px;
     }
 
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid #1f2937;
-      text-align: left;
-    }
-
     th {
       color: #9ca3af;
       font-size: 12px;
@@ -59,6 +53,19 @@
       color: white;
       border-radius: 6px;
     }
+
+    tr:hover {
+      background: #111827;
+    }
+
+    th {
+      color: #9ca3af;
+      font-size: 12px;
+      text-transform: uppercase;
+      position: sticky;
+      top: 0;
+      background: #0b0f19;
+    }
   </style>
 </head>
 
@@ -67,6 +74,11 @@
 <div class="container">
 
 <!-- HEADER -->
+<div style="display:flex; justify-content:space-between; align-items:center;">
+    <h1>NovoxLab Dashboard</h1>
+    <a href="/logout" style="color:#9ca3af;">Logout</a>
+</div>
+
 <div style="text-align:center; margin-bottom:20px;">
   <img src="{{ url_for('static', filename='images/logo.png') }}" style="height:100px;">
   <h2>Candidate Results</h2>
@@ -74,14 +86,14 @@
 
 <!-- FILTERS -->
 <form method="GET">
-  <input type="text" name="search" placeholder="Search email">
+  <input type="text" name="search" placeholder="Search email" value="{{ request.args.get('search', '') }}">
   
-  <select name="status">
-    <option value="">All Status</option>
-    <option value="STRONG PASS">STRONG PASS</option>
-    <option value="BORDERLINE">BORDERLINE</option>
-    <option value="FAIL">FAIL</option>
-  </select>
+ <select name="status">
+  <option value="">All Status</option>
+  <option value="STRONG PASS" {% if request.args.get('status') == 'STRONG PASS' %}selected{% endif %}>STRONG PASS</option>
+  <option value="BORDERLINE" {% if request.args.get('status') == 'BORDERLINE' %}selected{% endif %}>BORDERLINE</option>
+  <option value="FAIL" {% if request.args.get('status') == 'FAIL' %}selected{% endif %}>FAIL</option>
+ </select>
 
   <button class="button">Filter</button>
   <a href="/download" class="button">Download CSV</a>
@@ -89,23 +101,36 @@
 
 <!-- TABLE -->
 <table>
-  <tr>
-    <th>Name</th>
-    <th>Email</th>
-    <th>Language</th>
-    <th>Test Type</th>
-    <th>Date</th>
-    <th>Total Score</th>
-    <th>Summary</th>
-    <th>Status</th>
-    <th>Details</th>
-    <th>BLEU</th>
-    <th>TER</th>
-    <th>GLEU</th>
-  </tr>
 
-  {% for r in results %}
-  <tr>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Language</th>
+      <th>Test Type</th>
+      <th>Date</th>
+      <th>Total Score</th>
+      <th>Summary</th>
+      <th>Status</th>
+      <th>Details</th>
+      <th>BLEU</th>
+      <th>TER</th>
+      <th>GLEU</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for r in results %}
+    <tr>
+      <td>{{ r.first_name }} {{ r.last_name }}</td>
+      <td>{{ r.email }}</td>
+      <td>{{ r.language }}</td>
+      <!-- rest of your columns -->
+    </tr>
+    {% endfor %}
+  </tbody>
+
+</table>
     <td>{{ r.first_name }} {{ r.last_name }}</td>
     <td>{{ r.email }}</td>
     <td>{{ r.language }}</td>
@@ -122,28 +147,44 @@
 
     <td>
         <strong style="font-size:16px;">
-          {{ r.final_score or '-' }}
+          {% if r.final_score is not none %}
+            {% if r.final_score >= 8 %}
+              <span style="color:#22c55e;">{{ r.final_score }}</span>
+            {% elif r.final_score >= 6 %}
+              <span style="color:#f59e0b;">{{ r.final_score }}</span>
+            {% else %}
+              <span style="color:#ef4444;">{{ r.final_score }}</span>
+            {% endif %}
+          {% else %}
+            -
+          {% endif %}
         </strong>
     </td>
 
-    <td style="max-width:250px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-      {% if r.test_type == "translation" %}
-        {{ r.translation_score }}
-      {% elif r.test_type == "interpretation" %}
-        {{ r.interpretation_score }}
-      {% elif r.test_type == "editing" %}
-        {{ r.editing_score }}
-      {% elif r.test_type == "post_editing" %}
-        {{ r.post_edit_score }}
-      {% endif %}
+    <td style="max-width:250px;">
+      <div style="
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+      ">
+        {% if r.test_type == "translation" %}
+          {{ r.translation_score }}
+        {% elif r.test_type == "interpretation" %}
+          {{ r.interpretation_score }}
+        {% elif r.test_type == "editing" %}
+          {{ r.editing_score }}
+        {% elif r.test_type == "post_editing" %}
+          {{ r.post_edit_score }}
+        {% endif %}
+      </div>
     </td>
 
     <td>
-      {% if "PASS" in r.status %}
+      {% if r.status == "STRONG PASS" %}
         <span style="background:#064e3b; color:#22c55e; padding:6px 10px; border-radius:8px; font-size:12px;">
           {{ r.status }}
         </span>
-      {% elif "BORDERLINE" in r.status %}
+      {% elif r.status == "BORDERLINE" %}
         <span style="background:#78350f; color:#f59e0b; padding:6px 10px; border-radius:8px; font-size:12px;">
           {{ r.status }}
         </span>
@@ -152,6 +193,7 @@
           {{ r.status }}
         </span>
       {% endif %}
+      
     </td>
 
     <td>
@@ -167,6 +209,11 @@
 
 </table>
 
+{% if results|length == 0 %}
+        <p style="text-align:center; margin-top:20px; color:#9ca3af;">
+          No results found.
+        </p>
+      {% endif %}
 </div>
 
 </body>
