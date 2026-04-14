@@ -560,35 +560,39 @@ def login():
 
 @app.route("/dashboard")
 def dashboard():
-    if not session.get("logged_in"):
-        return redirect(url_for("login"))
+    try:
+        if not session.get("logged_in"):
+            return redirect(url_for("login"))
 
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    c = conn.cursor()
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
 
-    search = request.args.get("search", "")
-    status_filter = request.args.get("status", "")
+        search = request.args.get("search", "")
+        status_filter = request.args.get("status", "")
 
-    query = "SELECT * FROM results WHERE 1=1"
-    params = []
+        query = "SELECT * FROM results WHERE 1=1"
+        params = []
 
-    if search:
-        query += " AND email LIKE ?"
-        params.append(f"%{search}%")
+        if search:
+            query += " AND email LIKE ?"
+            params.append(f"%{search}%")
 
-    if status_filter:
-        query += " AND status = ?"
-        params.append(status_filter)
+        if status_filter:
+            query += " AND status = ?"
+            params.append(status_filter)
 
-    query += " ORDER BY created_at DESC"
+        query += " ORDER BY created_at DESC"
 
-    c.execute(query, params)
-    results = c.fetchall()
+        c.execute(query, params)
+        results = c.fetchall()
 
-    conn.close()
+        conn.close()
 
-    return render_template("dashboard.html", results=results)
+        return render_template("dashboard.html", results=results)
+
+    except Exception as e:
+        return str(e) 
 
 @app.route("/logout")
 def logout():
