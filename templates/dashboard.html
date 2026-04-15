@@ -125,6 +125,7 @@
       <th>Total Score</th>
       <th>Summary</th>
       <th>Status</th>
+      <th>Flag</th>
       <th>Details</th>
       <th>BLEU</th>
       <th>TER</th>
@@ -134,7 +135,8 @@
 
   <tbody>
     {% for r in results %}
-    <tr>
+    <tr {% if r.flag == "AI suspected" %}style="background:#1f2937;"{% endif %}>
+
       <td>{{ r.first_name }} {{ r.last_name }}</td>
       <td>{{ r.email }}</td>
       <td>{{ r.language }}</td>
@@ -198,7 +200,31 @@
           </span>
         {% endif %}
       </td>
-
+      <td>
+        {% if r.flag and r.flag == "AI suspected" %}
+          <span style="
+            background:#7f1d1d;
+            color:#fecaca;
+            padding:6px 10px;
+            border-radius:8px;
+            font-size:12px;
+            font-weight:bold;
+          ">
+            🚨 AI Suspected
+          </span>
+        {% else %}
+          <span style="
+            background:#064e3b;
+            color:#22c55e;
+            padding:6px 10px;
+            border-radius:8px;
+            font-size:12px;
+            font-weight:bold;
+          ">
+            OK
+          </span>
+        {% endif %}
+      </td>
       <td>
         <a href="/result/{{ r.id }}" class="button">View</a>
       </td>
