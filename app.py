@@ -466,14 +466,25 @@ as soon as possible to avoid losing customers."""
 
 
 
-        # INTERPRETATION
-        if test_type == "interpretation":
-            parts = [
-                score_interpretation(ORIGINAL_AUDIO_TEXTS[i], t_en, language)
-                for i, t_en in enumerate([t1_en, t2_en, t3_en, t4_en])
-            ]
-            interpretation_score = "\n".join(parts)
+       # INTERPRETATION
+       parts = []
 
+       for i, t_en in enumerate([t1_en, t2_en, t3_en, t4_en], start=1):
+
+           if not t_en:
+               continue
+
+           if i-1 < len(ORIGINAL_AUDIO_TEXTS):
+               original_text = ORIGINAL_AUDIO_TEXTS[i-1]
+           else:
+               original_text = ""
+
+           result = score_interpretation(original_text, t_en, language)
+
+           parts.append(f"\n\n📌 AUDIO {i}\n{result}")
+
+
+       interpretation_score = "\n".join(parts)
         # SCORES
         def get_score(text):
             scores = extract_all_scores(text)
@@ -484,7 +495,12 @@ as soon as possible to avoid losing customers."""
         ter_component = None
 
         t_score = get_score(translation_score)
-        i_score = get_score(interpretation_score)
+        scores = extract_all_scores(interpretation_score)
+
+        if scores:
+            i_score = round(sum(scores) / len(scores), 2)
+        else:
+            i_score = 0
         e_score = get_score(editing_score)
         if test_type == "editing" and original_text:
             e_score = apply_completion_penalty(original_text, edit1, e_score)

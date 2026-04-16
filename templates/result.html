@@ -12,7 +12,7 @@
 
     .container {
       max-width: 900px;
-      margin: 40px auto;
+      margin: 80px auto 40px auto;
     }
 
     .card {
@@ -100,6 +100,38 @@
       display: inline-block;
       margin-top: 10px;
     }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: #020617;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1f2937;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .header-left img {
+      height: 40px;
+    }
+
+    .button {
+      background: #6366f1;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+    }
   </style>
 </head>
 
@@ -108,9 +140,13 @@
 <div class="container">
 
 <!-- HEADER -->
-<div style="text-align:center; margin-bottom:20px;">
-  <img src="{{ url_for('static', filename='images/logo.png') }}" style="height:100px;">
-  <h2>Candidate Detail</h2>
+<div class="header">
+  <div class="header-left">
+    <img src="{{ url_for('static', filename='images/logo.png') }}">
+    <span>Candidate Detail</span>
+  </div>
+
+  <a href="/dashboard" class="button">← Back to Dashboard</a>
 </div>
 
 <div style="margin-bottom:20px;">
@@ -181,13 +217,27 @@
   {% if r.test_type == "translation" %}
 <div class="section">
   <h4>Translation Evaluation</h4>
-  <pre>{{ r.translation_score or 'No feedback available' }}</pre>
+
+  <p style="margin-bottom:10px;">
+    <strong>Final Score:</strong> {{ r.final_score }}
+  </p>
+
+  <pre>
+{{ r.translation_score | replace("FINAL_SCORE: 10/10", "") }}
+  </pre>
+
 </div>
 {% endif %}
 
 {% if r.test_type == "interpretation" %}
 <div class="section">
   <h4>Interpretation Evaluation</h4>
+
+  <p>
+    <strong>Average Score:</strong>
+    <span style="color:#22c55e;">{{ r.final_score }}</span>
+  </p>
+
   <pre>{{ r.interpretation_score or 'No feedback available' }}</pre>
 </div>
 
