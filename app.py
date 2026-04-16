@@ -243,6 +243,19 @@ def translate_to_english(text):
     except:
         return ""
 
+def translate_to_target(text, language):
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": f"Translate this into {language}."},
+                {"role": "user", "content": text}
+            ]
+        )
+        return response.choices[0].message.content.strip()
+    except:
+        return text
+
 def process_audio(base64_audio):
     if not base64_audio:
         return ""
@@ -262,8 +275,21 @@ def score_interpretation(original, interpreted, language):
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": f"Evaluate interpretation into {language}. Return SCORE X/10."},
-                {"role": "user", "content": f"{original}\n{interpreted}"}
+                {"role": "system", "content": f"""
+                Evaluate interpretation.
+
+                Source meaning:
+                {original}
+
+                Target language: {language}
+
+                Evaluate accuracy, completeness, and fluency.
+
+                Return:
+                SCORE: X/10
+                Explanation: ...
+                """},
+                {"role": "user", "content": interpreted}
             ]
         )
         return response.choices[0].message.content.strip()
@@ -326,7 +352,15 @@ def score_post_edit(mt_text, edited):
 @app.route("/")
 def home():
     success = request.args.get("success")
-    return render_template("test.html", success=success)
+
+    # TEMP SAFE VERSION
+    target_texts = ORIGINAL_AUDIO_TEXTS
+
+    return render_template(
+        "test.html",
+        success=success,
+        target_texts=target_texts
+    )
 
 # ---------------------------
 # SUBMIT
@@ -343,6 +377,11 @@ def submit():
         last_name = request.form.get("last_name")
         test_type = request.form.get("test_type")
         language = request.form.get("language")
+
+        target_texts = [
+            translate_to_target(text, language)
+            for text in ORIGINAL_AUDIO_TEXTS
+        ]
 
         a1 = request.form.get("answer1","")
         a2 = request.form.get("answer2","")
@@ -458,6 +497,11 @@ as soon as possible to avoid losing customers."""
         t3 = process_audio(request.form.get("audio3"))
         t4 = process_audio(request.form.get("audio4"))
 
+        rev1 = process_audio(request.form.get("rev_audio1"))
+        rev2 = process_audio(request.form.get("rev_audio2"))
+        rev3 = process_audio(request.form.get("rev_audio3"))
+        rev4 = process_audio(request.form.get("rev_audio4"))
+
         # TRANSLATE TO ENGLISH
         t1_en = translate_to_english(t1)
         t2_en = translate_to_english(t2)
@@ -470,19 +514,30 @@ as soon as possible to avoid losing customers."""
         if test_type == "interpretation":
             parts = []
 
-            for i, t_en in enumerate([t1_en, t2_en, t3_en, t4_en], start=1):
+            t_en_list = [t1_en, t2_en, t3_en, t4_en]
+            rev_list = [rev1, rev2, rev3, rev4]
 
-                if not t_en:
-                    continue
+            for i in range(4):
 
-                if i-1 < len(ORIGINAL_AUDIO_TEXTS):
-                    original_text = ORIGINAL_AUDIO_TEXTS[i-1]
-                else:
-                    original_text = ""
+                # EN → TARGET
+                if t_en_list[i]:
+                    result1 = score_interpretation(
+                        ORIGINAL_AUDIO_TEXTS[i],
+                        t_en_list[i],
+                        language
+                    )
+                    parts.append(f"\n📌 AUDIO {i+1} (EN → {language})\n{result1}")
 
-                result = score_interpretation(original_text, t_en, language)
+                # TARGET → EN
+                if rev_list[i]:
+                    reference_text = target_texts[i]  # translated version
 
-                parts.append(f"\n\n📌 AUDIO {i}\n{result}")
+                    result2 = score_interpretation(
+                        reference_text,
+                        rev_list[i],
+                        "English"
+                    )
+                    parts.append(f"\n📌 AUDIO {i+1} ({language} → EN)\n{result2}")
 
             interpretation_score = "\n".join(parts)
 

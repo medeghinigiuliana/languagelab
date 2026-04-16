@@ -378,127 +378,153 @@
 <!-- ================= INTERPRETATION ================= -->
 <div id="interpretationTest" style="display:none;">
 
-<!-- AUDIO 1 -->
-<div class="section" id="section1">
-  <h3>Audio 1</h3>
-  <audio id="audio1" controls controlsList="nodownload" oncontextmenu="return false;">
-    <source src="{{ url_for('static', filename='audio/audio1.mp3') }}" type="audio/mpeg">
-  </audio>
-  <p id="count1" class="plays">Plays left: 2</p>
-  <p id="timer1" class="timer">Time left: 10s</p>
+<div class="card">
 
-  <div class="controls">
-  <button type="button" class="btn-start" onclick="startRecording(1)">
-    🔴 Start
-  </button>
-  <button type="button" class="btn-stop" onclick="stopRecording(1)">
-    ⏹ Stop
-  </button>
-</div>
+  <h3>🎧 Audio 1</h3>
 
-<p class="subtitle">Click Start to begin recording your interpretation.</p>
+  <!-- STEP 1 -->
+  <div class="step">
+    <h4>Step 1 — Listen & Interpret</h4>
 
-  <p id="status1"></p>
-  <input type="hidden" name="audio1" id="audioData1">
-</div>
+    <audio id="audio1" controls src="/static/audio1.mp3"></audio>
 
-<!-- AUDIO 2 -->
-<div class="section locked" id="section2">
-  <h3>Audio 2</h3>
-  <audio id="audio2" controls controlsList="nodownload" oncontextmenu="return false;">
-    <source src="{{ url_for('static', filename='audio/audio2.mp3') }}" type="audio/mpeg">
-  </audio>
-  <p id="count2" class="plays">Plays left: 2</p>
-  <p id="timer2" class="timer">Time left: 10s</p>
+    <div class="controls">
+      <button type="button" onclick="startRecording('audio1')">🔴 Record Answer</button>
+      <button type="button" onclick="stopRecording('audio1')">⏹ Stop</button>
+    </div>
 
-  <div class="controls">
-  <button type="button" class="btn-start" onclick="startRecording(2)">
-    🔴 Start
-  </button>
-  <button type="button" class="btn-stop" onclick="stopRecording(2)">
-    ⏹ Stop
-  </button>
-</div>
+    <input type="hidden" name="audio1" id="audioData1">
+  </div>
 
-<p class="subtitle">Click Start to begin recording your interpretation.</p>
+  <hr style="border-color:#1f2937; margin:15px 0;">
+  <!-- STEP 2 -->
+  <div class="step">
+    <h4>Step 2 — Reverse Interpretation ({{ language }} → English)</h4>
 
-  <p id="status2"></p>
-  <input type="hidden" name="audio2" id="audioData2">
-</div>
+    <p class="text-box">
+      {{ target_texts[0] }}
+    </p>
 
-<!-- AUDIO 3 -->
-<div class="section locked" id="section3">
-  <h3>Audio 3</h3>
-  <audio id="audio3" controls controlsList="nodownload" oncontextmenu="return false;">
-    <source src="{{ url_for('static', filename='audio/audio3.mp3') }}" type="audio/mpeg">
-  </audio>
-  <p id="count3" class="plays">Plays left: 2</p>
-  <p id="timer3" class="timer">Time left: 10s</p>
+    <div class="controls">
+      <button type="button" onclick="startRecording('rev1')">🔴 Record Answer</button>
+      <button type="button" onclick="stopRecording('rev1')">⏹ Stop</button>
+    </div>
 
-  <div class="controls">
-  <button type="button" class="btn-start" onclick="startRecording(3)">
-    🔴 Start
-  </button>
-  <button type="button" class="btn-stop" onclick="stopRecording(3)">
-    ⏹ Stop
-  </button>
-</div>
-
-<p class="subtitle">Click Start to begin recording your interpretation.</p>
-
-  <p id="status3"></p>
-  <input type="hidden" name="audio3" id="audioData3">
-</div>
-
-<!-- AUDIO 4 -->
-<div class="section locked" id="section4">
-  <h3>Audio 4</h3>
-  <audio id="audio4" controls controlsList="nodownload" oncontextmenu="return false;">
-    <source src="{{ url_for('static', filename='audio/audio4.mp3') }}" type="audio/mpeg">
-  </audio>
-  <p id="count4" class="plays">Plays left: 2</p>
-  <p id="timer4" class="timer">Time left: 10s</p>
-
-  <div class="controls">
-  <button type="button" class="btn-start" onclick="startRecording(4)">
-    🔴 Start
-  </button>
-  <button type="button" class="btn-stop" onclick="stopRecording(4)">
-    ⏹ Stop
-  </button>
-</div>
-
-<p class="subtitle">Click Start to begin recording your interpretation.</p>
-
-  <p id="status4"></p>
-  <input type="hidden" name="audio4" id="audioData4">
-</div>
+    <input type="hidden" name="rev_audio1" id="audioDatarev1">
+  </div>
 
 </div>
 
-<script>
-const form = document.querySelector("form");
+<div class="card">
 
-if (form) {
-  form.addEventListener("submit", function(e) {
-    const type = document.getElementById("testType").value;
+  <h3>🎧 Audio 2</h3>
 
-    if (type === "interpretation") {
-      const audios = [
-        document.getElementById("audioData1").value,
-        document.getElementById("audioData2").value,
-        document.getElementById("audioData3").value,
-        document.getElementById("audioData4").value
-      ];
+  <!-- STEP 1 -->
+  <div class="step">
+    <h4>Step 1 — Listen & Interpret</h4>
 
-      if (audios.every(a => !a)) {
-        e.preventDefault();
-        alert("Please record at least one interpretation.");
-      }
-    }
-  });
-}
-</script>
+    <audio id="audio2" controls src="/static/audio2.mp3"></audio>
+
+    <div class="controls">
+      <button type="button" onclick="startRecording('audio2')">🔴 Record Answer</button>
+      <button type="button" onclick="stopRecording('audio2')">⏹ Stop</button>
+    </div>
+
+    <input type="hidden" name="audio2" id="audioData2">
+  </div>
+
+  <hr style="border-color:#1f2937; margin:15px 0;">
+  <!-- STEP 2 -->
+  <div class="step">
+    <h4>Step 2 — Reverse Interpretation ({{ language }} → English)</h4>
+
+    <p class="text-box">
+      {{ target_texts[1] }}
+    </p>
+
+    <div class="controls">
+      <button type="button" onclick="startRecording('rev2')">🔴 Record Answer</button>
+      <button type="button" onclick="stopRecording('rev2')">⏹ Stop</button>
+    </div>
+
+    <input type="hidden" name="rev_audio2" id="audioDatarev2">
+  </div>
+
+</div>
+
+<div class="card">
+
+  <h3>🎧 Audio 3</h3>
+
+  <!-- STEP 1 -->
+  <div class="step">
+    <h4>Step 1 — Listen & Interpret</h4>
+
+    <audio id="audio3" controls src="/static/audio3.mp3"></audio>
+
+    <div class="controls">
+      <button type="button" onclick="startRecording('audio3')">🔴 Record Answer</button>
+      <button type="button" onclick="stopRecording('audio3')">⏹ Stop</button>
+    </div>
+
+    <input type="hidden" name="audio3" id="audioData3">
+  </div>
+
+  <hr style="border-color:#1f2937; margin:15px 0;">
+  <!-- STEP 2 -->
+  <div class="step">
+    <h4>Step 2 — Reverse Interpretation ({{ language }} → English)</h4>
+
+    <p class="text-box">
+      {{ target_texts[2] }}
+    </p>
+
+    <div class="controls">
+      <button type="button" onclick="startRecording('rev3')">🔴 Record Answer</button>
+      <button type="button" onclick="stopRecording('rev3')">⏹ Stop</button>
+    </div>
+
+    <input type="hidden" name="rev_audio3" id="audioDatarev3">
+  </div>
+
+</div>
+
+<div class="card">
+
+  <h3>🎧 Audio 4</h3>
+
+  <!-- STEP 1 -->
+  <div class="step">
+    <h4>Step 1 — Listen & Interpret</h4>
+
+    <audio id="audio4" controls src="/static/audio4.mp3"></audio>
+
+    <div class="controls">
+      <button type="button" onclick="startRecording('audio4')">🔴 Record Answer</button>
+      <button type="button" onclick="stopRecording('audio4')">⏹ Stop</button>
+    </div>
+
+    <input type="hidden" name="audio4" id="audioData4">
+  </div>
+
+  <hr style="border-color:#1f2937; margin:15px 0;">
+  <!-- STEP 2 -->
+  <div class="step">
+    <h4>Step 2 — Reverse Interpretation ({{ language }} → English)</h4>
+
+    <p class="text-box">
+      {{ target_texts[3] }}
+    </p>
+
+    <div class="controls">
+      <button type="button" onclick="startRecording('rev4')">🔴 Record Answer</button>
+      <button type="button" onclick="stopRecording('rev4')">⏹ Stop</button>
+    </div>
+
+    <input type="hidden" name="rev_audio4" id="audioDatarev4">
+  </div>
+
+</div>
 
 <button class="button" onclick="this.disabled=true; this.innerText='Submitting...'; this.form.submit();">
   Submit
@@ -522,27 +548,24 @@ function showTest() {
   if (type) {
     const section = document.getElementById(type + "Test");
     section.style.display = "block";
-
-    
     section.scrollIntoView({ behavior: "smooth" });
   }
 }
 
 // SETTINGS
 const MAX_PLAYS = 2;
-const TIME_LIMIT = 10;
 
 // STATE
 let playCount = {1:0,2:0,3:0,4:0};
 let isRecording = false;
-let timers = {};
-let timeLeft = {1:10,2:10,3:10,4:10};
 let recorders = {};
 let chunks = {};
 
 // PLAY LIMIT
 function attachPlayLimit(id){
   const audio = document.getElementById("audio"+id);
+
+  if (!audio) return;
 
   audio.addEventListener("play", () => {
 
@@ -560,64 +583,34 @@ function attachPlayLimit(id){
     }
 
     playCount[id]++;
-    document.getElementById("count"+id).innerText =
-      "Plays left: " + (MAX_PLAYS - playCount[id]);
   });
 }
 
 [1,2,3,4].forEach(attachPlayLimit);
 
-// TIMER
-function startTimer(id){
-  timeLeft[id] = TIME_LIMIT;
-
-  let el = document.getElementById("timer"+id);
-  el.style.color = "white"; // reset color at start
-
-  timers[id] = setInterval(()=>{
-    timeLeft[id]--;
-
-    el.innerText = "Time left: " + timeLeft[id] + "s";
-
-    if(timeLeft[id] <= 3){
-      el.style.color = "red";
-    }
-
-    if(timeLeft[id] <= 0){
-      clearInterval(timers[id]);
-      stopRecording(id);
-    }
-
-  },1000);
-}
-// RECORDING
+// RECORDING (CLEAN VERSION)
 async function startRecording(id){
   isRecording = true;
-  startTimer(id);
 
   const stream = await navigator.mediaDevices.getUserMedia({audio:true});
   recorders[id] = new MediaRecorder(stream);
   chunks[id] = [];
 
-  document.getElementById("status"+id).innerText = "🔴 Recording...";
-
   recorders[id].ondataavailable = e => chunks[id].push(e.data);
 
   recorders[id].onstop = () => {
     isRecording = false;
-    clearInterval(timers[id]);
 
     const blob = new Blob(chunks[id], {type:"audio/webm"});
     const reader = new FileReader();
 
     reader.readAsDataURL(blob);
     reader.onloadend = () => {
-      document.getElementById("audioData"+id).value = reader.result;
+      const field = document.getElementById("audioData"+id);
+      if(field){
+        field.value = reader.result;
+      }
     };
-
-    document.getElementById("status"+id).innerText = "✅ Saved";
-
-    unlockNext(id);
   };
 
   recorders[id].start();
@@ -629,41 +622,34 @@ function stopRecording(id){
   }
 }
 
-// LOCK FLOW
-function unlockNext(id){
-  const next = id + 1;
+// VALIDATION (FIXED)
+const form = document.querySelector("form");
 
-  if(next <= 4){
-    const nextSection = document.getElementById("section"+next);
+if (form) {
+  form.addEventListener("submit", function(e) {
+    const type = document.getElementById("testType").value;
 
-    nextSection.classList.remove("locked");
+    if (type === "interpretation") {
+      const audios = [
+        document.getElementById("audioData1").value,
+        document.getElementById("audioData2").value,
+        document.getElementById("audioData3").value,
+        document.getElementById("audioData4").value,
+        document.getElementById("audioDatarev1").value,
+        document.getElementById("audioDatarev2").value,
+        document.getElementById("audioDatarev3").value,
+        document.getElementById("audioDatarev4").value
+      ];
 
-    // ✅ ADD THIS (you were missing it)
-
-    // highlight
-    nextSection.style.border = "2px solid #22c55e";
-
-    const nextAudio = document.getElementById("audio"+next);
-    nextAudio.play();
-
-    // optional auto-record
-    
-
-    // scroll
-    setTimeout(() => {
-      nextSection.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 400);
-
-  } else {
-    // ✅ ALSO add this for final step
-
-    setTimeout(() => {
-      document.querySelector(".button").scrollIntoView({ behavior: "smooth" });
-    }, 400);
-  }
+      if (audios.every(a => !a)) {
+        e.preventDefault();
+        alert("Please record at least one interpretation.");
+      }
+    }
+  });
 }
 
-// LANGUAGE TOGGLE (FIXED)
+// LANGUAGE TOGGLE
 document.addEventListener("DOMContentLoaded", function () {
 
   const testTypeSelect = document.getElementById("testType");
@@ -688,11 +674,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   testTypeSelect.addEventListener("change", toggleLanguage);
 
-  
-  // run on load
   toggleLanguage();
-
 });
+
 </script>
 
 </body>
