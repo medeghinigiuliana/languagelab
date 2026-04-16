@@ -466,25 +466,26 @@ as soon as possible to avoid losing customers."""
 
 
 
-       # INTERPRETATION
-       parts = []
+        # INTERPRETATION
+        if test_type == "interpretation":
+            parts = []
 
-       for i, t_en in enumerate([t1_en, t2_en, t3_en, t4_en], start=1):
+            for i, t_en in enumerate([t1_en, t2_en, t3_en, t4_en], start=1):
 
-           if not t_en:
-               continue
+                if not t_en:
+                    continue
 
-           if i-1 < len(ORIGINAL_AUDIO_TEXTS):
-               original_text = ORIGINAL_AUDIO_TEXTS[i-1]
-           else:
-               original_text = ""
+                if i-1 < len(ORIGINAL_AUDIO_TEXTS):
+                    original_text = ORIGINAL_AUDIO_TEXTS[i-1]
+                else:
+                    original_text = ""
 
-           result = score_interpretation(original_text, t_en, language)
+                result = score_interpretation(original_text, t_en, language)
 
-           parts.append(f"\n\n📌 AUDIO {i}\n{result}")
+                parts.append(f"\n\n📌 AUDIO {i}\n{result}")
 
+            interpretation_score = "\n".join(parts)
 
-       interpretation_score = "\n".join(parts)
         # SCORES
         def get_score(text):
             scores = extract_all_scores(text)
