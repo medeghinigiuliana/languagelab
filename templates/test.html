@@ -98,6 +98,8 @@
       </style>
 </head>
 
+<body>
+
 <a href="/login" style="
     position:absolute;
     top:20px;
@@ -112,7 +114,6 @@
     Recruiter Dashboard
 </a>
 
-<body>
 
 <div class="container">
 
@@ -170,7 +171,7 @@
 <input type="text" name="last_name" placeholder="Last Name" required>
 
 <!-- EMAIL -->
-<input name="email" placeholder="Your email" required>
+<input type="email" name="email" placeholder="Your email" required>
 
 <!-- TEST TYPE -->
 <select name="test_type" id="testType" onchange="showTest(); toggleLanguage();" required>
@@ -182,8 +183,8 @@
 </select>
 
 <!-- LANGUAGE -->
-<div id="languageWrapper">
-<input list="languages" name="language" id="languageInput" placeholder="Select or type language">
+<div id="languageWrapper" style="display:none;">
+<input list="languages" name="language" id="languageInput" placeholder="Select or type language" required>
 </div>
 
 <datalist id="languages">
@@ -475,7 +476,33 @@
 
 </div>
 
-<button class="button">Submit</button>
+<script>
+const form = document.querySelector("form");
+
+if (form) {
+  form.addEventListener("submit", function(e) {
+    const type = document.getElementById("testType").value;
+
+    if (type === "interpretation") {
+      const audios = [
+        document.getElementById("audioData1").value,
+        document.getElementById("audioData2").value,
+        document.getElementById("audioData3").value,
+        document.getElementById("audioData4").value
+      ];
+
+      if (audios.every(a => !a)) {
+        e.preventDefault();
+        alert("Please record at least one interpretation.");
+      }
+    }
+  });
+}
+</script>
+
+<button class="button" onclick="this.disabled=true; this.innerText='Submitting...'; this.form.submit();">
+  Submit
+</button>
 
 </form>
 {% endif %}
@@ -488,14 +515,16 @@
 function showTest() {
   const type = document.getElementById("testType").value;
 
-  // hide all test sections
   document.querySelectorAll('[id$="Test"]').forEach(el => {
     el.style.display = "none";
   });
 
-  // only show if something is selected
   if (type) {
-    document.getElementById(type + "Test").style.display = "block";
+    const section = document.getElementById(type + "Test");
+    section.style.display = "block";
+
+    
+    section.scrollIntoView({ behavior: "smooth" });
   }
 }
 
