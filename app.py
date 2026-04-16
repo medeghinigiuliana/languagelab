@@ -352,14 +352,21 @@ def score_post_edit(mt_text, edited):
 @app.route("/")
 def home():
     success = request.args.get("success")
+    language = request.args.get("lang")
 
-    # TEMP SAFE VERSION
-    target_texts = ORIGINAL_AUDIO_TEXTS
+    if language:
+        target_texts = [
+            translate_to_target(text, language)
+            for text in ORIGINAL_AUDIO_TEXTS
+        ]
+    else:
+        target_texts = ORIGINAL_AUDIO_TEXTS
 
     return render_template(
         "test.html",
         success=success,
-        target_texts=target_texts
+        target_texts=target_texts,
+        language=language
     )
 
 # ---------------------------

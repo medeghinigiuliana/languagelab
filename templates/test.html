@@ -174,7 +174,7 @@
 <input type="email" name="email" placeholder="Your email" required>
 
 <!-- TEST TYPE -->
-<select name="test_type" id="testType" onchange="showTest(); toggleLanguage();" required>
+<select name="test_type" id="testType" onchange="showTest(); toggleLanguage(); updateLanguage();" required>
   <option value="">Select Test Type</option>
   <option value="translation">Translation</option>
   <option value="editing">Editing</option>
@@ -538,6 +538,17 @@
 <script>
 
 // SHOW TEST
+
+function updateLanguage() {
+  const lang = document.getElementById("languageInput").value;
+
+  if (lang) {
+    const url = new URL(window.location.href);
+    url.searchParams.set("lang", lang);
+    window.location.href = url.toString();
+  }
+}
+
 function showTest() {
   const type = document.getElementById("testType").value;
 
