@@ -613,43 +613,42 @@ as soon as possible to avoid losing customers."""
 
            scores = []
 
-          for i in range(4):
+           for i in range(4):
 
-              # STEP 1: EN → TARGET → BACK TO EN
-              if t_en_list[i]:
-                  result1 = score_interpretation(
-                      ORIGINAL_AUDIO_TEXTS[i],
-                      t_en_list[i],
-                      language
-                  )
-                  parts.append(f"\n📌 AUDIO {i+1} (EN → {language})\n{result1}")
+               # STEP 1: EN → TARGET → BACK TO EN
+               if t_en_list[i]:
+                   result1 = score_interpretation(
+                       ORIGINAL_AUDIO_TEXTS[i],
+                       t_en_list[i],
+                       language
+                   )
+                   parts.append(f"\n📌 AUDIO {i+1} (EN → {language})\n{result1}")
 
-                  s = extract_all_scores(result1)
-                  if s:
-                      scores.append(s[-1])
+                   s = extract_all_scores(result1)
+                   if s:
+                       scores.append(s[-1])
 
-              # STEP 2: TARGET → ENGLISH
-              if rev_list[i]:
-                  result2 = score_interpretation(
-                      REVERSE_TEXTS[i],
-                      rev_list[i],
-                      "English"
-                  )
-                  parts.append(f"\n📌 AUDIO {i+1} (Reverse → English)\n{result2}")
+               # STEP 2: TARGET → ENGLISH
+               if rev_list[i]:
+                   result2 = score_interpretation(
+                       REVERSE_TEXTS[i],
+                       rev_list[i],
+                       "English"
+                   )
+                   parts.append(f"\n📌 AUDIO {i+1} (Reverse → English)\n{result2}")
 
-                  s = extract_all_scores(result2)
-                  if s:
-                      scores.append(s[-1])
+                   s = extract_all_scores(result2)
+                   if s:
+                       scores.append(s[-1])
 
-          interpretation_score = "\n".join(parts)
+           interpretation_score = "\n".join(parts)
 
-          # FINAL SCORE
-          valid_scores = [s for s in scores if s > 0]
+           valid_scores = [s for s in scores if s > 0]
 
-          if valid_scores:
-              i_score = round(sum(valid_scores) / len(valid_scores), 2)
-          else:
-              i_score = 0
+           if valid_scores:
+               i_score = round(sum(valid_scores) / len(valid_scores), 2)
+           else:
+               i_score = 0
 
         # SCORES
         def get_score(text):
@@ -661,12 +660,7 @@ as soon as possible to avoid losing customers."""
         ter_component = None
 
         t_score = get_score(translation_score)
-        scores = extract_all_scores(interpretation_score)
-
-        if scores:
-            i_score = round(sum(scores) / len(scores), 2)
-        else:
-            i_score = 0
+        
         e_score = get_score(editing_score)
         if test_type == "editing" and original_text:
             e_score = apply_completion_penalty(original_text, edit1, e_score)
