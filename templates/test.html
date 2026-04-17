@@ -184,7 +184,15 @@
 
 <!-- LANGUAGE -->
 <div id="languageWrapper" style="display:none;">
-<input list="languages" name="language" id="languageInput" placeholder="Select or type language" required>
+  <input 
+    list="languages" 
+    name="language" 
+    id="languageInput" 
+    placeholder="Select or type language" 
+    required 
+    value="{{ language or '' }}"
+    onchange="updateLanguage()"
+  >
 </div>
 
 <datalist id="languages">
@@ -687,6 +695,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
   toggleLanguage();
 });
+
+  function updateLanguage() {
+    const input = document.getElementById("languageInput");
+
+    if (!input) return;
+
+    const lang = input.value;
+
+    if (lang) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("lang", lang);
+      window.location.href = url.toString();
+    }
+  }
 
 </script>
 
