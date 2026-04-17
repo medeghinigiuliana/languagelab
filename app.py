@@ -242,8 +242,20 @@ def translate_to_english(text):
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "Translate the following text to English."},
-                {"role": "user", "content": text}
+                {
+                    "role": "system",
+                    "content": (
+                        f"You are a professional translator. "
+                        f"Translate everything strictly into {target_language}. "
+                        f"Do NOT return the original text. "
+                        f"Do NOT explain anything. "
+                        f"Only output the translated sentence."
+                    )
+                },
+                {
+                    "role": "user",
+                    "content": text
+                }
             ]
         )
         return response.choices[0].message.content.strip()
