@@ -215,7 +215,7 @@
 <input type="email" name="email" placeholder="Your email" required>
 
 <!-- TEST TYPE -->
-<select name="test_type" id="testType" required>
+<select name="test_type" id="testType" onchange="showTest(); toggleLanguage();" required>
   <option value="">Select Test Type</option>
   <option value="translation">Translation</option>
   <option value="editing">Editing</option>
@@ -594,67 +594,65 @@ function showTest() {
   const type = document.getElementById("testType").value;
   const lang = document.getElementById("languageInput").value;
 
-  // Hide all
+  // Hide all tests
   document.querySelectorAll('[id$="Test"]').forEach(el => {
     el.style.display = "none";
   });
 
-  // Only show when BOTH exist
-  if (!type || !lang) return;
+  if (!type) return;
 
-  // Show section
+  // Require language ONLY for specific tests
+  const needsLanguage = ["interpretation", "translation"];
+
+  if (needsLanguage.includes(type) && !lang) return;
+
+  // Show selected test
   const section = document.getElementById(type + "Test");
   if (section) {
     section.style.display = "block";
     section.scrollIntoView({ behavior: "smooth" });
   }
-
 }
 
 // ------------------
 // LANGUAGE TRANSLATION 
 // ------------------
 async function startTest() {
+  console.log("START TEST RUNNING");
 
   const type = document.getElementById("testType").value;
   const lang = document.getElementById("languageInput").value;
 
-  if (!type || !lang) return;
+  if (!type || !lang) {
+    alert("Please select test type and language");
+    return;
+  }
+
+  // 🔒 Hide everything first
+  document.querySelectorAll('[id$="Test"]').forEach(el => {
+    el.style.display = "none";
+  });
 
   try {
-    // Fetch translations FIRST
-    const response = await fetch(`/get_translation?lang=${encodeURIComponent(lang)}`);
-    const data = await response.json();
+    const res = await fetch(`/get_translation?lang=${encodeURIComponent(lang)}`);
+    const data = await res.json();
 
-    console.log("START TEST RUNNING");
-    console.log(data.target_texts);
+    console.log("TRANSLATED:", data.target_texts);
 
-    for (let i = 0; i < 4; i++) {
-      const el = document.getElementById("targetText" + (i+1));
-      if (el) {
-        el.innerText = data.target_texts[i];
-      }
+    // ✅ FORCE UPDATE (no conditions)
+    document.getElementById("targetText1").textContent = data.target_texts[0];
+    document.getElementById("targetText2").textContent = data.target_texts[1];
+    document.getElementById("targetText3").textContent = data.target_texts[2];
+    document.getElementById("targetText4").textContent = data.target_texts[3];
 
-      const label = document.getElementById("step2Label" + (i+1));
-      if (label) {
-        label.innerText = `Step 2 — Reverse Interpretation (${lang} → English)`;
-      }
-    }
-
-    // Hide all tests
-    document.querySelectorAll('[id$="Test"]').forEach(el => {
-      el.style.display = "none";
-    });
-
-    // Show test AFTER translation
+    // ✅ NOW show test
     const section = document.getElementById(type + "Test");
     if (section) {
       section.style.display = "block";
-      section.scrollIntoView({ behavior: "smooth" });
     }
 
-  } catch (e) {
-    console.error("Start test error:", e);
+  } catch (err) {
+    console.error("Translation failed:", err);
   }
 }
 
@@ -692,9 +690,9 @@ function toggleLanguage() {
   const type = document.getElementById("testType").value;
   const wrapper = document.getElementById("languageWrapper");
 
-  if (!wrapper) return;
+  const needsLanguage = ["interpretation", "translation"];
 
-  if (type === "interpretation") {
+  if (needsLanguage.includes(type)) {
     wrapper.style.display = "block";
   } else {
     wrapper.style.display = "none";
