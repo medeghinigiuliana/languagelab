@@ -174,7 +174,7 @@
 <input type="email" name="email" placeholder="Your email" required>
 
 <!-- TEST TYPE -->
-<select name="test_type" id="testType" onchange="toggleLanguage(); showTest();" required>
+<select name="test_type" id="testType" required>
   <option value="">Select Test Type</option>
   <option value="translation">Translation</option>
   <option value="editing">Editing</option>
@@ -187,10 +187,7 @@
   <input 
     list="languages" 
     name="language" 
-    id="languageInput" 
-    placeholder="Select or type language" 
-    required
-    value="{{ language or '' }}"
+    id="languageInput"
     onchange="showTest()"
   >
 </div>
@@ -686,6 +683,8 @@ if (form) {
     const type = document.getElementById("testType").value;
     const wrapper = document.getElementById("languageWrapper");
 
+    if (!wrapper) return;
+
     if (type === "interpretation") {
       wrapper.style.display = "block";
     } else {
@@ -724,6 +723,18 @@ if (form) {
         }
        }
 
+document.addEventListener("DOMContentLoaded", function () {
+  const testType = document.getElementById("testType");
+
+  if (testType) {
+    testType.addEventListener("change", function () {
+      console.log("Test type changed:", this.value); // DEBUG
+
+      toggleLanguage();
+      showTest();
+    });
+  }
+});
 </script>
 
 </body>
