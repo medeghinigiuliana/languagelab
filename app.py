@@ -605,7 +605,7 @@ as soon as possible to avoid losing customers."""
 
 
         # INTERPRETATION
-       if test_type == "interpretation":
+        if test_type == "interpretation":
            parts = []
 
            t_en_list = [t1_en or "", t2_en or "", t3_en or "", t4_en or ""]
