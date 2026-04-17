@@ -189,9 +189,12 @@
     name="language" 
     id="languageInput"
     placeholder="Select language"
-    onchange="showTest()"
   >
 </div>
+
+<button type="button" id="startTestBtn" class="button" style="display:none;">
+  Start Test
+</button>
 
 <datalist id="languages">
   <option value="Afrikaans">
@@ -557,13 +560,33 @@ function showTest() {
     section.scrollIntoView({ behavior: "smooth" });
   }
 
-  // Update translated text
-  updateLanguage();
 }
 
 // ------------------
-// LANGUAGE TRANSLATION (NO RELOAD)
+// LANGUAGE TRANSLATION 
 // ------------------
+async function startTest() {
+  const type = document.getElementById("testType").value;
+  const lang = document.getElementById("languageInput").value;
+
+  if (!type || !lang) return;
+
+  // Hide all tests first
+  document.querySelectorAll('[id$="Test"]').forEach(el => {
+    el.style.display = "none";
+  });
+
+  // Load translation FIRST
+  await updateLanguage();
+
+  // THEN show test
+  const section = document.getElementById(type + "Test");
+  if (section) {
+    section.style.display = "block";
+    section.scrollIntoView({ behavior: "smooth" });
+  }
+}
+
 async function updateLanguage() {
   const lang = document.getElementById("languageInput").value;
   if (!lang) return;
@@ -613,19 +636,29 @@ function toggleLanguage() {
 document.addEventListener("DOMContentLoaded", function () {
   const testType = document.getElementById("testType");
   const languageInput = document.getElementById("languageInput");
+  const startBtn = document.getElementById("startTestBtn");
+
+  function checkReady() {
+    if (testType.value === "interpretation" && languageInput.value) {
+      startBtn.style.display = "block";
+    } else {
+      startBtn.style.display = "none";
+    }
+  }
 
   if (testType) {
     testType.addEventListener("change", function () {
       toggleLanguage();
-      showTest();
+      checkReady();
     });
   }
 
   if (languageInput) {
-    languageInput.addEventListener("change", function () {
-      showTest();
-    });
+    languageInput.addEventListener("input", checkReady);
   }
+
+  // ✅ CLICK START BUTTON
+  startBtn.addEventListener("click", startTest);
 });
 
 
