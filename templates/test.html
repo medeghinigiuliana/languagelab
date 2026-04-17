@@ -444,6 +444,7 @@
       <button type="button" onclick="startRecording('audio1')">🔴 Record Answer</button>
       <button type="button" onclick="stopRecording('audio1')">⏹ Stop</button>
     </div>
+    <p id="status-audio1" class="subtitle"></p>
 
     <input type="hidden" name="audio1" id="audioData1">
   </div>
@@ -459,6 +460,7 @@
       <button type="button" onclick="startRecording('rev1')">🔴 Record Answer</button>
       <button type="button" onclick="stopRecording('rev1')">⏹ Stop</button>
     </div>
+    <p id="status-rev1" class="subtitle"></p>
 
     <input type="hidden" name="rev_audio1" id="audioDatarev1">
   </div>
@@ -481,7 +483,7 @@
       <button type="button" onclick="startRecording('audio2')">🔴 Record Answer</button>
       <button type="button" onclick="stopRecording('audio2')">⏹ Stop</button>
     </div>
-
+    <p id="status-audio2" class="subtitle"></p>
     <input type="hidden" name="audio2" id="audioData2">
   </div>
 
@@ -496,7 +498,7 @@
       <button type="button" onclick="startRecording('rev2')">🔴 Record Answer</button>
       <button type="button" onclick="stopRecording('rev2')">⏹ Stop</button>
     </div>
-
+    <p id="status-rev2" class="subtitle"></p>
     <input type="hidden" name="rev_audio2" id="audioDatarev2">
   </div>
 
@@ -518,7 +520,7 @@
       <button type="button" onclick="startRecording('audio3')">🔴 Record Answer</button>
       <button type="button" onclick="stopRecording('audio3')">⏹ Stop</button>
     </div>
-
+    <p id="status-audio3" class="subtitle"></p>
     <input type="hidden" name="audio3" id="audioData3">
   </div>
 
@@ -533,7 +535,7 @@
       <button type="button" onclick="startRecording('rev3')">🔴 Record Answer</button>
       <button type="button" onclick="stopRecording('rev3')">⏹ Stop</button>
     </div>
-
+    <p id="status-rev3" class="subtitle"></p>
     <input type="hidden" name="rev_audio3" id="audioDatarev3">
   </div>
 
@@ -555,7 +557,7 @@
       <button type="button" onclick="startRecording('audio4')">🔴 Record Answer</button>
       <button type="button" onclick="stopRecording('audio4')">⏹ Stop</button>
     </div>
-
+    <p id="status-audio4" class="subtitle"></p>
     <input type="hidden" name="audio4" id="audioData4">
   </div>
 
@@ -570,7 +572,7 @@
       <button type="button" onclick="startRecording('rev4')">🔴 Record Answer</button>
       <button type="button" onclick="stopRecording('rev4')">⏹ Stop</button>
     </div>
-
+    <p id="status-rev4" class="subtitle"></p>
     <input type="hidden" name="rev_audio4" id="audioDatarev4">
   </div>
 
@@ -767,6 +769,11 @@ function attachPlayLimit(id){
 [1,2,3,4].forEach(attachPlayLimit);
 
 async function startRecording(id){
+  const status = document.getElementById("status-" + id);
+  if (status) {
+    status.innerText = "🔴 Recording...";
+    status.classList.add("recording");
+  }
   isRecording = true;
 
   const stream = await navigator.mediaDevices.getUserMedia({audio:true});
@@ -799,7 +806,11 @@ function stopRecording(id){
   }
 }
 
-// VALIDATION
+const status = document.getElementById("status-" + id);
+if (status) {
+  status.innerText = "✅ Recording saved";
+  status.classList.remove("recording");
+}
 const form = document.querySelector("form");
 
 if (form) {
