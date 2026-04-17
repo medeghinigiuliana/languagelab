@@ -233,7 +233,7 @@
   >
 </div>
 
-<button type="button" id="startTestBtn" class="button" style="display:none;">
+<button type="button" id="startTestBtn" class="button" style="display:none;" onclick="startTest()">
   Start Test
 </button>
 
@@ -615,6 +615,7 @@ function showTest() {
 // LANGUAGE TRANSLATION 
 // ------------------
 async function startTest() {
+
   const type = document.getElementById("testType").value;
   const lang = document.getElementById("languageInput").value;
 
@@ -625,7 +626,9 @@ async function startTest() {
     const response = await fetch(`/get_translation?lang=${encodeURIComponent(lang)}`);
     const data = await response.json();
 
-    // Update UI BEFORE showing test
+    console.log("START TEST RUNNING");
+    console.log(data.target_texts);
+
     for (let i = 0; i < 4; i++) {
       const el = document.getElementById("targetText" + (i+1));
       if (el) {
