@@ -620,19 +620,38 @@ async function startTest() {
 
   if (!type || !lang) return;
 
-  // Hide all tests first
-  document.querySelectorAll('[id$="Test"]').forEach(el => {
-    el.style.display = "none";
-  });
+  try {
+    // Fetch translations FIRST
+    const response = await fetch(`/get_translation?lang=${encodeURIComponent(lang)}`);
+    const data = await response.json();
 
-  // Load translation FIRST
-  await updateLanguage();
+    // Update UI BEFORE showing test
+    for (let i = 0; i < 4; i++) {
+      const el = document.getElementById("targetText" + (i+1));
+      if (el) {
+        el.innerText = data.target_texts[i];
+      }
 
-  // THEN show test
-  const section = document.getElementById(type + "Test");
-  if (section) {
-    section.style.display = "block";
-    section.scrollIntoView({ behavior: "smooth" });
+      const label = document.getElementById("step2Label" + (i+1));
+      if (label) {
+        label.innerText = `Step 2 — Reverse Interpretation (${lang} → English)`;
+      }
+    }
+
+    // Hide all tests
+    document.querySelectorAll('[id$="Test"]').forEach(el => {
+      el.style.display = "none";
+    });
+
+    // Show test AFTER translation
+    const section = document.getElementById(type + "Test");
+    if (section) {
+      section.style.display = "block";
+      section.scrollIntoView({ behavior: "smooth" });
+    }
+
+  } catch (e) {
+    console.error("Start test error:", e);
   }
 }
 
@@ -644,14 +663,14 @@ async function updateLanguage() {
     const response = await fetch(`/get_translation?lang=${encodeURIComponent(lang)}`);
     const data = await response.json();
 
-    // ✅ Update texts
+    // Update texts
     for (let i = 0; i < 4; i++) {
       const el = document.getElementById("targetText" + (i+1));
       if (el) {
         el.innerText = data.target_texts[i];
       }
 
-      // ✅ Update labels
+      // Update labels
       const label = document.getElementById("step2Label" + (i+1));
       if (label) {
         label.innerText = `Step 2 — Reverse Interpretation (${lang} → English)`;
