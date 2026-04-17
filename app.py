@@ -107,6 +107,13 @@ ORIGINAL_AUDIO_TEXTS = [
     "The patient is recovering well after the procedure."
 ]
 
+REVERSE_TEXTS = [
+    "A public meeting will be held about the new community pool.",
+    "Some professors may not engage students effectively.",
+    "The document must be signed in front of a notary.",
+    "The doctor decided to discharge the patient."
+]
+
 # ---------------------------
 # HELPERS
 # ---------------------------
@@ -374,15 +381,20 @@ def home():
 def get_translation():
     language = request.args.get("lang")
 
-    if language:
-        target_texts = [
-            translate_to_target(text, language)
-            for text in REVERSE_TEXTS
-        ]
-    else:
-        target_texts = ORIGINAL_AUDIO_TEXTS
+    try:
+        if language:
+            target_texts = [
+                translate_to_target(text, language)
+                for text in REVERSE_TEXTS
+            ]
+        else:
+            target_texts = ORIGINAL_AUDIO_TEXTS
 
-    return {"target_texts": target_texts}
+        return {"target_texts": target_texts}
+
+    except Exception as e:
+        print("TRANSLATION ERROR:", e)
+        return {"target_texts": ORIGINAL_AUDIO_TEXTS}
 
 # ---------------------------
 # SUBMIT
