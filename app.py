@@ -266,24 +266,22 @@ def translate_to_target(text, language):
     try:
         response = client.chat.completions.create(
             model="gpt-4o-mini",
+            temperature=0,
             messages=[
                 {
                     "role": "system",
-                    "content": (
-                        f"You are a professional human translator. "
-                        f"Translate as a professional interpreter would, ensuring clarity, fluency, and natural phrasing for real-world communication."
-                        f"Avoid literal translation. Use context-appropriate phrasing."
-                    )
+                    "content": f"You are a professional translator. Translate EVERYTHING into {language}. Only output the translation. Never output English."
                 },
                 {
                     "role": "user",
-                    "content": text
+                    "content": f"Translate this into {language}:\n\n{text}"
                 }
-            ],
-            temperature=0.3
+            ]
         )
 
-        return response.choices[0].message.content.strip()
+        result = response.choices[0].message.content.strip()
+
+        return result
 
     except Exception as e:
         print("Translation error:", e)
