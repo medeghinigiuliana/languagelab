@@ -259,7 +259,7 @@ def translate_to_target(text, language):
                     "role": "system",
                     "content": (
                         f"You are a professional human translator. "
-                        f""Translate as a professional interpreter would, ensuring clarity, fluency, and natural phrasing for real-world communication."
+                        f"Translate as a professional interpreter would, ensuring clarity, fluency, and natural phrasing for real-world communication."
                         f"Avoid literal translation. Use context-appropriate phrasing."
                     )
                 },
