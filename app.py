@@ -101,17 +101,17 @@ init_db()
 # ORIGINAL AUDIO TEXTS
 # ---------------------------
 ORIGINAL_AUDIO_TEXTS = [
-    "The city is planning a new transportation system.",
-    "Students must complete the assignment by next week.",
-    "The contract was approved by the legal department.",
-    "The patient is recovering well after the procedure."
+    "They are holding a public meeting on the new community pool.",
+    "Visiting professors can be boring.",
+    "The execution of the document was witnessed by the clerk.",
+    "The doctor decided to let the patient go."
 ]
 
 REVERSE_TEXTS = [
-    "A public meeting will be held about the new community pool.",
-    "Some professors may not engage students effectively.",
-    "The document must be signed in front of a notary.",
-    "The doctor decided to discharge the patient."
+    "A public meeting will be held next week to discuss the development of the new community pool, including its proposed location, budget allocation, and expected impact on local residents.",
+    "Some professors may struggle to engage students effectively in the classroom, particularly when teaching large groups or relying heavily on traditional lecture-based methods.",
+    "The document must be signed in the presence of a notary public, who will verify the identity of all parties involved and ensure that the signing is conducted in accordance with legal requirements.",
+    "After evaluating the patient’s progress and reviewing the test results, the doctor decided to discharge the patient with specific instructions for follow-up care and medication."
 ]
 
 # ---------------------------
@@ -255,12 +255,26 @@ def translate_to_target(text, language):
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": f"Translate this into {language}."},
-                {"role": "user", "content": text}
-            ]
+                {
+                    "role": "system",
+                    "content": (
+                        f"You are a professional human translator. "
+                        f""Translate as a professional interpreter would, ensuring clarity, fluency, and natural phrasing for real-world communication."
+                        f"Avoid literal translation. Use context-appropriate phrasing."
+                    )
+                },
+                {
+                    "role": "user",
+                    "content": text
+                }
+            ],
+            temperature=0.3
         )
+
         return response.choices[0].message.content.strip()
-    except:
+
+    except Exception as e:
+        print("Translation error:", e)
         return text
 
 def process_audio(base64_audio):
@@ -388,7 +402,7 @@ def get_translation():
                 for text in REVERSE_TEXTS
             ]
         else:
-            target_texts = ORIGINAL_AUDIO_TEXTS
+            target_texts = REVERSE_TEXTS
 
         return {"target_texts": target_texts}
 
