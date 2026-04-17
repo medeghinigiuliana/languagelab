@@ -188,6 +188,7 @@
     list="languages" 
     name="language" 
     id="languageInput"
+    placeholder="Select language"
     onchange="showTest()"
   >
 </div>
@@ -404,7 +405,7 @@
   <hr style="border-color:#1f2937; margin:15px 0;">
   <!-- STEP 2 -->
   <div class="step">
-    <h4>Step 2 — Reverse Interpretation ({{ language }} → English)</h4>
+    <h4 id="step2Label1">Step 2 — Reverse Interpretation</h4>
 
     <p class="text-box" id="targetText1">
       {{ target_texts[0] }}
@@ -441,7 +442,7 @@
   <hr style="border-color:#1f2937; margin:15px 0;">
   <!-- STEP 2 -->
   <div class="step">
-    <h4>Step 2 — Reverse Interpretation ({{ language }} → English)</h4>
+    <h4 id="step2Label2">Step 2 — Reverse Interpretation</h4>
 
     <p class="text-box" id="targetText2">
       {{ target_texts[1] }}
@@ -478,7 +479,7 @@
   <hr style="border-color:#1f2937; margin:15px 0;">
   <!-- STEP 2 -->
   <div class="step">
-    <h4>Step 2 — Reverse Interpretation ({{ language }} → English)</h4>
+    <h4 id="step2Label3">Step 2 — Reverse Interpretation</h4>
 
     <p class="text-box" id="targetText3">
       {{ target_texts[2] }}
@@ -515,7 +516,7 @@
   <hr style="border-color:#1f2937; margin:15px 0;">
   <!-- STEP 2 -->
   <div class="step">
-    <h4>Step 2 — Reverse Interpretation ({{ language }} → English)</h4>
+    <h4 id="step2Label4">Step 2 — Reverse Interpretation</h4>
 
     <p class="text-box" id="targetText4">
       {{ target_texts[3] }}
@@ -579,12 +580,20 @@ async function updateLanguage() {
     const response = await fetch(`/get_translation?lang=${encodeURIComponent(lang)}`);
     const data = await response.json();
 
+    // ✅ Update texts
     for (let i = 0; i < 4; i++) {
       const el = document.getElementById("targetText" + (i+1));
       if (el) {
         el.innerText = data.target_texts[i];
       }
+
+      // ✅ Update labels
+      const label = document.getElementById("step2Label" + (i+1));
+      if (label) {
+        label.innerText = `Step 2 — Reverse Interpretation (${lang} → English)`;
+      }
     }
+
   } catch (e) {
     console.error("Translation error:", e);
   }
