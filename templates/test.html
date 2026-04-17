@@ -445,6 +445,7 @@
       <button type="button" onclick="stopRecording('audio1')">⏹ Stop</button>
     </div>
     <p id="status-audio1" class="subtitle"></p>
+    <p id="timer-audio1" class="subtitle timer"></p>
 
     <input type="hidden" name="audio1" id="audioData1">
   </div>
@@ -461,6 +462,7 @@
       <button type="button" onclick="stopRecording('rev1')">⏹ Stop</button>
     </div>
     <p id="status-rev1" class="subtitle"></p>
+    <p id="timer-rev1" class="subtitle timer"></p>
 
     <input type="hidden" name="rev_audio1" id="audioDatarev1">
   </div>
@@ -484,6 +486,8 @@
       <button type="button" onclick="stopRecording('audio2')">⏹ Stop</button>
     </div>
     <p id="status-audio2" class="subtitle"></p>
+    <p id="timer-audio2" class="subtitle timer"></p>
+
     <input type="hidden" name="audio2" id="audioData2">
   </div>
 
@@ -499,6 +503,8 @@
       <button type="button" onclick="stopRecording('rev2')">⏹ Stop</button>
     </div>
     <p id="status-rev2" class="subtitle"></p>
+    <p id="timer-rev2" class="subtitle timer"></p>
+
     <input type="hidden" name="rev_audio2" id="audioDatarev2">
   </div>
 
@@ -521,6 +527,8 @@
       <button type="button" onclick="stopRecording('audio3')">⏹ Stop</button>
     </div>
     <p id="status-audio3" class="subtitle"></p>
+    <p id="timer-audio3" class="subtitle timer"></p>
+
     <input type="hidden" name="audio3" id="audioData3">
   </div>
 
@@ -536,6 +544,7 @@
       <button type="button" onclick="stopRecording('rev3')">⏹ Stop</button>
     </div>
     <p id="status-rev3" class="subtitle"></p>
+    <p id="timer-rev3" class="subtitle timer"></p>
     <input type="hidden" name="rev_audio3" id="audioDatarev3">
   </div>
 
@@ -558,6 +567,8 @@
       <button type="button" onclick="stopRecording('audio4')">⏹ Stop</button>
     </div>
     <p id="status-audio4" class="subtitle"></p>
+    <p id="timer-audio4" class="subtitle timer"></p>
+
     <input type="hidden" name="audio4" id="audioData4">
   </div>
 
@@ -573,6 +584,7 @@
       <button type="button" onclick="stopRecording('rev4')">⏹ Stop</button>
     </div>
     <p id="status-rev4" class="subtitle"></p>
+    <p id="timer-rev4" class="subtitle timer"></p>
     <input type="hidden" name="rev_audio4" id="audioDatarev4">
   </div>
 
@@ -588,6 +600,8 @@
 </div>
 
 <script>
+
+let timers = {};
 
 // ------------------
 // SHOW / HIDE TEST
@@ -776,6 +790,36 @@ async function startRecording(id){
     status.innerText = "🔴 Recording...";
     status.classList.add("recording");
   }
+  const status = document.getElementById("status-" + id);
+  const timerEl = document.getElementById("timer-" + id);
+
+  if (status) {
+    status.innerText = "🔴 Recording...";
+    status.classList.add("recording");
+  }
+
+  // ⏱ START TIMER
+  let timeLeft = 25;
+
+  if (timerEl) {
+    timerEl.innerText = `⏱ ${timeLeft}s remaining`;
+  }
+
+  timers[id] = setInterval(() => {
+    timeLeft--;
+
+    if (timerEl) {
+      timerEl.innerText = `⏱ ${timeLeft}s remaining`;
+    }
+
+    if (timeLeft <= 0) {
+      clearInterval(timers[id]);
+
+      if (recorders[id] && recorders[id].state === "recording") {
+        recorders[id].stop(); // ✅ AUTO STOP
+      }
+    }
+  }, 1000);
 
   try {
     const stream = await navigator.mediaDevices.getUserMedia({audio:true});
@@ -786,7 +830,12 @@ async function startRecording(id){
 
     recorders[id].onstop = () => {
       
+      clearInterval(timers[id]);
 
+      const timerEl = document.getElementById("timer-" + id);
+      if (timerEl) {
+        timerEl.innerText = "⏱ Completed";
+      }
       const blob = new Blob(chunks[id], {type:"audio/webm"});
       const reader = new FileReader();
 
@@ -819,6 +868,7 @@ async function startRecording(id){
 }
 
 function stopRecording(id){
+  clearInterval(timers[id]);
   const recorder = recorders[id];
 
   if (!recorder) {
