@@ -352,7 +352,8 @@ def score_post_edit(mt_text, edited):
 @app.route("/")
 def home():
     success = request.args.get("success")
-    language = request.args.get("lang")
+    language = request.args.get("lang") or request.form.get("language")
+    print("LANG RECEIVED:", language)
 
     if language:
         target_texts = [
@@ -368,6 +369,20 @@ def home():
         target_texts=target_texts,
         language=language
     )
+
+@app.route("/get_translation")
+def get_translation():
+    language = request.args.get("lang")
+
+    if language:
+        target_texts = [
+            translate_to_target(text, language)
+            for text in ORIGINAL_AUDIO_TEXTS
+        ]
+    else:
+        target_texts = ORIGINAL_AUDIO_TEXTS
+
+    return {"target_texts": target_texts}
 
 # ---------------------------
 # SUBMIT
