@@ -221,14 +221,6 @@
   <option value="interpretation">Interpretation</option>
 </select>
 
-<!-- TEST TYPE -->
-<select name="test_type" id="testType" onchange="showTest(); toggleLanguage();" required>
-  <option value="">Select Test Type</option>
-  <option value="translation">Translation</option>
-  <option value="editing">Editing</option>
-  <option value="post_editing">Post-MT Editing</option>
-  <option value="interpretation">Interpretation</option>
-</select>
 
 <!-- LANGUAGE -->
 <div id="languageWrapper" style="display:none;">
@@ -627,7 +619,7 @@ function showTest() {
   // Require language ONLY for specific tests
   const needsLanguage = ["interpretation", "translation"];
 
-  if (needsLanguage.includes(type) && !lang) return;
+  if (!type) return;
 
   // Show selected test
   const section = document.getElementById(type + "Test");
@@ -792,11 +784,6 @@ function attachPlayLimit(id){
 async function startRecording(id){
   if (recorders[id] && recorders[id].state === "recording") return;
 
-  const status = document.getElementById("status-" + id);
-  if (status) {
-    status.innerText = "🔴 Recording...";
-    status.classList.add("recording");
-  }
   const status = document.getElementById("status-" + id);
   const timerEl = document.getElementById("timer-" + id);
 
