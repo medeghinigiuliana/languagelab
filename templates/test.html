@@ -178,7 +178,7 @@
     text-align: center;
 ">
 
-    <!-- ✅ CHECKMARK (CORRECT PLACE) -->
+    <!-- CHECKMARK (CORRECT PLACE) -->
     <div style="
         width:80px;
         height:80px;
@@ -430,7 +430,7 @@
 
 <div class="card">
 
-  <h3>🎧 Audio 1</h3>
+  <h3> Audio 1</h3>
 
   <!-- STEP 1 -->
   <div class="step">
@@ -467,7 +467,7 @@
 
 <div class="card">
 
-  <h3>🎧 Audio 2</h3>
+  <h3> Audio 2</h3>
 
   <!-- STEP 1 -->
   <div class="step">
@@ -504,7 +504,7 @@
 
 <div class="card">
 
-  <h3>🎧 Audio 3</h3>
+  <h3> Audio 3</h3>
 
   <!-- STEP 1 -->
   <div class="step">
@@ -541,7 +541,7 @@
 
 <div class="card">
 
-  <h3>🎧 Audio 4</h3>
+  <h3> Audio 4</h3>
 
   <!-- STEP 1 -->
   <div class="step">
@@ -628,7 +628,7 @@ async function startTest() {
     return;
   }
 
-  // 🔒 Hide everything first
+  //  Hide everything first
   document.querySelectorAll('[id$="Test"]').forEach(el => {
     el.style.display = "none";
   });
@@ -639,13 +639,13 @@ async function startTest() {
 
     console.log("TRANSLATED:", data.target_texts);
 
-    // ✅ FORCE UPDATE (no conditions)
+    //  FORCE UPDATE (no conditions)
     document.getElementById("targetText1").textContent = data.target_texts[0];
     document.getElementById("targetText2").textContent = data.target_texts[1];
     document.getElementById("targetText3").textContent = data.target_texts[2];
     document.getElementById("targetText4").textContent = data.target_texts[3];
 
-    // ✅ NOW show test
+    //  NOW show test
     const section = document.getElementById(type + "Test");
     if (section) {
       section.style.display = "block";
@@ -726,7 +726,7 @@ document.addEventListener("DOMContentLoaded", function () {
     languageInput.addEventListener("input", checkReady);
   }
 
-  // ✅ CLICK START BUTTON
+  // CLICK START BUTTON
   startBtn.addEventListener("click", startTest);
 });
 

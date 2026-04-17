@@ -85,6 +85,10 @@ def init_db():
         ("t3_en", "TEXT"),
         ("t4_en", "TEXT"),
         ("flag", "TEXT"),
+        ("rev_transcription1", "TEXT"),
+        ("rev_transcription2", "TEXT"),
+        ("rev_transcription3", "TEXT"),
+        ("rev_transcription4", "TEXT"),
     ]
 
     for col, col_type in columns:
@@ -241,16 +245,23 @@ def translate_to_english(text):
 
         response = client.chat.completions.create(
             model="gpt-4o-mini",
+            temperature=0,
             messages=[
                 {
                     "role": "system",
-                    "content": (
-                        f"You are a professional translator. "
-                        f"Translate everything strictly into {target_language}. "
-                        f"Do NOT return the original text. "
-                        f"Do NOT explain anything. "
-                        f"Only output the translated sentence."
-                    )
+                    "content": """
+You are a professional interpreter.
+
+Your task is to convert spoken content into accurate, natural English.
+
+Rules:
+- Translate the meaning, not word-for-word
+- Preserve intent, tone, and full meaning
+- Do not summarize or omit information
+- Do not add explanations
+- Do not repeat the original language
+- Output ONLY the English sentence
+"""
                 },
                 {
                     "role": "user",
@@ -258,8 +269,17 @@ def translate_to_english(text):
                 }
             ]
         )
-        return response.choices[0].message.content.strip()
-    except:
+
+        result = response.choices[0].message.content.strip()
+
+        # Safety check: avoid returning same text
+        if result.lower() == text.lower():
+            return ""
+
+        return result
+
+    except Exception as e:
+        print("Translate to English error:", e)
         return ""
 
 def translate_to_target(text, language):
@@ -301,31 +321,47 @@ def process_audio(base64_audio):
 def score_interpretation(original, interpreted, language):
     try:
         if not interpreted.strip():
-            return "SCORE: 0/10"
+            return "SCORE: 0/10\nExplanation: No response provided."
 
         response = client.chat.completions.create(
             model="gpt-4o-mini",
+            temperature=0,
             messages=[
-                {"role": "system", "content": f"""
-                Evaluate interpretation.
+                {
+                    "role": "system",
+                    "content": f"""
+You are a professional interpreter evaluator.
 
-                Source meaning:
-                {original}
+SOURCE (original meaning):
+{original}
 
-                Target language: {language}
+CANDIDATE OUTPUT:
+{interpreted}
 
-                Evaluate accuracy, completeness, and fluency.
+Evaluate strictly:
 
-                Return:
-                SCORE: X/10
-                Explanation: ...
-                """},
-                {"role": "user", "content": interpreted}
+1. Accuracy → Did they preserve meaning?
+2. Completeness → Did they miss any information?
+3. Fluency → Is it natural and correct?
+
+Be strict. Penalize:
+- Missing information
+- Distorted meaning
+- Awkward phrasing
+
+Return ONLY:
+
+SCORE: X/10
+Explanation: 1–2 short sentences.
+"""
+                }
             ]
         )
+
         return response.choices[0].message.content.strip()
+
     except:
-        return "SCORE: 0/10"
+        return "SCORE: 0/10\nExplanation: Evaluation failed."
 
 def score_editing(original, edited):
     try:
@@ -569,35 +605,51 @@ as soon as possible to avoid losing customers."""
 
 
         # INTERPRETATION
-        if test_type == "interpretation":
-            parts = []
+       if test_type == "interpretation":
+           parts = []
 
-            t_en_list = [t1_en, t2_en, t3_en, t4_en]
-            rev_list = [rev1, rev2, rev3, rev4]
+           t_en_list = [t1_en or "", t2_en or "", t3_en or "", t4_en or ""]
+           rev_list = [rev1 or "", rev2 or "", rev3 or "", rev4 or ""]
 
-            for i in range(4):
+           scores = []
 
-                # EN → TARGET
-                if t_en_list[i]:
-                    result1 = score_interpretation(
-                        ORIGINAL_AUDIO_TEXTS[i],
-                        t_en_list[i],
-                        language
-                    )
-                    parts.append(f"\n📌 AUDIO {i+1} (EN → {language})\n{result1}")
+          for i in range(4):
 
-                # TARGET → EN
-                if rev_list[i]:
-                    reference_text = target_texts[i]  # translated version
+              # STEP 1: EN → TARGET → BACK TO EN
+              if t_en_list[i]:
+                  result1 = score_interpretation(
+                      ORIGINAL_AUDIO_TEXTS[i],
+                      t_en_list[i],
+                      language
+                  )
+                  parts.append(f"\n📌 AUDIO {i+1} (EN → {language})\n{result1}")
 
-                    result2 = score_interpretation(
-                        reference_text,
-                        rev_list[i],
-                        "English"
-                    )
-                    parts.append(f"\n📌 AUDIO {i+1} ({language} → EN)\n{result2}")
+                  s = extract_all_scores(result1)
+                  if s:
+                      scores.append(s[-1])
 
-            interpretation_score = "\n".join(parts)
+              # STEP 2: TARGET → ENGLISH
+              if rev_list[i]:
+                  result2 = score_interpretation(
+                      REVERSE_TEXTS[i],
+                      rev_list[i],
+                      "English"
+                  )
+                  parts.append(f"\n📌 AUDIO {i+1} (Reverse → English)\n{result2}")
+
+                  s = extract_all_scores(result2)
+                  if s:
+                      scores.append(s[-1])
+
+          interpretation_score = "\n".join(parts)
+
+          # FINAL SCORE
+          valid_scores = [s for s in scores if s > 0]
+
+          if valid_scores:
+              i_score = round(sum(valid_scores) / len(valid_scores), 2)
+          else:
+              i_score = 0
 
         # SCORES
         def get_score(text):
@@ -684,15 +736,15 @@ as soon as possible to avoid losing customers."""
         translation_score,interpretation_score,editing_score,post_edit_score,
         gleu_score,bleu_score,ter_score,final_score,status,flag,
         ai_component,bleu_component,ter_component,
-        transcription1,transcription2,transcription3,transcription4,t1_en, t2_en, t3_en, t4_en)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        transcription1,transcription2,transcription3,transcription4,t1_en, t2_en, t3_en, t4_en, rev_transcription1, rev_transcription2, rev_transcription3, rev_transcription4)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """,(
              first_name,last_name,email,test_type,created_at,language,answer,
              translation_score,interpretation_score,editing_score,post_edit_score,
              gleu_score,bleu_score,ter_score,final_score,status,flag,
              ai_component,bleu_component,ter_component,
              t1,t2,t3,t4,
-             t1_en,t2_en,t3_en,t4_en
+             t1_en,t2_en,t3_en,t4_en,rev1, rev2, rev3, rev4
             ))
 
         conn.commit()

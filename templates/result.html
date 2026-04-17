@@ -230,6 +230,7 @@
 {% endif %}
 
 {% if r.test_type == "interpretation" %}
+
 <div class="section">
   <h4>Interpretation Evaluation</h4>
 
@@ -241,45 +242,62 @@
   <pre>{{ r.interpretation_score or 'No feedback available' }}</pre>
 </div>
 
+<!-- STEP 1 -->
 <div class="section">
-  <h4>Candidate Speech (Original Language)</h4>
-  <pre>{{ r.transcription1 or '-' }}</pre>
-</div>
+  <h4>Step 1 — Interpretation ({{ r.language }} → English)</h4>
 
-<div class="section">
-  <h4>Translated to English</h4>
+  <p class="label">Candidate Response ({{ r.language }})</p>
+  <pre>{{ r.transcription1 or '-' }}</pre>
+
+  <p class="label">Normalized (English)</p>
   <pre>{{ r.t1_en or '-' }}</pre>
 </div>
 
 <div class="section">
-  <h4>Candidate Speech (Original Language)</h4>
-  <pre>{{ r.transcription2 }}</pre>
+  <p class="label">Candidate Response ({{ r.language }})</p>
+  <pre>{{ r.transcription2 or '-' }}</pre>
+
+  <p class="label">Normalized (English)</p>
+  <pre>{{ r.t2_en or '-' }}</pre>
 </div>
 
 <div class="section">
-  <h4>Translated to English</h4>
-  <pre>{{ r.t2_en }}</pre>
+  <p class="label">Candidate Response ({{ r.language }})</p>
+  <pre>{{ r.transcription3 or '-' }}</pre>
+
+  <p class="label">Normalized (English)</p>
+  <pre>{{ r.t3_en or '-' }}</pre>
 </div>
 
 <div class="section">
-  <h4>Candidate Speech (Original Language)</h4>
-  <pre>{{ r.transcription3 }}</pre>
+  <p class="label">Candidate Response ({{ r.language }})</p>
+  <pre>{{ r.transcription4 or '-' }}</pre>
+
+  <p class="label">Normalized (English)</p>
+  <pre>{{ r.t4_en or '-' }}</pre>
+</div>
+
+<!-- STEP 2 -->
+<div class="section">
+  <h4>Step 2 — Reverse Interpretation (English)</h4>
+
+  <p class="label">Candidate Response (English)</p>
+  <pre>{{ r.rev_transcription1 or '-' }}</pre>
 </div>
 
 <div class="section">
-  <h4>Translated to English</h4>
-  <pre>{{ r.t3_en }}</pre>
-</div>
-
-
-<div class="section">
-  <h4>Candidate Speech (Original Language)</h4>
-  <pre>{{ r.transcription4 }}</pre>
+  <p class="label">Candidate Response (English)</p>
+  <pre>{{ r.rev_transcription2 or '-' }}</pre>
 </div>
 
 <div class="section">
-  <h4>Translated to English</h4>
-  <pre>{{ r.t4_en }}</pre>
+  <p class="label">Candidate Response (English)</p>
+  <pre>{{ r.rev_transcription3 or '-' }}</pre>
+</div>
+
+<div class="section">
+  <p class="label">Candidate Response (English)</p>
+  <pre>{{ r.rev_transcription4 or '-' }}</pre>
 </div>
 
 {% endif %}
