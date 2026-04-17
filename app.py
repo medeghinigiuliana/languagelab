@@ -101,10 +101,10 @@ init_db()
 # ORIGINAL AUDIO TEXTS
 # ---------------------------
 ORIGINAL_AUDIO_TEXTS = [
-    "They are holding a public meeting on the new community pool.",
-    "Visiting professors can be boring.",
-    "The execution of the document was witnessed by the clerk.",
-    "The doctor decided to let the patient go."
+    "The city is planning a new transportation system.",
+    "Students must complete the assignment by next week.",
+    "The contract was approved by the legal department.",
+    "The patient is recovering well after the procedure."
 ]
 
 # ---------------------------
@@ -377,7 +377,7 @@ def get_translation():
     if language:
         target_texts = [
             translate_to_target(text, language)
-            for text in ORIGINAL_AUDIO_TEXTS
+            for text in REVERSE_TEXTS
         ]
     else:
         target_texts = ORIGINAL_AUDIO_TEXTS
@@ -402,7 +402,7 @@ def submit():
 
         target_texts = [
             translate_to_target(text, language)
-            for text in ORIGINAL_AUDIO_TEXTS
+            for text in REVERSE_TEXTS
         ]
 
         a1 = request.form.get("answer1","")

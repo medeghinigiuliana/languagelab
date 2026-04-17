@@ -174,7 +174,7 @@
 <input type="email" name="email" placeholder="Your email" required>
 
 <!-- TEST TYPE -->
-<select name="test_type" id="testType" onchange="showTest(); toggleLanguage(); updateLanguage();" required>
+<select name="test_type" id="testType" onchange="toggleLanguage(); showTest();" required>
   <option value="">Select Test Type</option>
   <option value="translation">Translation</option>
   <option value="editing">Editing</option>
@@ -189,9 +189,9 @@
     name="language" 
     id="languageInput" 
     placeholder="Select or type language" 
-    required 
+    required
     value="{{ language or '' }}"
-    onchange="updateLanguage()"
+    onchange="showTest()"
   >
 </div>
 
@@ -409,7 +409,7 @@
   <div class="step">
     <h4>Step 2 — Reverse Interpretation ({{ language }} → English)</h4>
 
-    <p class="text-box">
+    <p class="text-box" id="targetText1">
       {{ target_texts[0] }}
     </p>
 
@@ -446,7 +446,7 @@
   <div class="step">
     <h4>Step 2 — Reverse Interpretation ({{ language }} → English)</h4>
 
-    <p class="text-box">
+    <p class="text-box" id="targetText2">
       {{ target_texts[1] }}
     </p>
 
@@ -483,7 +483,7 @@
   <div class="step">
     <h4>Step 2 — Reverse Interpretation ({{ language }} → English)</h4>
 
-    <p class="text-box">
+    <p class="text-box" id="targetText3">
       {{ target_texts[2] }}
     </p>
 
@@ -520,7 +520,7 @@
   <div class="step">
     <h4>Step 2 — Reverse Interpretation ({{ language }} → English)</h4>
 
-    <p class="text-box">
+    <p class="text-box" id="targetText4">
       {{ target_texts[3] }}
     </p>
 
@@ -559,16 +559,24 @@ function updateLanguage() {
 
 function showTest() {
   const type = document.getElementById("testType").value;
+  const lang = document.getElementById("languageInput").value;
 
+  // Hide all tests first
   document.querySelectorAll('[id$="Test"]').forEach(el => {
     el.style.display = "none";
   });
 
-  if (type) {
+  // 🚫 DO NOT SHOW until both are selected
+  if (!type || !lang) return;
+
+  // Load translations first
+  updateLanguage().then(() => {
     const section = document.getElementById(type + "Test");
-    section.style.display = "block";
-    section.scrollIntoView({ behavior: "smooth" });
-  }
+    if (section) {
+      section.style.display = "block";
+      section.scrollIntoView({ behavior: "smooth" });
+    }
+  });
 }
 
 // SETTINGS
@@ -706,9 +714,21 @@ document.addEventListener("DOMContentLoaded", function () {
     if (lang) {
       const url = new URL(window.location.href);
       url.searchParams.set("lang", lang);
-      window.location.href = url.toString();
-    }
-  }
+      async function updateLanguage() {
+        const lang = document.getElementById("languageInput").value;
+
+        if (!lang) return;
+
+        const response = await fetch(`/get_translation?lang=${encodeURIComponent(lang)}`);
+        const data = await response.json();
+
+        for (let i = 0; i < 4; i++) {
+          const el = document.getElementById("targetText" + (i+1));
+          if (el) {
+            el.innerText = data.target_texts[i];
+          }
+        }
+       }
 
 </script>
 
