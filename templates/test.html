@@ -542,57 +542,108 @@
 
 <script>
 
-// SHOW TEST
-
-function updateLanguage() {
-  const lang = document.getElementById("languageInput").value;
-
-  if (lang) {
-    const url = new URL(window.location.href);
-    url.searchParams.set("lang", lang);
-    window.location.href = url.toString();
-  }
-}
-
+// ------------------
+// SHOW / HIDE TEST
+// ------------------
 function showTest() {
   const type = document.getElementById("testType").value;
   const lang = document.getElementById("languageInput").value;
 
-  // Hide all tests first
+  // Hide all
   document.querySelectorAll('[id$="Test"]').forEach(el => {
     el.style.display = "none";
   });
 
-  // 🚫 DO NOT SHOW until both are selected
+  // Only show when BOTH exist
   if (!type || !lang) return;
 
-  // Load translations first
-  updateLanguage().then(() => {
-    const section = document.getElementById(type + "Test");
-    if (section) {
-      section.style.display = "block";
-      section.scrollIntoView({ behavior: "smooth" });
-    }
-  });
+  // Show section
+  const section = document.getElementById(type + "Test");
+  if (section) {
+    section.style.display = "block";
+    section.scrollIntoView({ behavior: "smooth" });
+  }
+
+  // Update translated text
+  updateLanguage();
 }
+
+// ------------------
+// LANGUAGE TRANSLATION (NO RELOAD)
+// ------------------
+async function updateLanguage() {
+  const lang = document.getElementById("languageInput").value;
+  if (!lang) return;
+
+  try {
+    const response = await fetch(`/get_translation?lang=${encodeURIComponent(lang)}`);
+    const data = await response.json();
+
+    for (let i = 0; i < 4; i++) {
+      const el = document.getElementById("targetText" + (i+1));
+      if (el) {
+        el.innerText = data.target_texts[i];
+      }
+    }
+  } catch (e) {
+    console.error("Translation error:", e);
+  }
+}
+
+// ------------------
+// LANGUAGE TOGGLE
+// ------------------
+function toggleLanguage() {
+  const type = document.getElementById("testType").value;
+  const wrapper = document.getElementById("languageWrapper");
+
+  if (!wrapper) return;
+
+  if (type === "interpretation") {
+    wrapper.style.display = "block";
+  } else {
+    wrapper.style.display = "none";
+  }
+}
+
+// ------------------
+// EVENT LISTENERS (CLEAN)
+// ------------------
+document.addEventListener("DOMContentLoaded", function () {
+  const testType = document.getElementById("testType");
+  const languageInput = document.getElementById("languageInput");
+
+  if (testType) {
+    testType.addEventListener("change", function () {
+      toggleLanguage();
+      showTest();
+    });
+  }
+
+  if (languageInput) {
+    languageInput.addEventListener("change", function () {
+      showTest();
+    });
+  }
+});
+
+
+// ------------------
+// AUDIO + RECORDING (KEEP YOUR ORIGINAL BELOW)
+// ------------------
 
 // SETTINGS
 const MAX_PLAYS = 2;
-
-// STATE
 let playCount = {1:0,2:0,3:0,4:0};
 let isRecording = false;
 let recorders = {};
 let chunks = {};
 
-// PLAY LIMIT
 function attachPlayLimit(id){
   const audio = document.getElementById("audio"+id);
-
   if (!audio) return;
 
   audio.addEventListener("play", () => {
-
     if(isRecording){
       audio.pause();
       alert("Cannot play while recording");
@@ -612,7 +663,6 @@ function attachPlayLimit(id){
 
 [1,2,3,4].forEach(attachPlayLimit);
 
-// RECORDING (CLEAN VERSION)
 async function startRecording(id){
   isRecording = true;
 
@@ -646,7 +696,7 @@ function stopRecording(id){
   }
 }
 
-// VALIDATION (FIXED)
+// VALIDATION
 const form = document.querySelector("form");
 
 if (form) {
@@ -673,68 +723,6 @@ if (form) {
   });
 }
 
-// LANGUAGE TOGGLE
-
-  const testTypeSelect = document.getElementById("testType");
-  const languageInput = document.getElementById("languageInput");
-  const languageWrapper = document.getElementById("languageWrapper");
-
-  function toggleLanguage() {
-    const type = document.getElementById("testType").value;
-    const wrapper = document.getElementById("languageWrapper");
-
-    if (!wrapper) return;
-
-    if (type === "interpretation") {
-      wrapper.style.display = "block";
-    } else {
-      wrapper.style.display = "none";
-    }
-  }
-
-  testTypeSelect.addEventListener("change", toggleLanguage);
-
-  toggleLanguage();
-});
-
-  function updateLanguage() {
-    const input = document.getElementById("languageInput");
-
-    if (!input) return;
-
-    const lang = input.value;
-
-    if (lang) {
-      const url = new URL(window.location.href);
-      url.searchParams.set("lang", lang);
-      async function updateLanguage() {
-        const lang = document.getElementById("languageInput").value;
-
-        if (!lang) return;
-
-        const response = await fetch(`/get_translation?lang=${encodeURIComponent(lang)}`);
-        const data = await response.json();
-
-        for (let i = 0; i < 4; i++) {
-          const el = document.getElementById("targetText" + (i+1));
-          if (el) {
-            el.innerText = data.target_texts[i];
-          }
-        }
-       }
-
-document.addEventListener("DOMContentLoaded", function () {
-  const testType = document.getElementById("testType");
-
-  if (testType) {
-    testType.addEventListener("change", function () {
-      console.log("Test type changed:", this.value); // DEBUG
-
-      toggleLanguage();
-      showTest();
-    });
-  }
-});
 </script>
 
 </body>
