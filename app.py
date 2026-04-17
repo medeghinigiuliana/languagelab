@@ -365,10 +365,10 @@ def home():
     if language:
         target_texts = [
             translate_to_target(text, language)
-            for text in ORIGINAL_AUDIO_TEXTS
+            for text in REVERSE_TEXTS
         ]
     else:
-        target_texts = ORIGINAL_AUDIO_TEXTS
+        target_texts = REVERSE_TEXTS
 
     return render_template(
         "test.html",
