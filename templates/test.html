@@ -677,25 +677,19 @@ if (form) {
 }
 
 // LANGUAGE TOGGLE
-document.addEventListener("DOMContentLoaded", function () {
 
   const testTypeSelect = document.getElementById("testType");
   const languageInput = document.getElementById("languageInput");
   const languageWrapper = document.getElementById("languageWrapper");
 
   function toggleLanguage() {
-    const type = testTypeSelect.value;
+    const type = document.getElementById("testType").value;
+    const wrapper = document.getElementById("languageWrapper");
 
-    if (!type) {
-      languageWrapper.style.display = "none";
-      return;
-    }
-
-    if (type === "editing" || type === "post_editing") {
-      languageWrapper.style.display = "none";
-      languageInput.value = "";
+    if (type === "interpretation") {
+      wrapper.style.display = "block";
     } else {
-      languageWrapper.style.display = "block";
+      wrapper.style.display = "none";
     }
   }
 
