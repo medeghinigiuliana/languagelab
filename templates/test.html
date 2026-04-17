@@ -769,47 +769,68 @@ function attachPlayLimit(id){
 [1,2,3,4].forEach(attachPlayLimit);
 
 async function startRecording(id){
+  if (recorders[id] && recorders[id].state === "recording") return;
+
   const status = document.getElementById("status-" + id);
   if (status) {
     status.innerText = "🔴 Recording...";
     status.classList.add("recording");
   }
-  isRecording = true;
 
-  const stream = await navigator.mediaDevices.getUserMedia({audio:true});
-  recorders[id] = new MediaRecorder(stream);
-  chunks[id] = [];
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    recorders[id] = new MediaRecorder(stream);
+    chunks[id] = [];
 
-  recorders[id].ondataavailable = e => chunks[id].push(e.data);
+    recorders[id].ondataavailable = e => chunks[id].push(e.data);
 
-  recorders[id].onstop = () => {
-    isRecording = false;
+    recorders[id].onstop = () => {
+      
 
-    const blob = new Blob(chunks[id], {type:"audio/webm"});
-    const reader = new FileReader();
+      const blob = new Blob(chunks[id], {type:"audio/webm"});
+      const reader = new FileReader();
 
-    reader.readAsDataURL(blob);
-    reader.onloadend = () => {
-      const field = document.getElementById("audioData"+id);
-      if(field){
-        field.value = reader.result;
-      }
+      reader.readAsDataURL(blob);
+      reader.onloadend = () => {
+        const field = document.getElementById("audioData"+id);
+        if(field){
+          field.value = reader.result;
+        }
+
+        
+        const status = document.getElementById("status-" + id);
+        if (status) {
+          status.innerText = "✅ Recording saved";
+          status.classList.remove("recording");
+        }
+      };
     };
-  };
 
-  recorders[id].start();
-}
+    recorders[id].start();
 
-function stopRecording(id){
-  if(recorders[id]){
-    recorders[id].stop();
+  } catch (err) {
+    console.error(err);
+    
+
+    if (status) {
+      status.innerText = "❌ Microphone error";
+    }
   }
 }
 
-const status = document.getElementById("status-" + id);
-if (status) {
-  status.innerText = "✅ Recording saved";
-  status.classList.remove("recording");
+function stopRecording(id){
+  const recorder = recorders[id];
+
+  if (!recorder) {
+    alert("No recording in progress");
+    return;
+  }
+
+  if (recorder.state === "inactive") {
+    return;
+  }
+
+  recorder.stop();
 }
 const form = document.querySelector("form");
 
