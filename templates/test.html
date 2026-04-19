@@ -564,11 +564,12 @@
   </div>
 
 </div>
-
-<button class="button" onclick="this.disabled=true; this.innerText='Submitting...'; this.form.submit();">
-  Submit
-</button>
-
+<div style="margin-top:20px;">
+  <button type="submit" class="button" id="submitBtn"
+    onclick="this.disabled=true; this.innerText='Submitting...';">
+    Submit
+  </button>
+</div>
 </form>
 {% endif %}
 
@@ -624,8 +625,8 @@ async function startTest() {
     section.style.display = "block";
     section.scrollIntoView({ behavior: "smooth" });
   }
-
-  try {
+  
+    try {
 
     // -------------------------
     // INTERPRETATION
