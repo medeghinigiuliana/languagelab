@@ -615,7 +615,6 @@ let timers = {};
 // ------------------
 function showTest() {
   const type = document.getElementById("testType").value;
-  const lang = document.getElementById("languageInput").value;
 
   // Hide all tests
   document.querySelectorAll('[id$="Test"]').forEach(el => {
@@ -624,12 +623,8 @@ function showTest() {
 
   if (!type) return;
 
-  // Require language ONLY for specific tests
-  const needsLanguage = ["interpretation", "translation"];
+  toggleLanguage();
 
-  if (!type) return;
-
-  // Show selected test
   const section = document.getElementById(type + "Test");
   if (section) {
     section.style.display = "block";
@@ -771,10 +766,11 @@ document.addEventListener("DOMContentLoaded", function () {
     domain.addEventListener("change", checkReady);
   }
 
-  // CLICK START BUTTON
   if (startBtn) {
     startBtn.addEventListener("click", startTest);
   }
+
+  toggleLanguage();
 });
 
 // ------------------
