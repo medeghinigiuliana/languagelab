@@ -333,8 +333,6 @@
 <!-- ================= TRANSLATION ================= -->
 <div id="translationTest" style="display:none;">
 
-  <div id="translationTest" style="display:none;">
-
   <h3>Domain Translation Test</h3>
 
   <!-- STEP 1 -->
@@ -642,6 +640,7 @@ async function startTest() {
   const section = document.getElementById(type + "Test");
   if (section) {
     section.style.display = "block";
+    section.scrollIntoView({ behavior: "smooth" });
   }
 
 } catch (err) {
