@@ -567,10 +567,6 @@ def submit():
         test_type = request.form.get("test_type")
         language = request.form.get("language")
 
-        target_texts = [
-            translate_to_target(text, language)
-            for text in REVERSE_TEXTS
-        ]
 
         a1 = request.form.get("answer1","")
         a2 = request.form.get("answer2","")
@@ -725,10 +721,10 @@ as soon as possible to avoid losing customers."""
         rev4 = process_audio(request.form.get("rev_audio4"))
 
         # TRANSLATE TO ENGLISH
-        t1_en = translate_to_english(t1)
-        t2_en = translate_to_english(t2)
-        t3_en = translate_to_english(t3)
-        t4_en = translate_to_english(t4)
+        t1_en = t1
+        t2_en = t2
+        t3_en = t3
+        t4_en = t4
 
 
 
@@ -832,17 +828,8 @@ as soon as possible to avoid losing customers."""
         # ---------------------------
         # AI DETECTION
         # ---------------------------
-        ai_score = detect_ai(candidate_translation) if candidate_translation else 0
-
-        if ai_score > 0.7:
-            if test_type == "translation":
-                final_score = min(final_score, 5)  # strong penalty
-            else:
-                final_score = max(0, final_score - 2)
-
-            flag = "AI suspected"
-        else:
-            flag = "OK"
+        ai_score = 0
+        flag = "OK"
 
         status = get_status(final_score)
         
