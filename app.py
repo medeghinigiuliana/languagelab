@@ -615,14 +615,14 @@ def submit():
        # ---------------------------
        # TRANSLATION SCORING (TEMP DISABLED)
        # ---------------------------
-       if test_type == "translation":
-           score1 = 5
-           score2 = 5
-           final_translation_score = 5
+        if test_type == "translation":
+            score1 = 5
+            score2 = 5
+            final_translation_score = 5
 
-           translation_score = f"""STEP 1 SCORE: {score1}/10
-       STEP 2 SCORE: {score2}/10
-       FINAL: {final_translation_score}/10"""
+            translation_score = f"""STEP 1 SCORE: {score1}/10
+        STEP 2 SCORE: {score2}/10
+        FINAL: {final_translation_score}/10"""
 
         # EDITING
 
