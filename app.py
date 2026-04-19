@@ -561,6 +561,8 @@ def submit():
         return redirect(url_for("home"))
     try:
         gleu_score = None
+        bleu_score = 0
+        ter_score = 100
         email = request.form.get("email")
         first_name = request.form.get("first_name")
         last_name = request.form.get("last_name")
