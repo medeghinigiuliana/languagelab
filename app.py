@@ -633,10 +633,38 @@ def submit():
                 step1_source = DOMAIN_TESTS[domain]["step1_en"]
                 step2_source = DOMAIN_TESTS[domain]["step2_en"]
 
-                score1 = score_translation_step(step1_source, step1, "EN → Target")
-                score2 = score_translation_step(step2_source, step2, "Target → EN")
+                try:
+                    combined_text = f"""
+                STEP 1:
+                {step1}
 
-                final_translation_score = round((score1 + score2) / 2, 2)
+                STEP 2:
+                {step2}
+                """
+
+                    if client:
+                        response = client.chat.completions.create(
+                            model="gpt-4o-mini",
+                            temperature=0,
+                            messages=[{
+                                "role": "user",
+                                "content": f"Score this translation (0-10):\n{combined_text}"
+                            }]
+                        )
+
+                        import re
+                        numbers = re.findall(r'\d+', response.choices[0].message.content)
+                        final_translation_score = int(numbers[0]) if numbers else 0
+
+                        score1 = final_translation_score
+                        score2 = final_translation_score
+
+                    else:
+                        score1 = score2 = final_translation_score = 0
+
+                except Exception as e:
+                    print("SCORING ERROR:", e)
+                    score1 = score2 = final_translation_score = 0
 
             translation_score = f"""STEP 1 SCORE: {score1}/10
             STEP 2 SCORE: {score2}/10
