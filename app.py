@@ -524,20 +524,20 @@ def submit():
         step1 = request.form.get("step1_answer", "")
         step2 = request.form.get("step2_answer", "")
 
-       if test_type == "translation":
-           if step1 or step2:
-               answer = f"STEP 1:\n{step1}\n\nSTEP 2:\n{step2}"
-           else:
-               answer = f"{a1}\n\n{a2}\n\n{a3}\n\n{a4}"
+        if test_type == "translation":
+            if step1 or step2:
+                answer = f"STEP 1:\n{step1}\n\nSTEP 2:\n{step2}"
+            else:
+                answer = f"{a1}\n\n{a2}\n\n{a3}\n\n{a4}"
 
-       elif test_type == "editing":
-           answer = edit1
+        elif test_type == "editing":
+            answer = edit1
 
-       elif test_type == "post_editing":
-           answer = mt1
+        elif test_type == "post_editing":
+            answer = mt1
 
-       else:
-           answer = ""
+        else:
+            answer = ""
        
         # ---------------------------
         # SELECT TEXT FOR AI DETECTION
