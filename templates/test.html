@@ -566,8 +566,7 @@
 </div>
 </div>
 <div style="margin-top:20px;">
-  <button type="submit" class="button" id="submitBtn"
-    onclick="this.disabled=true; this.innerText='Submitting...';">
+  <button type="submit" class="button" id="submitBtn">
     Submit
   </button>
 </div>
@@ -727,22 +726,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function checkReady() {
 
-    // Interpretation → needs language
-    if (testType.value === "interpretation" && languageInput.value) {
-      startBtn.style.display = "block";
+    function checkReady() {
+      const type = testType.value;
+      const lang = languageInput.value;
+      const dom = domain ? domain.value : "";
 
-    // Translation → needs language + domain
-    } else if (
-      testType.value === "translation" &&
-      languageInput.value &&
-      domain && domain.value
-    ) {
-      startBtn.style.display = "block";
-
-    } else {
-      startBtn.style.display = "none";
+      if (
+        (type === "interpretation" && lang) ||
+        (type === "translation" && lang && dom) ||
+        type === "editing" ||
+        type === "post_editing"
+      ) {
+        startBtn.style.display = "block";
+      } else {
+        startBtn.style.display = "none";
+      }
     }
-  }
 
   if (testType) {
     testType.addEventListener("change", function () {
@@ -899,30 +898,29 @@ function stopRecording(id){
 }
 const form = document.querySelector("form");
 
-if (form) {
-  form.addEventListener("submit", function(e) {
-    const type = document.getElementById("testType").value;
-
-    if (type === "interpretation") {
-      const audios = [
-        document.getElementById("audioData1").value,
-        document.getElementById("audioData2").value,
-        document.getElementById("audioData3").value,
-        document.getElementById("audioData4").value,
-        document.getElementById("audioDatarev1").value,
-        document.getElementById("audioDatarev2").value,
-        document.getElementById("audioDatarev3").value,
-        document.getElementById("audioDatarev4").value
-      ];
-
-      if (audios.every(a => !a)) {
-        e.preventDefault();
-        alert("Please record at least one interpretation.");
-      }
-    }
-  });
-}
-
+// if (form) {
+//   form.addEventListener("submit", function(e) {
+//     const type = document.getElementById("testType").value;
+//
+//     if (type === "interpretation") {
+//       const audios = [
+//         document.getElementById("audioData1").value,
+//         document.getElementById("audioData2").value,
+//         document.getElementById("audioData3").value,
+//         document.getElementById("audioData4").value,
+//         document.getElementById("audioDatarev1").value,
+//         document.getElementById("audioDatarev2").value,
+//         document.getElementById("audioDatarev3").value,
+//         document.getElementById("audioDatarev4").value
+//       ];
+//
+//       if (audios.every(a => !a)) {
+//         e.preventDefault();
+//         alert("Please record at least one interpretation.");
+//       }
+//     }
+//   });
+// }
 </script>
 
 </body>
