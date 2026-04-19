@@ -709,22 +709,20 @@ as soon as possible to avoid losing customers."""
 
             
 
-        # AUDIO
-        t1 = process_audio(request.form.get("audio1"))
-        t2 = process_audio(request.form.get("audio2"))
-        t3 = process_audio(request.form.get("audio3"))
-        t4 = process_audio(request.form.get("audio4"))
+        # AUDIO 
+        if test_type == "interpretation":
+            t1 = process_audio(request.form.get("audio1"))
+            t2 = process_audio(request.form.get("audio2"))
+            t3 = process_audio(request.form.get("audio3"))
+            t4 = process_audio(request.form.get("audio4"))
 
-        rev1 = process_audio(request.form.get("rev_audio1"))
-        rev2 = process_audio(request.form.get("rev_audio2"))
-        rev3 = process_audio(request.form.get("rev_audio3"))
-        rev4 = process_audio(request.form.get("rev_audio4"))
-
-        # TRANSLATE TO ENGLISH
-        t1_en = t1
-        t2_en = t2
-        t3_en = t3
-        t4_en = t4
+            rev1 = process_audio(request.form.get("rev_audio1"))
+            rev2 = process_audio(request.form.get("rev_audio2"))
+            rev3 = process_audio(request.form.get("rev_audio3"))
+            rev4 = process_audio(request.form.get("rev_audio4"))
+        else:
+            t1 = t2 = t3 = t4 = ""
+            rev1 = rev2 = rev3 = rev4 = ""
 
 
 
