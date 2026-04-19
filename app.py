@@ -2,6 +2,14 @@ from flask import Flask, render_template, request, Response, redirect, url_for
 import sqlite3
 import os
 from openai import OpenAI
+import os
+
+api_key = os.getenv("OPENAI_API_KEY")
+
+if not api_key:
+    print("⚠️ Missing OPENAI_API_KEY")
+
+client = OpenAI(api_key=api_key) if api_key else None
 import base64
 import io
 import re
@@ -437,7 +445,13 @@ def score_post_edit(mt_text, edited):
 
 def score_translation_step(source, candidate, direction):
     try:
-        if not candidate.strip():
+        
+        if not candidate or not candidate.strip():
+            return 0
+
+        
+        if not client:
+            print("⚠️ OpenAI client not initialized")
             return 0
 
         prompt = f"""
@@ -466,15 +480,21 @@ Return ONLY a number from 0 to 10.
             messages=[{"role": "user", "content": prompt}]
         )
 
-        score = response.choices[0].message.content.strip()
+        
+        if not response or not response.choices:
+            print("⚠️ Empty response from OpenAI")
+            return 0
 
-        numbers = re.findall(r'\d+', score)
+        score_text = response.choices[0].message.content.strip()
+
+        import re
+        numbers = re.findall(r'\d+', score_text)
+
         return int(numbers[0]) if numbers else 0
 
     except Exception as e:
-        print("Translation step scoring error:", e)
-        return 0
-# ---------------------------
+        print("❌ Translation scoring error:", e)
+        return 0# ---------------------------
 # ROUTES
 # ---------------------------
 @app.route("/")
