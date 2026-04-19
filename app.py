@@ -32,6 +32,28 @@ app.secret_key = os.getenv("SECRET_KEY", "dev-key")
 RECRUITER_USER = os.getenv("ADMIN_USER", "admin")
 RECRUITER_PASS = os.getenv("ADMIN_PASS", "novox123")
 
+# ------------------
+# DOMAIN TEST DATA
+# ------------------
+DOMAIN_TESTS = {
+    "legal": {
+        "step1_en": "This Agreement shall remain in effect unless terminated by either party upon written notice.",
+        "step2_en": "Each party agrees to comply with all applicable laws and regulations in connection with this Agreement."
+    },
+    "medical": {
+        "step1_en": "The patient presented with symptoms of severe respiratory distress requiring immediate intervention.",
+        "step2_en": "Treatment must be administered promptly to avoid complications and ensure patient stability."
+    },
+    "it": {
+        "step1_en": "The system encountered an unexpected error due to invalid input parameters during execution.",
+        "step2_en": "Developers should implement proper validation and logging mechanisms to improve debugging."
+    },
+    "marketing": {
+        "step1_en": "Our new product line offers unmatched performance and style for modern consumers.",
+        "step2_en": "Take advantage of this limited-time promotion and elevate your everyday experience."
+    }
+}
+
 
 # ---------------------------
 # INIT DB
@@ -440,8 +462,24 @@ def home():
 @app.route("/get_translation")
 def get_translation():
     language = request.args.get("lang")
+    domain = request.args.get("domain")
 
     try:
+        if domain:
+            if domain not in DOMAIN_TESTS:
+                return {"error": "Invalid domain"}
+
+            step1_en = DOMAIN_TESTS[domain]["step1_en"]
+            step2_en = DOMAIN_TESTS[domain]["step2_en"]
+
+            step2_target = translate_to_target(step2_en, language)
+
+            return {
+                "step1_en": step1_en,
+                "step2_target": step2_target,
+                "step2_en": step2_en
+            }
+
         if language:
             target_texts = [
                 translate_to_target(text, language)
@@ -483,19 +521,23 @@ def submit():
         a4 = request.form.get("answer4","")
         edit1 = request.form.get("edit1","")
         mt1 = request.form.get("mt1","")
+        step1 = request.form.get("step1_answer", "")
+        step2 = request.form.get("step2_answer", "")
 
-        
-        if test_type == "translation":
-            answer = f"{a1}\n\n{a2}\n\n{a3}\n\n{a4}"
+       if test_type == "translation":
+           if step1 or step2:
+               answer = f"STEP 1:\n{step1}\n\nSTEP 2:\n{step2}"
+           else:
+               answer = f"{a1}\n\n{a2}\n\n{a3}\n\n{a4}"
 
-        elif test_type == "editing":
-            answer = edit1
+       elif test_type == "editing":
+           answer = edit1
 
-        elif test_type == "post_editing":
-            answer = mt1
+       elif test_type == "post_editing":
+           answer = mt1
 
-        else:
-            answer = ""
+       else:
+           answer = ""
        
         # ---------------------------
         # SELECT TEXT FOR AI DETECTION

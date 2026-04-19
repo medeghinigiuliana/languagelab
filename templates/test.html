@@ -333,52 +333,22 @@
 <!-- ================= TRANSLATION ================= -->
 <div id="translationTest" style="display:none;">
 
-  <h3>The Multi-Industry Translation Test</h3>
-  <p style="opacity:0.8;">
-    Translate each passage into your native language using the correct tone and terminology.
-  </p>
+  <div id="translationTest" style="display:none;">
 
-  <!-- 1 -->
+  <h3>Domain Translation Test</h3>
+
+  <!-- STEP 1 -->
   <div class="section">
-    <h3>1. Software & IT</h3>
-    <p>
-      Error 404: Endpoint not found. The API gateway timed out while trying to fetch the JSON payload.
-      To resolve this issue, please flush your DNS cache, verify your firewall configurations,
-      and ensure your current OAuth token has not expired.
-    </p>
-    <textarea name="answer1"></textarea>
+    <h4>Step 1 — Translate into your selected language</h4>
+    <p id="step1Text"></p>
+    <textarea name="step1_answer"></textarea>
   </div>
 
-  <!-- 2 -->
+  <!-- STEP 2 -->
   <div class="section">
-    <h3>2. Legal & Compliance</h3>
-    <p>
-      Notwithstanding any prior agreements to the contrary, the Licensee agrees to indemnify, defend,
-      and hold harmless the Licensor against any and all claims, liabilities, or punitive damages arising
-      out of a material breach of this Non-Disclosure Agreement.
-    </p>
-    <textarea name="answer2"></textarea>
-  </div>
-
-  <!-- 3 -->
-  <div class="section">
-    <h3>3. Medical & Scientific</h3>
-    <p>
-      The 54-year-old patient presented with symptoms indicative of an acute myocardial infarction,
-      preceded by acute dyspnea and profuse diaphoresis.
-    </p>
-    <textarea name="answer3"></textarea>
-  </div>
-
-  <!-- 4 -->
-  <div class="section">
-    <h3>4. Marketing & Retail</h3>
-    <p>
-      Upgrade your everyday carry with our premium, full-grain leather tote.
-      Built for modern trailblazers, it seamlessly transitions from the boardroom to the boardwalk.
-      Don’t miss out on our limited-time offer!
-    </p>
-    <textarea name="answer4"></textarea>
+    <h4>Step 2 — Translate into English</h4>
+    <p id="step2Text"></p>
+    <textarea name="step2_answer"></textarea>
   </div>
 
 </div>
@@ -661,7 +631,13 @@ async function startTest() {
     document.getElementById("targetText4").textContent = data.target_texts[3];
   }
 
-  // (Optional for later — translation will go here)
+  if (type === "translation") {
+    const res = await fetch(`/get_translation?lang=${encodeURIComponent(lang)}&domain=${domain}`);
+    const data = await res.json();
+
+    document.getElementById("step1Text").textContent = data.step1_en;
+    document.getElementById("step2Text").textContent = data.step2_target;
+  }
 
   const section = document.getElementById(type + "Test");
   if (section) {
