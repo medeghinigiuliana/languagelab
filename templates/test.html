@@ -220,7 +220,15 @@
   <option value="post_editing">Post-MT Editing</option>
   <option value="interpretation">Interpretation</option>
 </select>
-
+<div id="domainWrapper" style="display:none;">
+  <select name="domain" id="domainSelect">
+    <option value="">Select Domain</option>
+    <option value="legal">Legal</option>
+    <option value="medical">Medical</option>
+    <option value="it">IT / Software</option>
+    <option value="marketing">Marketing</option>
+  </select>
+</div>
 
 <!-- LANGUAGE -->
 <div id="languageWrapper" style="display:none;">
@@ -633,42 +641,40 @@ function showTest() {
 // LANGUAGE TRANSLATION 
 // ------------------
 async function startTest() {
-  console.log("START TEST RUNNING");
-
   const type = document.getElementById("testType").value;
   const lang = document.getElementById("languageInput").value;
+  const domain = document.getElementById("domainSelect").value;
 
-  if (!type || !lang) {
-    alert("Please select test type and language");
+  if (!type || !lang || (type === "translation" && !domain)) {
+    alert("Please select test type, language, and domain");
     return;
   }
 
-  //  Hide everything first
   document.querySelectorAll('[id$="Test"]').forEach(el => {
     el.style.display = "none";
   });
 
   try {
+
+  if (type === "interpretation") {
     const res = await fetch(`/get_translation?lang=${encodeURIComponent(lang)}`);
     const data = await res.json();
 
-    console.log("TRANSLATED:", data.target_texts);
-
-    //  FORCE UPDATE (no conditions)
     document.getElementById("targetText1").textContent = data.target_texts[0];
     document.getElementById("targetText2").textContent = data.target_texts[1];
     document.getElementById("targetText3").textContent = data.target_texts[2];
     document.getElementById("targetText4").textContent = data.target_texts[3];
-
-    //  NOW show test
-    const section = document.getElementById(type + "Test");
-    if (section) {
-      section.style.display = "block";
-    }
-
-  } catch (err) {
-    console.error("Translation failed:", err);
   }
+
+  // (Optional for later — translation will go here)
+
+  const section = document.getElementById(type + "Test");
+  if (section) {
+    section.style.display = "block";
+  }
+
+} catch (err) {
+  console.error("Translation failed:", err);
 }
 
 async function updateLanguage() {
@@ -704,13 +710,21 @@ async function updateLanguage() {
 function toggleLanguage() {
   const type = document.getElementById("testType").value;
   const wrapper = document.getElementById("languageWrapper");
+  const domainWrapper = document.getElementById("domainWrapper");
 
   const needsLanguage = ["interpretation", "translation"];
 
+  // EXISTING LOGIC (unchanged)
   if (needsLanguage.includes(type)) {
     wrapper.style.display = "block";
   } else {
     wrapper.style.display = "none";
+  }
+
+  if (type === "translation") {
+    domainWrapper.style.display = "block";
+  } else {
+    domainWrapper.style.display = "none";
   }
 }
 
@@ -721,10 +735,22 @@ document.addEventListener("DOMContentLoaded", function () {
   const testType = document.getElementById("testType");
   const languageInput = document.getElementById("languageInput");
   const startBtn = document.getElementById("startTestBtn");
+  const domain = document.getElementById("domainSelect"); 
 
   function checkReady() {
+
+    // Interpretation → needs language
     if (testType.value === "interpretation" && languageInput.value) {
       startBtn.style.display = "block";
+
+    // Translation → needs language + domain
+    } else if (
+      testType.value === "translation" &&
+      languageInput.value &&
+      domain && domain.value
+    ) {
+      startBtn.style.display = "block";
+
     } else {
       startBtn.style.display = "none";
     }
@@ -741,10 +767,15 @@ document.addEventListener("DOMContentLoaded", function () {
     languageInput.addEventListener("input", checkReady);
   }
 
-  // CLICK START BUTTON
-  startBtn.addEventListener("click", startTest);
-});
+  if (domain) {
+    domain.addEventListener("change", checkReady);
+  }
 
+  // CLICK START BUTTON
+  if (startBtn) {
+    startBtn.addEventListener("click", startTest);
+  }
+});
 
 // ------------------
 // AUDIO + RECORDING (KEEP YOUR ORIGINAL BELOW)
