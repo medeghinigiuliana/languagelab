@@ -213,7 +213,7 @@
 
 <!-- EMAIL -->
 <input type="email" name="email" placeholder="Your email" required>
-<select name="test_type" id="testType" onchange="showTest(); toggleLanguage();" required>
+<select name="test_type" id="testType" onchange="showTest();" required>
   <option value="">Select Test Type</option>
   <option value="translation">Translation</option>
   <option value="editing">Editing</option>
@@ -592,6 +592,7 @@ function showTest() {
   if (!type) return;
 
   toggleLanguage();
+  checkReady();
 
   const section = document.getElementById(type + "Test");
   if (section) {
@@ -613,29 +614,10 @@ async function startTest() {
     return;
   }
 
+  // Hide all tests
   document.querySelectorAll('[id$="Test"]').forEach(el => {
     el.style.display = "none";
   });
-
-  try {
-
-  if (type === "interpretation") {
-    const res = await fetch(`/get_translation?lang=${encodeURIComponent(lang)}`);
-    const data = await res.json();
-
-    document.getElementById("targetText1").textContent = data.target_texts[0];
-    document.getElementById("targetText2").textContent = data.target_texts[1];
-    document.getElementById("targetText3").textContent = data.target_texts[2];
-    document.getElementById("targetText4").textContent = data.target_texts[3];
-  }
-
-  if (type === "translation") {
-    const res = await fetch(`/get_translation?lang=${encodeURIComponent(lang)}&domain=${domain}`);
-    const data = await res.json();
-
-    document.getElementById("step1Text").textContent = data.step1_en;
-    document.getElementById("step2Text").textContent = data.step2_target;
-  }
 
   const section = document.getElementById(type + "Test");
   if (section) {
@@ -643,12 +625,43 @@ async function startTest() {
     section.scrollIntoView({ behavior: "smooth" });
   }
 
-} catch (err) {
-  console.error("Translation failed:", err);
-}
+  try {
 
-}
+    // -------------------------
+    // INTERPRETATION
+    // -------------------------
+    if (type === "interpretation") {
+      const res = await fetch(`/get_translation?lang=${encodeURIComponent(lang)}`);
+      const data = await res.json();
 
+      document.getElementById("targetText1").innerText = data.target_texts[0];
+      document.getElementById("targetText2").innerText = data.target_texts[1];
+      document.getElementById("targetText3").innerText = data.target_texts[2];
+      document.getElementById("targetText4").innerText = data.target_texts[3];
+    }
+
+    // -------------------------
+    // TRANSLATION
+    // -------------------------
+    if (type === "translation") {
+      const res = await fetch(`/get_translation?lang=${encodeURIComponent(lang)}&domain=${domain}`);
+      const data = await res.json();
+
+      console.log("API RESPONSE:", data);
+
+      if (data.error) {
+        alert(data.error);
+        return;
+      }
+
+      document.getElementById("step1Text").innerText = data.step1_en || "Error loading text";
+      document.getElementById("step2Text").innerText = data.step2_target || "Error loading text";
+    }
+
+  } catch (err) {
+    console.error("Start test error:", err);
+  }
+}
 async function updateLanguage() {
   const lang = document.getElementById("languageInput").value;
   if (!lang) return;
@@ -737,6 +750,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (languageInput) {
     languageInput.addEventListener("input", checkReady);
+    languageInput.addEventListener("change", checkReady);
   }
 
   if (domain) {
