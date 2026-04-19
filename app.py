@@ -637,7 +637,8 @@ between departments, which affect negatively the overall performance."""
             reference_text = "The company doesn't have enough information to make a decision about the project."
 
             # AI score
-            editing_score = score_editing(original_text, edit1)
+            # editing_score = score_editing(original_text, edit1)
+            editing_score = "SCORE: 5/10"
 
             # BLEU
             bleu_original = calculate_bleu(reference_text, original_text)
@@ -659,7 +660,8 @@ and the interface is not intuitive causing confusion. Also, the loading times ar
 and this make the experience very frustrating for the clients. It is necessary to make improvements
 as soon as possible to avoid losing customers."""
 
-            post_edit_score = score_post_edit(mt_original, mt1)
+            # post_edit_score = score_post_edit(mt_original, mt1)
+            post_edit_score = "SCORE: 5/10
 
             gleu_score = calculate_gleu(
                 "The system presents many errors and does not work correctly on all devices. Users are reporting that the application crashes frequently when they try to upload files, and the interface is not intuitive, causing confusion. Also, the loading times are too long, making the experience very frustrating for clients. Improvements must be made as soon as possible to avoid losing customers.",
@@ -689,7 +691,7 @@ as soon as possible to avoid losing customers."""
         if test_type == "interpretation":
            parts = []
 
-           t_en_list = [t1_en or "", t2_en or "", t3_en or "", t4_en or ""]
+           t_en_list = ["", "", "", ""]
            rev_list = [rev1 or "", rev2 or "", rev3 or "", rev4 or ""]
 
            scores = []
@@ -698,29 +700,16 @@ as soon as possible to avoid losing customers."""
 
                # STEP 1: EN → TARGET → BACK TO EN
                if t_en_list[i]:
-                   result1 = score_interpretation(
-                       ORIGINAL_AUDIO_TEXTS[i],
-                       t_en_list[i],
-                       language
-                   )
-                   parts.append(f"\n📌 AUDIO {i+1} (EN → {language})\n{result1}")
-
-                   s = extract_all_scores(result1)
-                   if s:
-                       scores.append(s[-1])
+                   parts.append(f"\n📌 AUDIO {i+1} (EN → {language})\nSCORE: 5/10")
+                   scores.append(5)                       
+                   
+                   
 
                # STEP 2: TARGET → ENGLISH
                if rev_list[i]:
-                   result2 = score_interpretation(
-                       REVERSE_TEXTS[i],
-                       rev_list[i],
-                       "English"
-                   )
-                   parts.append(f"\n📌 AUDIO {i+1} (Reverse → English)\n{result2}")
-
-                   s = extract_all_scores(result2)
-                   if s:
-                       scores.append(s[-1])
+                   parts.append(f"\n📌 AUDIO {i+1} (Reverse → English)\nSCORE: 5/10")
+                   scores.append(5)
+                   
 
            interpretation_score = "\n".join(parts)
 

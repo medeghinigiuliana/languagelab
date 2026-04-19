@@ -213,7 +213,7 @@
 
 <!-- EMAIL -->
 <input type="email" name="email" placeholder="Your email" required>
-<select name="test_type" id="testType" onchange="showTest();" required>
+<select name="test_type" id="testType" onchange="showTest(); checkReady();" required>
   <option value="">Select Test Type</option>
   <option value="translation">Translation</option>
   <option value="editing">Editing</option>
@@ -586,21 +586,25 @@ let timers = {};
 function showTest() {
   const type = document.getElementById("testType").value;
 
-  // Hide all tests
+  // Hide all
   document.querySelectorAll('[id$="Test"]').forEach(el => {
     el.style.display = "none";
   });
 
-  if (!type) return;
-
   toggleLanguage();
-  checkReady();
 
   const section = document.getElementById(type + "Test");
-  if (section) {
+
+  if (!section) return;
+
+  if (type === "editing" || type === "post_editing") {
     section.style.display = "block";
-    section.scrollIntoView({ behavior: "smooth" });
+    document.getElementById("startTestBtn").style.display = "none";
+    return;
   }
+
+  // Other tests → wait for Start
+  section.style.display = "none";
 }
 
 // ------------------
@@ -699,15 +703,14 @@ function toggleLanguage() {
   const wrapper = document.getElementById("languageWrapper");
   const domainWrapper = document.getElementById("domainWrapper");
 
-  const needsLanguage = ["interpretation", "translation"];
-
-  // EXISTING LOGIC (unchanged)
-  if (needsLanguage.includes(type)) {
+  // Language needed only for interpretation + translation
+  if (type === "interpretation" || type === "translation") {
     wrapper.style.display = "block";
   } else {
     wrapper.style.display = "none";
   }
 
+  // Domain only for translation
   if (type === "translation") {
     domainWrapper.style.display = "block";
   } else {
@@ -725,23 +728,28 @@ document.addEventListener("DOMContentLoaded", function () {
   const domain = document.getElementById("domainSelect"); 
 
   function checkReady() {
+    const type = testType.value;
+    const lang = languageInput.value;
+    const dom = domain ? domain.value : "";
 
-    function checkReady() {
-      const type = testType.value;
-      const lang = languageInput.value;
-      const dom = domain ? domain.value : "";
-
-      if (
-        (type === "interpretation" && lang) ||
-        (type === "translation" && lang && dom) ||
-        type === "editing" ||
-        type === "post_editing"
-      ) {
-        startBtn.style.display = "block";
-      } else {
-        startBtn.style.display = "none";
-      }
+    // Editing → no requirements
+    if (type === "editing" || type === "post_editing") {
+      startBtn.style.display = "none";
+      return;
     }
+
+    if (type === "interpretation" && lang) {
+      startBtn.style.display = "block";
+      return;
+    }
+
+    if (type === "translation" && lang && dom) {
+      startBtn.style.display = "block";
+      return;
+    }
+
+    startBtn.style.display = "none";
+  }
 
   if (testType) {
     testType.addEventListener("change", function () {
@@ -764,6 +772,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   toggleLanguage();
+  checkReady();
 });
 
 // ------------------
