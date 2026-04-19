@@ -435,6 +435,45 @@ def score_post_edit(mt_text, edited):
     except:
         return "SCORE: 0/10"
 
+def score_translation_step(source, candidate, direction):
+    try:
+        if not candidate.strip():
+            return 0
+
+        prompt = f"""
+You are a professional translation evaluator.
+
+Direction: {direction}
+
+SOURCE:
+{source}
+
+CANDIDATE:
+{candidate}
+
+Evaluate:
+- Accuracy
+- Meaning preservation
+- Fluency
+- Grammar
+
+Return ONLY a number from 0 to 10.
+"""
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            temperature=0,
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        score = response.choices[0].message.content.strip()
+
+        numbers = re.findall(r'\d+', score)
+        return int(numbers[0]) if numbers else 0
+
+    except Exception as e:
+        print("Translation step scoring error:", e)
+        return 0
 # ---------------------------
 # ROUTES
 # ---------------------------
@@ -559,28 +598,29 @@ def submit():
         # TRANSLATION
 
         
+        # ---------------------------
+        # NEW TRANSLATION SCORING
+        # ---------------------------
         if test_type == "translation":
-            r = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role":"system","content":"""Evaluate translation quality.
+            domain = request.form.get("domain")
 
-                    1. Ensure all parts of the text are translated.
-                    2. If any section is missing, clearly state that the translation is incomplete.
-                    3. Evaluate accuracy, fluency, and terminology.
+            if not domain or domain not in DOMAIN_TESTS:
+                print("⚠️ Invalid or missing domain")
+                score1 = 0
+                score2 = 0
+                final_translation_score = 0
+            else:
+                step1_source = DOMAIN_TESTS[domain]["step1_en"]
+                step2_source = DOMAIN_TESTS[domain]["step2_en"]
 
-                    Return:
-                    FINAL_SCORE: X/10
-                    Explanation: Include both quality and whether the translation is complete or incomplete.
-                    """},
-                    {"role":"user","content":answer}
-                ]
-            )
-            translation_score = r.choices[0].message.content.strip()
+                score1 = score_translation_step(step1_source, step1, "EN → Target")
+                score2 = score_translation_step(step2_source, step2, "Target → EN")
 
-        bleu_improvement = 0
-        ter_score = 100
-        bleu_score = None
+                final_translation_score = round((score1 + score2) / 2, 2)
+
+            translation_score = f"""STEP 1 SCORE: {score1}/10
+            STEP 2 SCORE: {score2}/10
+            FINAL: {final_translation_score}/10"""
       
 
         # EDITING
@@ -736,7 +776,7 @@ as soon as possible to avoid losing customers."""
             final_score = editing_final_score
 
         elif test_type == "translation":
-            final_score = t_score
+            final_score = final_translation_score if 'final_translation_score' in locals() else 0
 
         elif test_type == "interpretation":
             final_score = i_score
