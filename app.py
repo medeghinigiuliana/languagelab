@@ -612,58 +612,17 @@ def submit():
         # TRANSLATION
 
         
-        # ---------------------------
-        # NEW TRANSLATION SCORING
-        # ---------------------------
-        if test_type == "translation":
-            domain = request.form.get("domain")
+       # ---------------------------
+       # TRANSLATION SCORING (TEMP DISABLED)
+       # ---------------------------
+       if test_type == "translation":
+           score1 = 5
+           score2 = 5
+           final_translation_score = 5
 
-            if not domain or domain not in DOMAIN_TESTS:
-                print("⚠️ Invalid or missing domain")
-                score1 = 0
-                score2 = 0
-                final_translation_score = 0
-            else:
-                step1_source = DOMAIN_TESTS[domain]["step1_en"]
-                step2_source = DOMAIN_TESTS[domain]["step2_en"]
-
-                try:
-                    combined_text = f"""
-                STEP 1:
-                {step1}
-
-                STEP 2:
-                {step2}
-                """
-
-                    if client:
-                        response = client.chat.completions.create(
-                            model="gpt-4o-mini",
-                            temperature=0,
-                            messages=[{
-                                "role": "user",
-                                "content": f"Score this translation (0-10):\n{combined_text}"
-                            }]
-                        )
-
-                        import re
-                        numbers = re.findall(r'\d+', response.choices[0].message.content)
-                        final_translation_score = int(numbers[0]) if numbers else 0
-
-                        score1 = final_translation_score
-                        score2 = final_translation_score
-
-                    else:
-                        score1 = score2 = final_translation_score = 0
-
-                except Exception as e:
-                    print("SCORING ERROR:", e)
-                    score1 = score2 = final_translation_score = 0
-
-            translation_score = f"""STEP 1 SCORE: {score1}/10
-            STEP 2 SCORE: {score2}/10
-            FINAL: {final_translation_score}/10"""
-      
+           translation_score = f"""STEP 1 SCORE: {score1}/10
+       STEP 2 SCORE: {score2}/10
+       FINAL: {final_translation_score}/10"""
 
         # EDITING
 
