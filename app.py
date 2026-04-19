@@ -33,8 +33,6 @@ except LookupError:
 
 from nltk.translate.bleu_score import sentence_bleu
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "dev-key")
 RECRUITER_USER = os.getenv("ADMIN_USER", "admin")
