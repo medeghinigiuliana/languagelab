@@ -661,7 +661,7 @@ and this make the experience very frustrating for the clients. It is necessary t
 as soon as possible to avoid losing customers."""
 
             # post_edit_score = score_post_edit(mt_original, mt1)
-            post_edit_score = "SCORE: 5/10
+            post_edit_score = "SCORE: 5/10"
 
             gleu_score = calculate_gleu(
                 "The system presents many errors and does not work correctly on all devices. Users are reporting that the application crashes frequently when they try to upload files, and the interface is not intuitive, causing confusion. Also, the loading times are too long, making the experience very frustrating for clients. Improvements must be made as soon as possible to avoid losing customers.",
