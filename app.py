@@ -563,6 +563,16 @@ def submit():
         gleu_score = None
         bleu_score = 0
         ter_score = 100
+        # ---------------------------
+        # SAFE DEFAULTS (DO NOT REMOVE)
+        # ---------------------------
+        final_translation_score = 0
+        score1 = 0
+        score2 = 0
+        i_score = 0
+
+        editing_score = "N/A"
+        post_edit_score = "N/A"
         email = request.form.get("email")
         first_name = request.form.get("first_name")
         last_name = request.form.get("last_name")
@@ -686,6 +696,11 @@ as soon as possible to avoid losing customers."""
         else:
             t1 = t2 = t3 = t4 = ""
             rev1 = rev2 = rev3 = rev4 = ""
+
+        t1_en = ""
+        t2_en = ""
+        t3_en = ""
+        t4_en = ""
 
 
 
