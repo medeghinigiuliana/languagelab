@@ -93,6 +93,19 @@ In addition to superior design, we are proud to offer a customer experience that
 Customer feedback has played a significant role in shaping this collection, guiding improvements in both design and usability. As a result, we have introduced features that enhance convenience while maintaining a refined aesthetic. From improved durability to thoughtful details, every aspect has been considered to provide a superior user experience.
 
 We are committed to delivering not only exceptional products but also outstanding service. With efficient delivery options, responsive support, and a customer-focused approach, we aim to build long-term relationships based on trust and satisfaction. This collection represents our continued dedication to innovation, quality, and customer value."""
+    },
+    "criminal_justice": {
+    "step1_en": """The suspect was taken into custody following an investigation conducted by local law enforcement authorities. According to official reports, the individual was identified as a person of interest after multiple witnesses provided statements linking them to the incident. Officers executed a search warrant at the suspect’s residence, where additional evidence was collected to support the case.
+
+During the arrest, the suspect was informed of their rights, including the right to remain silent and the right to legal representation. Authorities confirmed that the procedure was carried out in accordance with established legal protocols. The suspect was then transported to a detention facility, where they are currently being held pending further legal proceedings.
+
+Prosecutors are reviewing the evidence to determine the appropriate charges. A preliminary hearing is expected to take place within the coming days, during which a judge will evaluate whether sufficient evidence exists to proceed to trial. If convicted, the suspect could face significant penalties, depending on the severity of the charges and prior criminal history.""",
+
+    "step2_en": """Law enforcement officials responded to a reported incident involving a suspected violation of criminal law. Upon arrival at the scene, officers conducted an initial assessment and gathered statements from individuals present at the location. Based on the information obtained, authorities identified a potential suspect and initiated further investigative procedures.
+
+The individual was later detained for questioning and advised of their legal rights. During the interview process, investigators sought to clarify the sequence of events and determine the extent of the suspect’s involvement. Evidence collected during the investigation is currently being analyzed to establish a clear understanding of the case.
+
+Legal representatives may be appointed to ensure that the suspect’s rights are protected throughout the process. Depending on the outcome of the investigation, formal charges may be filed, leading to court proceedings. The case will ultimately be evaluated within the judicial system to determine responsibility and any applicable legal consequences."""
     }
 }
 
