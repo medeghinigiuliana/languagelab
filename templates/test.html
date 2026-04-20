@@ -437,15 +437,15 @@
     <p class="subtitle">You may listen up to 2 times</p>
 
     <div class="controls">
-        <button type="button" class="btn record" onclick="startRecording('audio1')">
+        <button type="button" class="btn-start" onclick="startRecording('audio1')">
           <span class="record-dot"></span> Record
         </button>
 
-        <button type="button" class="btn stop" onclick="stopRecording('audio1')">
+        <button type="button" class="btn-stop" onclick="stopRecording('audio1')">
           ⏹ Stop
         </button>
       </div>
-    </div>
+
     <p id="status-audio1" class="subtitle"></p>
     <p id="timer-audio1" class="subtitle timer"></p>
 
@@ -468,15 +468,15 @@
     </div>
 
     <div class="controls">
-        <button type="button" class="btn record" onclick="startRecording('rev1')">
+        <button type="button" class="btn-start" onclick="startRecording('rev1')">
           <span class="record-dot"></span> Record
         </button>
 
-        <button type="button" class="btn stop" onclick="stopRecording('rev1')">
+        <button type="button" class="btn-stop" onclick="stopRecording('rev1')">
           ⏹ Stop
         </button>
       </div>
-    </div>
+
     <p id="status-rev1" class="subtitle"></p>
     <p id="timer-rev1" class="subtitle timer"></p>
 
@@ -498,15 +498,15 @@
     <p class="subtitle">You may listen up to 2 times</p>
 
     <div class="controls">
-        <button type="button" class="btn record" onclick="startRecording('audio2')">
+        <button type="button" class="btn-start" onclick="startRecording('audio2')">
           <span class="record-dot"></span> Record
         </button>
 
-        <button type="button" class="btn stop" onclick="stopRecording('audio2')">
+        <button type="button" class="btn-stop" onclick="stopRecording('audio2')">
           ⏹ Stop
         </button>
       </div>
-    </div>
+
     <p id="status-audio2" class="subtitle"></p>
     <p id="timer-audio2" class="subtitle timer"></p>
 
@@ -529,15 +529,15 @@
     </div>
 
     <div class="controls">
-        <button type="button" class="btn record" onclick="startRecording('rev2')">
+        <button type="button" class="btn-start" onclick="startRecording('rev2')">
           <span class="record-dot"></span> Record
         </button>
 
-        <button type="button" class="btn stop" onclick="stopRecording('rev2')">
+        <button type="button" class="btn-stop" onclick="stopRecording('rev2')">
           ⏹ Stop
         </button>
       </div>
-    </div>
+
     <p id="status-rev2" class="subtitle"></p>
     <p id="timer-rev2" class="subtitle timer"></p>
 
@@ -559,15 +559,15 @@
     <p class="subtitle">You may listen up to 2 times</p>
 
     <div class="controls">
-        <button type="button" class="btn record" onclick="startRecording('audio3')">
+        <button type="button" class="btn-start" onclick="startRecording('audio3')">
           <span class="record-dot"></span> Record
         </button>
 
-        <button type="button" class="btn stop" onclick="stopRecording('audio3')">
+        <button type="button" class="btn-stop" onclick="stopRecording('audio3')">
           ⏹ Stop
         </button>
       </div>
-    </div>
+
     <p id="status-audio3" class="subtitle"></p>
     <p id="timer-audio3" class="subtitle timer"></p>
 
@@ -590,15 +590,15 @@
     </div>
 
     <div class="controls">
-        <button type="button" class="btn record" onclick="startRecording('rev3')">
+        <button type="button" class="btn-start" onclick="startRecording('rev3')">
           <span class="record-dot"></span> Record
         </button>
 
-        <button type="button" class="btn stop" onclick="stopRecording('rev3')">
+        <button type="button" class="btn-stop" onclick="stopRecording('rev3')">
           ⏹ Stop
         </button>
       </div>
-    </div>
+
     <p id="status-rev3" class="subtitle"></p>
     <p id="timer-rev3" class="subtitle timer"></p>
     <input type="hidden" name="rev_audio3" id="audioDatarev3">
@@ -619,15 +619,15 @@
     <p class="subtitle">You may listen up to 2 times</p>
 
     <div class="controls">
-        <button type="button" class="btn record" onclick="startRecording('audio4')">
+        <button type="button" class="btn-start" onclick="startRecording('audio4')">
           <span class="record-dot"></span> Record
         </button>
 
-        <button type="button" class="btn stop" onclick="stopRecording('audio4')">
+        <button type="button" class="btn-stop" onclick="stopRecording('audio4')">
           ⏹ Stop
         </button>
       </div>
-    </div>
+
     <p id="status-audio4" class="subtitle"></p>
     <p id="timer-audio4" class="subtitle timer"></p>
 
@@ -650,15 +650,15 @@
     </div>
 
     <div class="controls">
-        <button type="button" class="btn record" onclick="startRecording('rev4')">
+        <button type="button" class="btn-start" onclick="startRecording('rev4')">
           <span class="record-dot"></span> Record
         </button>
 
-        <button type="button" class="btn stop" onclick="stopRecording('rev4')">
+        <button type="button" class="btn-stop" onclick="stopRecording('rev4')">
           ⏹ Stop
         </button>
       </div>
-    </div>
+
     <p id="status-rev4" class="subtitle"></p>
     <p id="timer-rev4" class="subtitle timer"></p>
     <input type="hidden" name="rev_audio4" id="audioDatarev4">
@@ -882,6 +882,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   toggleLanguage();
   checkReady();
+
+  document.querySelectorAll('[id$="Test"]').forEach(el => {
+    el.style.display = "none";
+  });
 });
 
 // ------------------
