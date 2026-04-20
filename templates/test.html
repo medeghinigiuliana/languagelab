@@ -961,8 +961,13 @@ async function startRecording(id){
   }, 1000);
 
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
-    recorders[id] = new MediaRecorder(stream);
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    recorders[id] = new MediaRecorder(stream, {
+      mimeType: "audio/webm;codecs=opus",
+      audioBitsPerSecond: 32000
+    });
+
     chunks[id] = [];
 
     recorders[id].ondataavailable = e => chunks[id].push(e.data);
