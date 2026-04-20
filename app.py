@@ -43,20 +43,51 @@ RECRUITER_PASS = os.getenv("ADMIN_PASS", "novox123")
 # ------------------
 DOMAIN_TESTS = {
     "legal": {
-        "step1_en": "This Agreement shall remain in effect unless terminated by either party upon written notice.",
-        "step2_en": "Each party agrees to comply with all applicable laws and regulations in connection with this Agreement."
+        "step1_en": """This Agreement shall remain in effect unless terminated by either party upon written notice. 
+    The parties agree that all obligations outlined herein must be fulfilled in accordance with applicable laws and regulations. 
+    Any breach of the terms may result in immediate termination and potential legal action. Furthermore, all disputes arising 
+    from this Agreement shall be resolved through binding arbitration, unless otherwise required by law. Each party acknowledges 
+    that they have read and understood the terms and agree to be bound by them in full.""",
+
+        "step2_en": """Each party agrees to comply with all applicable laws and regulations in connection with this Agreement. 
+    This includes maintaining accurate records, adhering to confidentiality obligations, and ensuring that any third parties 
+    engaged in connection with this Agreement also comply with these requirements. Failure to comply may result in penalties, 
+    termination of the Agreement, or other legal consequences as determined by the governing authority."""
     },
     "medical": {
-        "step1_en": "The patient presented with symptoms of severe respiratory distress requiring immediate intervention.",
-        "step2_en": "Treatment must be administered promptly to avoid complications and ensure patient stability."
+        "step1_en": """The patient presented with symptoms of severe respiratory distress requiring immediate intervention. 
+    Upon examination, the medical team noted elevated heart rate, low oxygen saturation levels, and signs of fatigue. 
+    Emergency treatment was initiated, including oxygen therapy and intravenous medication. Continuous monitoring was required 
+    to assess the patient’s response to treatment and to prevent further complications. The patient’s medical history was also 
+    reviewed to determine any underlying conditions that could influence the treatment plan.""",
+
+        "step2_en": """Treatment must be administered promptly to avoid complications and ensure patient stability. 
+    Healthcare providers must follow established protocols and document all procedures accurately. Additionally, the patient 
+    should be informed about the treatment plan, potential risks, and expected outcomes. Proper follow-up care is essential to 
+    monitor recovery and prevent relapse, especially in cases involving chronic conditions or high-risk factors."""
     },
     "it": {
-        "step1_en": "The system encountered an unexpected error due to invalid input parameters during execution.",
-        "step2_en": "Developers should implement proper validation and logging mechanisms to improve debugging."
+        "step1_en": """The system encountered an unexpected error due to invalid input parameters during execution. 
+    This caused the application to crash and prevented users from completing their tasks. Developers must investigate the 
+    root cause of the issue, implement proper validation checks, and ensure that similar errors are handled gracefully in 
+    the future. Logging mechanisms should also be improved to capture detailed information about system failures.""",
+
+        "step2_en": """Developers should implement proper validation and logging mechanisms to improve debugging. 
+    This includes validating user inputs, handling exceptions effectively, and ensuring that error messages are clear and 
+    informative. Additionally, performance optimization and regular system testing should be conducted to maintain system 
+    reliability and enhance the overall user experience."""
     },
     "marketing": {
-        "step1_en": "Our new product line offers unmatched performance and style for modern consumers.",
-        "step2_en": "Take advantage of this limited-time promotion and elevate your everyday experience."
+        "step1_en": """Our new product line offers unmatched performance and style for modern consumers. 
+    Designed with innovation and quality in mind, these products cater to a wide range of customer needs and preferences. 
+    The marketing strategy focuses on highlighting key features, customer benefits, and competitive advantages. 
+    Campaigns will be executed across multiple channels, including social media, email marketing, and digital advertising, 
+    to maximize reach and engagement.""",
+
+        "step2_en": """Take advantage of this limited-time promotion and elevate your everyday experience. 
+    Customers are encouraged to explore the full range of products and benefit from exclusive discounts and offers. 
+    By leveraging targeted marketing strategies and personalized messaging, the company aims to increase customer 
+    loyalty and drive long-term growth. Continuous feedback will be collected to refine future campaigns and improve results."""
     }
 }
 
