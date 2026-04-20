@@ -368,6 +368,7 @@
     <h4>Step 2 — Translate into English</h4>
     <p id="step2Text"></p>
     <textarea name="step2_answer"></textarea>
+    <input type="hidden" name="step2_original" id="step2Original">
   </div>
 
 </div>
@@ -761,6 +762,7 @@ async function startTest() {
 
       document.getElementById("step1Text").innerText = data.step1_en || "Error loading text";
       document.getElementById("step2Text").innerText = data.step2_target || "Error loading text";
+      document.getElementById("step2Original").value = data.step2_en;
     }
 
     // Hide loading

@@ -43,51 +43,56 @@ RECRUITER_PASS = os.getenv("ADMIN_PASS", "novox123")
 # ------------------
 DOMAIN_TESTS = {
     "legal": {
-        "step1_en": """This Agreement shall remain in effect unless terminated by either party upon written notice. 
-    The parties agree that all obligations outlined herein must be fulfilled in accordance with applicable laws and regulations. 
-    Any breach of the terms may result in immediate termination and potential legal action. Furthermore, all disputes arising 
-    from this Agreement shall be resolved through binding arbitration, unless otherwise required by law. Each party acknowledges 
-    that they have read and understood the terms and agree to be bound by them in full.""",
+        "step1_en": """This Agreement shall remain in full force and effect unless terminated by either party in accordance with the provisions set forth herein. Notwithstanding any other clause contained in this document, either party may terminate this Agreement upon providing written notice at least thirty (30) days in advance, provided that such termination does not result in a breach of any outstanding obligations.
 
-        "step2_en": """Each party agrees to comply with all applicable laws and regulations in connection with this Agreement. 
-    This includes maintaining accurate records, adhering to confidentiality obligations, and ensuring that any third parties 
-    engaged in connection with this Agreement also comply with these requirements. Failure to comply may result in penalties, 
-    termination of the Agreement, or other legal consequences as determined by the governing authority."""
+In the event of a dispute arising out of or in connection with this Agreement, the parties agree to first attempt to resolve the matter through good faith negotiations. If no resolution is reached within a reasonable period of time, the dispute shall be submitted to binding arbitration in accordance with the rules of the American Arbitration Association. The decision rendered by the arbitrator shall be final and enforceable in any court of competent jurisdiction.
+
+Each party shall bear its own legal fees and expenses unless otherwise determined by the arbitrator. Furthermore, both parties agree to comply with all applicable laws and regulations, including those related to confidentiality, data protection, and intellectual property rights. Any violation of these obligations may result in immediate termination of this Agreement without prior notice.""",
+
+        "step2_en": """Each party acknowledges that all confidential information disclosed under this Agreement shall remain strictly protected and shall not be shared with any third party without prior written consent. This obligation shall continue for a period of five (5) years following the termination of the Agreement, regardless of the reason for termination. Confidential information includes, but is not limited to, business strategies, financial data, proprietary processes, and any other materials designated as confidential.
+
+In addition, both parties agree to implement appropriate safeguards to prevent unauthorized access, disclosure, or misuse of such information. Failure to comply with these obligations may result in legal action, including claims for damages and injunctive relief. The parties further agree that any breach of confidentiality may cause irreparable harm that cannot be adequately compensated by monetary damages alone.
+
+This Agreement shall be governed by and interpreted in accordance with the laws of the State of California. Any disputes that cannot be resolved through negotiation shall be submitted to arbitration in the appropriate jurisdiction. The parties expressly waive their right to a trial by jury and agree to accept the final decision of the arbitrator as binding and enforceable."""
     },
     "medical": {
-        "step1_en": """The patient presented with symptoms of severe respiratory distress requiring immediate intervention. 
-    Upon examination, the medical team noted elevated heart rate, low oxygen saturation levels, and signs of fatigue. 
-    Emergency treatment was initiated, including oxygen therapy and intravenous medication. Continuous monitoring was required 
-    to assess the patient’s response to treatment and to prevent further complications. The patient’s medical history was also 
-    reviewed to determine any underlying conditions that could influence the treatment plan.""",
+        "step1_en": """The patient presented to the emergency department with symptoms of severe respiratory distress, including shortness of breath, chest tightness, and persistent coughing. Upon initial evaluation, the medical team observed an elevated heart rate, reduced oxygen saturation levels, and visible signs of fatigue and discomfort. The patient reported that symptoms had progressively worsened over the previous 48 hours, despite the use of prescribed medication.
 
-        "step2_en": """Treatment must be administered promptly to avoid complications and ensure patient stability. 
-    Healthcare providers must follow established protocols and document all procedures accurately. Additionally, the patient 
-    should be informed about the treatment plan, potential risks, and expected outcomes. Proper follow-up care is essential to 
-    monitor recovery and prevent relapse, especially in cases involving chronic conditions or high-risk factors."""
+Immediate intervention was required to stabilize the patient’s condition. Oxygen therapy was administered, and intravenous medication was initiated to address inflammation and improve airway function. Continuous monitoring of vital signs was implemented, including heart rate, blood pressure, and oxygen levels, in order to assess the patient’s response to treatment and detect any signs of deterioration.
+
+Further diagnostic testing was ordered, including blood analysis, chest imaging, and pulmonary function assessments. The patient’s medical history was carefully reviewed to identify any underlying conditions, such as asthma or chronic respiratory disease, that could influence the treatment plan. Based on the findings, the medical team developed a comprehensive care strategy aimed at stabilizing the patient and preventing potential complications.""",
+
+        "step2_en": """The patient was admitted to the hospital following a sudden onset of symptoms, including dizziness, shortness of breath, and irregular heartbeat. Upon arrival, initial assessments indicated potential cardiovascular complications, requiring immediate diagnostic evaluation. Medical staff conducted a series of tests, including blood work, electrocardiography, and imaging studies to determine the underlying cause of the condition.
+
+Treatment was initiated promptly, involving the administration of medication to stabilize heart rhythm and improve circulation. The patient was placed under continuous observation to monitor vital signs and detect any changes in condition. Throughout the treatment process, adjustments were made based on the patient’s response and evolving clinical findings.
+
+A thorough review of the patient’s medical history revealed pre-existing conditions that may have contributed to the current episode. As a result, the care team developed a comprehensive treatment plan aimed not only at addressing the immediate symptoms but also at preventing future complications. Follow-up care and lifestyle recommendations were discussed to ensure long-term health and recovery."""
     },
     "it": {
-        "step1_en": """The system encountered an unexpected error due to invalid input parameters during execution. 
-    This caused the application to crash and prevented users from completing their tasks. Developers must investigate the 
-    root cause of the issue, implement proper validation checks, and ensure that similar errors are handled gracefully in 
-    the future. Logging mechanisms should also be improved to capture detailed information about system failures.""",
+        "step1_en": """The system experienced a critical failure during peak usage hours, resulting in a temporary service outage that affected a significant number of users. Initial reports indicated that requests to the main API endpoint were timing out, preventing data from being retrieved and processed correctly. As a result, several core functionalities of the platform became unavailable, including user authentication and data synchronization features.
 
-        "step2_en": """Developers should implement proper validation and logging mechanisms to improve debugging. 
-    This includes validating user inputs, handling exceptions effectively, and ensuring that error messages are clear and 
-    informative. Additionally, performance optimization and regular system testing should be conducted to maintain system 
-    reliability and enhance the overall user experience."""
+Developers began investigating the issue by reviewing system logs and monitoring server performance metrics. Early findings suggested that the problem was related to inefficient handling of concurrent requests, which led to excessive load on the backend infrastructure. Additionally, certain database queries were identified as potential bottlenecks, contributing to increased response times and system instability.
+
+To address these issues, the engineering team implemented temporary fixes, including load balancing adjustments and optimization of key database operations. Long-term solutions are being considered, such as improving error handling mechanisms, introducing retry logic for failed requests, and enhancing overall system scalability. Ensuring system reliability and minimizing downtime will be essential to maintaining user trust and supporting future growth of the platform.""",
+
+        "step2_en": """During a recent deployment, the system encountered unexpected issues that resulted in degraded performance across multiple services. Users reported slow response times, failed transactions, and occasional system errors when attempting to complete standard operations. Initial analysis suggested that the issue may have originated from recent configuration changes introduced during the update.
+
+Engineers conducted a detailed investigation by analyzing system logs, monitoring traffic patterns, and reviewing recent code changes. It was determined that certain services were not scaling efficiently under increased load, leading to resource exhaustion and service instability. Additionally, insufficient error handling mechanisms caused cascading failures in dependent systems.
+
+To mitigate these issues, the team implemented a rollback of the affected components and introduced temporary fixes to stabilize performance. Long-term improvements are currently being developed, including enhanced monitoring, better load distribution strategies, and more robust error handling processes. These measures aim to improve system resilience and ensure a more reliable experience for users."""
     },
     "marketing": {
-        "step1_en": """Our new product line offers unmatched performance and style for modern consumers. 
-    Designed with innovation and quality in mind, these products cater to a wide range of customer needs and preferences. 
-    The marketing strategy focuses on highlighting key features, customer benefits, and competitive advantages. 
-    Campaigns will be executed across multiple channels, including social media, email marketing, and digital advertising, 
-    to maximize reach and engagement.""",
+        "step1_en": """Discover a new standard of everyday luxury with our latest product collection, thoughtfully designed to combine style, functionality, and durability. Each item has been carefully crafted using premium materials, ensuring not only an elegant appearance but also long-lasting performance. Our design team has focused on creating versatile products that seamlessly adapt to the needs of modern consumers.
 
-        "step2_en": """Take advantage of this limited-time promotion and elevate your everyday experience. 
-    Customers are encouraged to explore the full range of products and benefit from exclusive discounts and offers. 
-    By leveraging targeted marketing strategies and personalized messaging, the company aims to increase customer 
-    loyalty and drive long-term growth. Continuous feedback will be collected to refine future campaigns and improve results."""
+Whether you are heading to work, traveling, or simply managing your daily routine, our collection offers practical solutions without compromising on aesthetics. Attention to detail is evident in every aspect, from the precision of the stitching to the selection of high-quality finishes. This commitment to excellence reflects our dedication to delivering products that meet the highest standards.
+
+In addition to superior design, we are proud to offer a customer experience that prioritizes satisfaction and convenience. With fast shipping options, responsive customer support, and a flexible return policy, we aim to make every interaction with our brand as smooth as possible. Take advantage of our limited-time promotion and experience the difference for yourself. Elevate your daily essentials with products designed to perform and impress.""",
+
+        "step2_en": """Our latest collection is designed to meet the evolving needs of modern consumers who seek both functionality and sophistication in their everyday products. By combining innovative design with high-quality materials, we have created a range of items that deliver both performance and style. Each product has been carefully developed to ensure versatility, allowing it to adapt seamlessly to different lifestyles and environments.
+
+Customer feedback has played a significant role in shaping this collection, guiding improvements in both design and usability. As a result, we have introduced features that enhance convenience while maintaining a refined aesthetic. From improved durability to thoughtful details, every aspect has been considered to provide a superior user experience.
+
+We are committed to delivering not only exceptional products but also outstanding service. With efficient delivery options, responsive support, and a customer-focused approach, we aim to build long-term relationships based on trust and satisfaction. This collection represents our continued dedication to innovation, quality, and customer value."""
     }
 }
 
@@ -519,7 +524,7 @@ Return ONLY a number from 0 to 10.
         import re
         numbers = re.findall(r'\d+', score_text)
 
-        return int(numbers[0]) if numbers else 0
+        return max(0, min(10, int(numbers[0]))) if numbers else 0
 
     except Exception as e:
         print("❌ Translation scoring error:", e)
@@ -659,13 +664,24 @@ def submit():
        # TRANSLATION SCORING (TEMP DISABLED)
        # ---------------------------
         if test_type == "translation":
-            score1 = 5
-            score2 = 5
-            final_translation_score = 5
+            domain = request.form.get("domain")
 
-            translation_score = f"""STEP 1 SCORE: {score1}/10
+            if domain in DOMAIN_TESTS:
+               step1_en = DOMAIN_TESTS[domain]["step1_en"]
+               step2_en = DOMAIN_TESTS[domain]["step2_en"]
+
+               score1 = score_translation_step(step1_en, step1, f"EN → {language}")
+               score2 = score_translation_step(step2_en, step2, f"{language} → EN")
+
+               final_translation_score = round((score1 + score2) / 2, 2)
+
+               translation_score = f"""
+        STEP 1 SCORE: {score1}/10
         STEP 2 SCORE: {score2}/10
-        FINAL: {final_translation_score}/10"""
+        FINAL: {final_translation_score}/10
+        """
+            else:
+                final_translation_score = 0
 
         # EDITING
 
