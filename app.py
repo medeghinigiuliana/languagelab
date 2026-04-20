@@ -297,6 +297,15 @@ def extract_all_scores(text):
     except:
         return []
 
+def get_score(text):
+    if not text:
+        return 0
+    try:
+        scores = extract_all_scores(text)
+        return scores[-1] if scores else 0
+    except:
+        return 0
+
 def decode_audio(base64_audio):
     try:
         header, encoded = base64_audio.split(",", 1)
@@ -397,7 +406,7 @@ def process_audio(base64_audio):
 # ---------------------------
 def score_interpretation(original, interpreted, language):
     try:
-        if not interpreted.strip():
+        if not interpreted or not interpreted.strip():
             return "SCORE: 0/10\nExplanation: No response provided."
 
         response = client.chat.completions.create(
@@ -710,7 +719,7 @@ between departments, which affect negatively the overall performance."""
 
             # AI score
             # editing_score = score_editing(original_text, edit1)
-            editing_score = "SCORE: 5/10"
+            editing_score = score_editing(original_text, edit1)
 
             # BLEU
             bleu_original = calculate_bleu(reference_text, original_text)
@@ -733,7 +742,7 @@ and this make the experience very frustrating for the clients. It is necessary t
 as soon as possible to avoid losing customers."""
 
             # post_edit_score = score_post_edit(mt_original, mt1)
-            post_edit_score = "SCORE: 5/10"
+            post_edit_score = score_post_edit(mt_original, mt1)
 
             gleu_score = calculate_gleu(
                 "The system presents many errors and does not work correctly on all devices. Users are reporting that the application crashes frequently when they try to upload files, and the interface is not intuitive, causing confusion. Also, the loading times are too long, making the experience very frustrating for clients. Improvements must be made as soon as possible to avoid losing customers.",
@@ -766,48 +775,83 @@ as soon as possible to avoid losing customers."""
 
         # INTERPRETATION
         if test_type == "interpretation":
-           parts = []
 
-           t_en_list = ["", "", "", ""]
-           rev_list = [rev1 or "", rev2 or "", rev3 or "", rev4 or ""]
+            parts = []
+            scores = []
 
-           scores = []
+            t_list = [t1, t2, t3, t4]
+            rev_list = [rev1, rev2, rev3, rev4]
 
-           for i in range(4):
+            for i in range(4):
 
-               # STEP 1: EN → TARGET → BACK TO EN
-               if t_en_list[i]:
-                   parts.append(f"\n📌 AUDIO {i+1} (EN → {language})\nSCORE: 5/10")
-                   scores.append(5)                       
-                   
-                   
+                original_en = ORIGINAL_AUDIO_TEXTS[i]
 
-               # STEP 2: TARGET → ENGLISH
-               if rev_list[i]:
-                   parts.append(f"\n📌 AUDIO {i+1} (Reverse → English)\nSCORE: 5/10")
-                   scores.append(5)
-                   
+                # -------------------
+                # STEP 1 (EN → TARGET → EN)
+                # -------------------
+                if t_list[i]:
+                    translated_back = translate_to_english(t_list[i])
 
-           interpretation_score = "\n".join(parts)
+                    if not translated_back:
+                        parts.append(f"\n📌 AUDIO {i+1} (EN → {language})")
+                        parts.append("SCORE: 0/10\nExplanation: Could not process response.")
+                        scores.append(0)
+                        continue
 
-           valid_scores = [s for s in scores if s > 0]
+                    score_text = score_interpretation(
+                        original_en,
+                        translated_back,
+                        language
+                    )
 
-           if valid_scores:
-               i_score = round(sum(valid_scores) / len(valid_scores), 2)
-           else:
-               i_score = 0
+                    parts.append(f"\n📌 AUDIO {i+1} (EN → {language})")
+                    parts.append(score_text)
 
-        # SCORES
-        def get_score(text):
-            scores = extract_all_scores(text)
-            return scores[-1] if scores else 0
+                    score_value = get_score(score_text)
+                    scores.append(score_value)
+
+                    if i == 0: t1_en = translated_back
+                    elif i == 1: t2_en = translated_back
+                    elif i == 2: t3_en = translated_back
+                    elif i == 3: t4_en = translated_back
+
+                # -------------------
+                # STEP 2 (TARGET → EN)
+                # -------------------
+                if rev_list[i]:
+                    score_text = score_interpretation(
+                        REVERSE_TEXTS[i],
+                        rev_list[i],
+                        language
+                    )
+
+                    parts.append(f"\n📌 AUDIO {i+1} (Reverse → English)")
+                    parts.append(score_text)
+
+                    score_value = get_score(score_text)
+                    scores.append(score_value)
+
+            interpretation_score = "\n".join(parts)
+
+            valid_scores = [s for s in scores if s > 0]
+            if not scores:
+                i_score = 0
+
+            if valid_scores:
+                i_score = round(sum(valid_scores) / len(valid_scores), 2)
+            else:
+                i_score = 0
+
+        # ---------------------------
+        # SCORE CALCULATION
+        # ---------------------------
 
         ai_component = None
         bleu_component = None
         ter_component = None
 
         t_score = get_score(translation_score)
-        
+
         e_score = get_score(editing_score)
         if test_type == "editing" and original_text:
             e_score = apply_completion_penalty(original_text, edit1, e_score)
@@ -821,7 +865,7 @@ as soon as possible to avoid losing customers."""
             ai_component = round(e_score * 0.6, 2)
             bleu_component = round(bleu_bonus * 0.2, 2)
             ter_component = round(ter_scaled * 0.2, 2)
-            
+    
             editing_final_score = (
                 ai_component +
                 bleu_component +
@@ -831,9 +875,12 @@ as soon as possible to avoid losing customers."""
         p_score = get_score(post_edit_score)
         if test_type == "post_editing" and mt_original:
             p_score = apply_completion_penalty(mt_original, mt1, p_score)
+
         final_score = None
 
-
+        # ---------------------------
+        # FINAL SCORE SELECTION
+        # ---------------------------
         if test_type == "post_editing":
             final_score = combine_scores(p_score, gleu_score or 0)
 
@@ -847,6 +894,7 @@ as soon as possible to avoid losing customers."""
             final_score = i_score
 
         final_score = final_score if final_score is not None else 0
+       
 
         # ---------------------------
         # AI DETECTION
