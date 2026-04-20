@@ -158,6 +158,10 @@
 
 <div class="container">
 
+<div id="loadingIndicator" style="display:none; text-align:center; margin-top:20px;">
+  <p>⏳ Preparing your test...</p>
+</div>
+
 <div style="text-align:center; margin-bottom:20px;">
   <img src="{{ url_for('static', filename='images/logo.png') }}"
        style="max-height:150px; width:auto;">
@@ -620,16 +624,13 @@ async function startTest() {
     return;
   }
 
+  document.getElementById("loadingIndicator").style.display = "block";
+
   // Hide all tests
   document.querySelectorAll('[id$="Test"]').forEach(el => {
     el.style.display = "none";
   });
 
-  const section = document.getElementById(type + "Test");
-  if (section) {
-    section.style.display = "block";
-    section.scrollIntoView({ behavior: "smooth" });
-  }
   
     try {
 
@@ -656,6 +657,7 @@ async function startTest() {
       console.log("API RESPONSE:", data);
 
       if (data.error) {
+        document.getElementById("loadingIndicator").style.display = "none";
         alert(data.error);
         return;
       }
@@ -664,7 +666,17 @@ async function startTest() {
       document.getElementById("step2Text").innerText = data.step2_target || "Error loading text";
     }
 
+    // Hide loading
+    document.getElementById("loadingIndicator").style.display = "none";
+
+    // Show test AFTER data is ready
+    const section = document.getElementById(type + "Test");
+    if (section) {
+      section.style.display = "block";
+      section.scrollIntoView({ behavior: "smooth" });
+    }
   } catch (err) {
+    document.getElementById("loadingIndicator").style.display = "none";
     console.error("Start test error:", err);
   }
 }
