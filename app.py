@@ -303,8 +303,8 @@ def get_score(text):
     if not text:
         return 0
     try:
-        scores = extract_all_scores(text)
-        return scores[-1] if scores else 0
+        match = re.search(r'(\d+(\.\d+)?)/10', text)
+        return float(match.group(1)) if match else 0
     except:
         return 0
 
@@ -868,10 +868,28 @@ as soon as possible to avoid losing customers."""
             bleu_component = round(bleu_bonus * 0.2, 2)
             ter_component = round(ter_scaled * 0.2, 2)
     
-            editing_final_score = (
-                ai_component +
-                bleu_component +
-                ter_component
+            # ---------------------------
+            # COMPLETENESS PENALTY
+            # ---------------------------
+            completeness_penalty = 1.0
+
+            if original_text and edit1:
+                ratio = len(edit1.split()) / len(original_text.split())
+                if ratio < 0.6:
+                    completeness_penalty = 0.5
+            elif ratio < 0.85:
+                completeness_penalty = 0.75
+
+            # ---------------------------
+            # FINAL EDITING SCORE
+            # ---------------------------
+            editing_final_score = round(
+                (
+                    (e_score * 0.6) +
+                    (bleu_bonus * 0.2) +
+                    (ter_scaled * 0.2)
+                ) * completeness_penalty,
+                2
             )
 
         p_score = get_score(post_edit_score)
@@ -884,7 +902,15 @@ as soon as possible to avoid losing customers."""
         # FINAL SCORE SELECTION
         # ---------------------------
         if test_type == "post_editing":
-            final_score = combine_scores(p_score, gleu_score or 0)
+            gleu_scaled = (gleu_score or 0) * 10
+            ter_scaled = max(0, 10 - (ter_score / 10))
+
+            final_score = round(
+                (p_score * 0.5) +
+                (gleu_scaled * 0.3) +
+                (ter_scaled * 0.2),
+                2
+            )
 
         elif test_type == "editing":
             final_score = editing_final_score

@@ -312,6 +312,25 @@
 <div class="section">
   <h4>Evaluation & Score</h4>
   <pre>{{ r.editing_score or 'No feedback available' }}</pre>
+  <div class="section">
+  <h4>Score Breakdown</h4>
+
+  <div class="metrics">
+    <div class="metric-box">
+      <div class="metric-title">AI Score</div>
+      <div class="metric-value">{{ r.ai_component or '-' }}</div>
+    </div>
+
+    <div class="metric-box">
+      <div class="metric-title">BLEU Component</div>
+      <div class="metric-value">{{ r.bleu_component or '-' }}</div>
+    </div>
+
+    <div class="metric-box">
+      <div class="metric-title">TER Component</div>
+      <div class="metric-value">{{ r.ter_component or '-' }}</div>
+    </div>
+  </div>
 </div>
 
 
@@ -338,6 +357,25 @@ as soon as possible to avoid losing customers.
 <div class="section">
   <h4>Evaluation & Score</h4>
   <pre>{{ r.post_edit_score or 'No feedback available' }}</pre>
+  <div class="section">
+  <h4>Score Breakdown</h4>
+
+  <div class="metrics">
+    <div class="metric-box">
+      <div class="metric-title">AI Score</div>
+      <div class="metric-value">{{ r.ai_component or '-' }}</div>
+    </div>
+
+    <div class="metric-box">
+      <div class="metric-title">BLEU Component</div>
+      <div class="metric-value">{{ r.bleu_component or '-' }}</div>
+    </div>
+
+    <div class="metric-box">
+      <div class="metric-title">TER Component</div>
+      <div class="metric-value">{{ r.ter_component or '-' }}</div>
+    </div>
+  </div>
 </div>
 
 
