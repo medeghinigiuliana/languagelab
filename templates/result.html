@@ -227,7 +227,25 @@
   </pre>
 
 </div>
+
+<div class="section">
+  <h4>Step 1 — Original (English)</h4>
+  <pre>{{ r.step1_original or '-' }}</pre>
+
+  <h4>Step 1 — Candidate Answer</h4>
+  <pre>{{ r.step1_answer or '-' }}</pre>
+</div>
+
+<div class="section">
+  <h4>Step 2 — Original ({{ r.language }})</h4>
+  <pre>{{ r.step2_original or '-' }}</pre>
+
+  <h4>Step 2 — Candidate Answer</h4>
+  <pre>{{ r.step2_answer or '-' }}</pre>
+</div>
 {% endif %}
+
+
 
 {% if r.test_type == "interpretation" %}
 
