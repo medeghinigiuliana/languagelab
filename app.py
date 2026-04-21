@@ -641,6 +641,7 @@ def submit():
         post_edit_score = "N/A"
         step1_original = ""
         step2_original = ""
+        flag = "OK"
         email = request.form.get("email")
         first_name = request.form.get("first_name")
         last_name = request.form.get("last_name")
@@ -991,12 +992,16 @@ as soon as possible to avoid losing customers."""
         # ---------------------------
         # AI DETECTION
         # ---------------------------
+        ai_score = 0
+        
         if candidate_translation:
             ai_score = detect_ai(candidate_translation)
             if ai_score > 0.7:
                 flag = "⚠️ AI Suspected"
 
         status = get_status(final_score)
+
+        flag = flag if 'flag' in locals() else "OK"
         
         eastern = pytz.timezone("America/New_York")
         created_at = datetime.now(eastern).strftime("%Y-%m-%d %H:%M:%S")
