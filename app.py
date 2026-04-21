@@ -514,6 +514,15 @@ def score_translation_step(source, candidate, direction):
     except:
         return 0
 
+def score_translation_step(source, candidate, direction):
+    try:
+        if not candidate or not candidate.strip():
+            return 0
+        return 5
+    except:
+        return 0
+
+
 def detect_suspicious_behavior(original, answer):
     if not original or not answer:
         return False
@@ -528,52 +537,8 @@ def detect_suspicious_behavior(original, answer):
         return True
 
     return False
-        
-        if not client:
-            print("⚠️ OpenAI client not initialized")
-            return 0
 
-        prompt = f"""
-You are a professional translation evaluator.
-
-Direction: {direction}
-
-SOURCE:
-{source}
-
-CANDIDATE:
-{candidate}
-
-Evaluate:
-- Accuracy
-- Meaning preservation
-- Fluency
-- Grammar
-
-Return ONLY a number from 0 to 10.
-"""
-
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            temperature=0,
-            messages=[{"role": "user", "content": prompt}]
-        )
-
-        
-        if not response or not response.choices:
-            print("⚠️ Empty response from OpenAI")
-            return 0
-
-        score_text = response.choices[0].message.content.strip()
-
-        import re
-        numbers = re.findall(r'\d+', score_text)
-
-        return max(0, min(10, int(numbers[0]))) if numbers else 0
-
-    except Exception as e:
-        print("❌ Translation scoring error:", e)
-        return 0# ---------------------------
+# ---------------------------
 # ROUTES
 # ---------------------------
 @app.route("/")
@@ -1032,7 +997,10 @@ as soon as possible to avoid losing customers."""
         if candidate_translation:
             ai_score = detect_ai(candidate_translation)
             if ai_score > 0.7:
-                flag = "⚠️ AI Suspected"
+                if "Suspicious" in flag:
+                    flag += " + AI"
+                else:
+                    flag = "⚠️ AI Suspected"
 
         status = get_status(final_score)
 
