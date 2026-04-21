@@ -245,7 +245,7 @@
 </div>
 {% endif %}
 {% if not success %}
-<form method="POST" action="/submit">
+<form method="POST" action="/submit" onsubmit="isSubmitting = true;">
 <input type="hidden" name="violations" id="violations" value="0">
 
 <!-- NAME -->
@@ -717,9 +717,15 @@
 <script>
 
 let violationCount = 0;
+let isSubmitting = false;
+
+// disable detection on success page
+if (window.location.search.includes("success=1")) {
+  isSubmitting = true;
+}
 
 document.addEventListener("visibilitychange", () => {
-  if (document.hidden) {
+  if (document.hidden && !isSubmitting) {
     violationCount++;
 
     alert("⚠️ Leaving the test window is not allowed.");
