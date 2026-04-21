@@ -683,87 +683,81 @@ def submit():
    
         # TRANSLATION
 
-        
-       # ---------------------------
-       # TRANSLATION SCORING (TEMP DISABLED)
-       # ---------------------------
+
+        # ---------------------------
+        # TRANSLATION SCORING (UPGRADED)
+        # ---------------------------
         if test_type == "translation":
             domain = request.form.get("domain")
 
             if domain in DOMAIN_TESTS:
-               step1_en = DOMAIN_TESTS[domain]["step1_en"]
-               step2_en = DOMAIN_TESTS[domain]["step2_en"]
+                step1_en = DOMAIN_TESTS[domain]["step1_en"]
+                step2_en = DOMAIN_TESTS[domain]["step2_en"]
 
-               # ---------------------------
-               # TRANSLATION SCORING (UPGRADED)
-               # ---------------------------
-               if test_type == "translation":
-                   domain = request.form.get("domain")
+                score1 = 0
+                score2 = 0
+                round_trip_score = 0
 
-                   if domain in DOMAIN_TESTS:
-                       step1_en = DOMAIN_TESTS[domain]["step1_en"]
-                       step2_en = DOMAIN_TESTS[domain]["step2_en"]
+                # ---------------------------
+                # LENGTH VALIDATION (ANTI-CHEAT)
+                # ---------------------------
+                def is_valid_length(original, answer):
+                    try:
+                        if not original or not answer:
+                            return False
+                        ratio = len(answer.split()) / len(original.split())
+                        return 0.5 <= ratio <= 1.8
+                    except:
+                        return False
 
-                       # ---------------------------
-                       # LENGTH VALIDATION (ANTI-CHEAT)
-                       # ---------------------------
-                       def is_valid_length(original, answer):
-                           try:
-                              if not original or not answer:
-                                  return False
-                              ratio = len(answer.split()) / len(original.split())
-                              return 0.5 <= ratio <= 1.8
-                           except:
-                              return False
+                if not step1 or not is_valid_length(step1_en, step1):
+                    score1 = 0
+                else:
+                    score1 = score_translation_step(step1_en, step1, f"EN → {language}")
 
-                       if not is_valid_length(step1_en, step1):
-                           score1 = 0
-                       else:
-                           score1 = score_translation_step(step1_en, step1, f"EN → {language}")
+                if not step2 or not is_valid_length(step2_en, step2):
+                    score2 = 0
+                else:
+                    score2 = score_translation_step(step2_en, step2, f"{language} → EN")
 
-                       if not is_valid_length(step2_en, step2):
-                           score2 = 0
-                       else:
-                           score2 = score_translation_step(step2_en, step2, f"{language} → EN")
+                # ---------------------------
+                # ROUND-TRIP CONSISTENCY
+                # ---------------------------
+                round_trip_score = 0
 
-                       # ---------------------------
-                       # ROUND-TRIP CONSISTENCY
-                       # ---------------------------
-                       round_trip_score = 0
+                try:
+                    if step1:
+                        back_translation = translate_to_english(step1)
 
-                       try:
-                           if step1:
-                               back_translation = translate_to_english(step1)
+                        if back_translation:
+                            consistency_eval = score_interpretation(
+                                step1_en,
+                                back_translation,
+                                language
+                            )
+                            round_trip_score = get_score(consistency_eval)
+                except:
+                    round_trip_score = 0
 
-                               if back_translation:
-                                   consistency_eval = score_interpretation(
-                                       step1_en,
-                                       back_translation,
-                                       language
-                                   )
-                                   round_trip_score = get_score(consistency_eval)
-                       except:
-                           round_trip_score = 0
+                # ---------------------------
+                # FINAL SCORE (WEIGHTED)
+                # ---------------------------
+                final_translation_score = round(
+                    (score1 * 0.4) +
+                    (score2 * 0.4) +
+                    (round_trip_score * 0.2),
+                    2
+                )
 
-                      # ---------------------------
-                      # FINAL SCORE (WEIGHTED)
-                      # ---------------------------
-                      final_translation_score = round(
-                          (score1 * 0.4) +
-                          (score2 * 0.4) +
-                          (round_trip_score * 0.2),
-                          2
-                      )
+                translation_score = f"""
+STEP 1 SCORE: {score1}/10
+STEP 2 SCORE: {score2}/10
+CONSISTENCY: {round_trip_score}/10
 
-                      translation_score = f"""
-               STEP 1 SCORE: {score1}/10
-               STEP 2 SCORE: {score2}/10
-               CONSISTENCY: {round_trip_score}/10
-
-               FINAL: {final_translation_score}/10
-               """
-                   else:
-                       final_translation_score = 0
+FINAL: {final_translation_score}/10
+"""
+            else:
+                final_translation_score = 0
 
 
         # EDITING
