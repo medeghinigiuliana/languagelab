@@ -35,7 +35,7 @@ except LookupError:
 from nltk.translate.bleu_score import sentence_bleu
 
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024
 app.secret_key = os.getenv("SECRET_KEY", "dev-key")
 RECRUITER_USER = os.getenv("ADMIN_USER", "admin")
 RECRUITER_PASS = os.getenv("ADMIN_PASS", "novox123")
