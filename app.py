@@ -507,9 +507,12 @@ def score_post_edit(mt_text, edited):
 
 def score_translation_step(source, candidate, direction):
     try:
-        
         if not candidate or not candidate.strip():
             return 0
+
+        return 5
+    except:
+        return 0
 
 def detect_suspicious_behavior(original, answer):
     if not original or not answer:
