@@ -164,6 +164,10 @@ def init_db():
         ("t3_en", "TEXT"),
         ("t4_en", "TEXT"),
         ("flag", "TEXT"),
+        ("step1_original", "TEXT"),
+        ("step2_original", "TEXT"),
+        ("step1_answer", "TEXT"),
+        ("step2_answer", "TEXT"),
         ("rev_transcription1", "TEXT"),
         ("rev_transcription2", "TEXT"),
         ("rev_transcription3", "TEXT"),
@@ -588,6 +592,8 @@ def get_translation():
 
             step1_en = DOMAIN_TESTS[domain]["step1_en"]
             step2_en = DOMAIN_TESTS[domain]["step2_en"]
+            step1_original = step1_en
+            step2_original = step2_en
 
             step2_target = translate_to_target(step2_en, language)
 
@@ -633,6 +639,8 @@ def submit():
 
         editing_score = "N/A"
         post_edit_score = "N/A"
+        step1_original = ""
+        step2_original = ""
         email = request.form.get("email")
         first_name = request.form.get("first_name")
         last_name = request.form.get("last_name")
@@ -693,6 +701,8 @@ def submit():
             if domain in DOMAIN_TESTS:
                 step1_en = DOMAIN_TESTS[domain]["step1_en"]
                 step2_en = DOMAIN_TESTS[domain]["step2_en"]
+                step1_original = step1_en
+                step2_original = step2_en
 
                 score1 = 0
                 score2 = 0
@@ -928,10 +938,11 @@ as soon as possible to avoid losing customers."""
 
             if original_text and edit1:
                 ratio = len(edit1.split()) / len(original_text.split())
+
                 if ratio < 0.6:
                     completeness_penalty = 0.5
-            elif ratio < 0.85:
-                completeness_penalty = 0.75
+                elif ratio < 0.85:
+                    completeness_penalty = 0.75
 
             # ---------------------------
             # FINAL EDITING SCORE
@@ -980,8 +991,10 @@ as soon as possible to avoid losing customers."""
         # ---------------------------
         # AI DETECTION
         # ---------------------------
-        ai_score = 0
-        flag = "OK"
+        if candidate_translation:
+            ai_score = detect_ai(candidate_translation)
+            if ai_score > 0.7:
+                flag = "⚠️ AI Suspected"
 
         status = get_status(final_score)
         
@@ -997,15 +1010,20 @@ as soon as possible to avoid losing customers."""
         translation_score,interpretation_score,editing_score,post_edit_score,
         gleu_score,bleu_score,ter_score,final_score,status,flag,
         ai_component,bleu_component,ter_component,
-        transcription1,transcription2,transcription3,transcription4,t1_en, t2_en, t3_en, t4_en, rev_transcription1, rev_transcription2, rev_transcription3, rev_transcription4)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        transcription1,transcription2,transcription3,transcription4,t1_en, t2_en, t3_en, t4_en,step1_original, step2_original, step1_answer, step2_answer, rev_transcription1, rev_transcription2, rev_transcription3, rev_transcription4)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """,(
              first_name,last_name,email,test_type,created_at,language,answer,
              translation_score,interpretation_score,editing_score,post_edit_score,
              gleu_score,bleu_score,ter_score,final_score,status,flag,
              ai_component,bleu_component,ter_component,
              t1,t2,t3,t4,
-             t1_en,t2_en,t3_en,t4_en,rev1, rev2, rev3, rev4
+             t1_en,t2_en,t3_en,t4_en,
+             step1_original,
+             step2_original,
+             step1,
+             step2,
+             rev1, rev2, rev3, rev4
             ))
 
         conn.commit()
