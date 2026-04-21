@@ -172,6 +172,22 @@
         outline: none;
         border: 1px solid #6366f1;
       }
+
+      .new-test-btn {
+        display: inline-block;
+        padding: 12px 20px;
+        background: #6366f1;
+        color: white;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        margin-top: 10px;
+        transition: all 0.2s ease;
+      }
+
+      .new-test-btn:hover {
+        background: #4f46e5;
+      }
       </style>
 </head>
 
@@ -243,6 +259,10 @@
     </p>
 
 </div>
+<div style="margin-top:20px;">
+    <a href="/" class="new-test-btn" onclick="window.location.href='/'">Start Another Test</a>
+</div>
+
 {% endif %}
 {% if not success %}
 <form method="POST" action="/submit" onsubmit="isSubmitting = true;">
