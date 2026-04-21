@@ -511,6 +511,20 @@ def score_translation_step(source, candidate, direction):
         if not candidate or not candidate.strip():
             return 0
 
+def detect_suspicious_behavior(original, answer):
+    if not original or not answer:
+        return False
+
+    ratio = len(answer.split()) / len(original.split())
+
+    if ratio < 0.4:
+        return True
+
+    overlap = len(set(original.split()) & set(answer.split())) / len(original.split())
+    if overlap > 0.9:
+        return True
+
+    return False
         
         if not client:
             print("⚠️ OpenAI client not initialized")
@@ -658,6 +672,11 @@ def submit():
         step1 = request.form.get("step1_answer", "")
         step2 = request.form.get("step2_answer", "")
 
+        violations = int(request.form.get("violations", 0))
+
+        if violations >= 2:
+            flag = "⚠️ Suspicious (left test window)"
+
         if test_type == "translation":
             if step1 or step2:
                 answer = f"STEP 1:\n{step1}\n\nSTEP 2:\n{step2}"
@@ -730,6 +749,19 @@ def submit():
                     score2 = 0
                 else:
                     score2 = score_translation_step(step2_en, step2, f"{language} → EN")
+
+
+                # ---------------------------
+                # ANTI-CHEAT CHECK
+                # ---------------------------
+                if detect_suspicious_behavior(step1_en, step1):
+                    flag = "⚠️ Suspicious (Step 1)"
+
+                if detect_suspicious_behavior(step2_en, step2):
+                    if "Suspicious" in flag:
+                        flag += " + Step 2"
+                    else:
+                        flag = "⚠️ Suspicious (Step 2)"
 
                 # ---------------------------
                 # ROUND-TRIP CONSISTENCY

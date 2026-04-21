@@ -153,6 +153,25 @@
         opacity: 0.6;
         margin-top: 6px;
       }
+
+      .translation-box {
+        width: 100%;
+        min-height: 220px;
+        padding: 14px;
+        border-radius: 12px;
+        border: 1px solid #1f2937;
+        background: #020617;
+        color: #e5e7eb;
+        font-size: 15px;
+        line-height: 1.6;
+        resize: vertical;
+        transition: border 0.2s ease;
+      }
+
+      .translation-box:focus {
+        outline: none;
+        border: 1px solid #6366f1;
+      }
       </style>
 </head>
 
@@ -227,6 +246,7 @@
 {% endif %}
 {% if not success %}
 <form method="POST" action="/submit">
+<input type="hidden" name="violations" id="violations" value="0">
 
 <!-- NAME -->
 <input type="text" name="first_name" placeholder="First Name" required>
@@ -361,14 +381,29 @@
   <div class="section">
     <h4>Step 1 — Translate into your selected language</h4>
     <p id="step1Text"></p>
-    <textarea name="step1_answer"></textarea>
+    <textarea 
+      name="step1_answer" 
+      class="translation-box"
+      onpaste="return false"
+      oncopy="return false"
+      oncut="return false"
+      oncontextmenu="return false"
+      oninput="this.style.height='auto'; this.style.height=this.scrollHeight + 'px'">
+    </textarea>
   </div>
 
   <!-- STEP 2 -->
   <div class="section">
     <h4>Step 2 — Translate into English</h4>
     <p id="step2Text"></p>
-    <textarea name="step2_answer"></textarea>
+    <textarea 
+      name="step2_answer" 
+      class="translation-box"
+      onpaste="return false"
+      oncopy="return false"
+      oncut="return false"
+      oncontextmenu="return false">
+    </textarea>
     <input type="hidden" name="step2_original" id="step2Original">
   </div>
 
@@ -680,6 +715,27 @@
 </div>
 
 <script>
+
+let violationCount = 0;
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    violationCount++;
+
+    alert("⚠️ Leaving the test window is not allowed.");
+
+    const field = document.getElementById("violations");
+    if (field) field.value = violationCount;
+  }
+});
+
+document.addEventListener("keydown", function(e) {
+  if (e.ctrlKey && ["c","v","x","u","a"].includes(e.key.toLowerCase())) {
+    e.preventDefault();
+  }
+});
+
+document.addEventListener("contextmenu", e => e.preventDefault());
 
 let timers = {};
 
