@@ -49,6 +49,7 @@
       }
 
       .button {
+        width: 100%;
         margin-top: 25px;
         background: linear-gradient(135deg, #6366f1, #4f46e5);
         padding: 14px;
@@ -314,12 +315,18 @@
 </select>
 <div id="domainWrapper" style="display:none;">
   <select name="domain" id="domainSelect">
-    <option value="">Select Domain</option>
-    <option value="legal">Legal</option>
-    <option value="medical">Medical</option>
-    <option value="it">IT / Software</option>
-    <option value="marketing">Marketing</option>
+    <option value="biology">Biology / Natural Sciences</option>
     <option value="criminal_justice">Criminal Justice</option>
+    <option value="education">Education</option>
+    <option value="finance">Finance</option>
+    <option value="healthcare">Healthcare</option>
+    <option value="hr">B2B / HR</option>
+    <option value="it">IT (Infrastructure / Systems)</option>
+    <option value="legal">Legal</option>
+    <option value="manufacturing">Manufacturing</option>
+    <option value="marketing">Marketing</option>
+    <option value="medical">Medical</option>
+    <option value="software">Software (Applications / Code)</option>
   </select>
 </div>
 
@@ -757,7 +764,7 @@
 <div style="margin-top:20px;">
   <button type="submit" id="submitBtn" class="button" style="display:none;">
   <span id="submitText">Submit</span>
-  <span id="submitLoading" style="display:none;"> Submitting...</span>
+  <span id="submitLoading" style="display:none;">Submitting...</span>
 </button>
 </div>
 
@@ -1199,7 +1206,7 @@ if (form) {
     //  BLOCK if uploads still running
     if (uploadsInProgress > 0) {
       e.preventDefault();
-      alert(" Please wait, audio is still uploading...");
+      alert("Please wait, audio is still uploading...");
       return;
     }
 

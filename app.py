@@ -50,73 +50,68 @@ RECRUITER_PASS = os.getenv("ADMIN_PASS", "novox123")
 # DOMAIN TEST DATA
 # ------------------
 DOMAIN_TESTS = {
-    "legal": {
-        "step1_en": """This Agreement shall remain in full force and effect unless terminated by either party in accordance with the provisions set forth herein. Notwithstanding any other clause contained in this document, either party may terminate this Agreement upon providing written notice at least thirty (30) days in advance, provided that such termination does not result in a breach of any outstanding obligations.
 
-In the event of a dispute arising out of or in connection with this Agreement, the parties agree to first attempt to resolve the matter through good faith negotiations. If no resolution is reached within a reasonable period of time, the dispute shall be submitted to binding arbitration in accordance with the rules of the American Arbitration Association. The decision rendered by the arbitrator shall be final and enforceable in any court of competent jurisdiction.
+"legal": {
+"step1_en": """This Agreement shall remain enforceable unless terminated in accordance with its provisions. Either party may initiate termination upon written notice, provided that such action does not constitute a breach of any outstanding obligations. Disputes arising under this Agreement shall first be addressed through good faith negotiations, and if unresolved, submitted to binding arbitration. Each party agrees to comply with applicable legal standards, including confidentiality and data protection requirements. Failure to adhere to these obligations may result in immediate termination and potential legal consequences, including claims for damages or injunctive relief.""",
 
-Each party shall bear its own legal fees and expenses unless otherwise determined by the arbitrator. Furthermore, both parties agree to comply with all applicable laws and regulations, including those related to confidentiality, data protection, and intellectual property rights. Any violation of these obligations may result in immediate termination of this Agreement without prior notice.""",
+"step2_en": """All confidential information disclosed under this Agreement shall remain protected and shall not be shared without prior written authorization. This obligation shall survive termination for a specified period and applies to all proprietary materials, including financial data and operational processes. Parties must implement safeguards to prevent unauthorized disclosure or misuse. Any breach may result in legal action, including compensation for damages and enforcement measures. This Agreement shall be governed by applicable jurisdictional laws, and disputes unresolved through negotiation shall be submitted to arbitration, with decisions considered final and legally binding."""
+},
 
-        "step2_en": """Each party acknowledges that all confidential information disclosed under this Agreement shall remain strictly protected and shall not be shared with any third party without prior written consent. This obligation shall continue for a period of five (5) years following the termination of the Agreement, regardless of the reason for termination. Confidential information includes, but is not limited to, business strategies, financial data, proprietary processes, and any other materials designated as confidential.
+"medical": {
+"step1_en": """The patient presented with acute respiratory distress, characterized by reduced oxygen saturation and increased heart rate. Clinical evaluation indicated progressive symptom escalation despite prior treatment. Immediate intervention was required, including oxygen therapy and pharmacological support to stabilize airway function. Continuous monitoring was initiated to assess vital parameters and response to treatment. Diagnostic procedures, including imaging and laboratory analysis, were conducted to identify underlying causes and guide clinical decisions aimed at preventing further complications.""",
 
-In addition, both parties agree to implement appropriate safeguards to prevent unauthorized access, disclosure, or misuse of such information. Failure to comply with these obligations may result in legal action, including claims for damages and injunctive relief. The parties further agree that any breach of confidentiality may cause irreparable harm that cannot be adequately compensated by monetary damages alone.
+"step2_en": """The patient was admitted following symptoms suggestive of cardiovascular instability, including dizziness and irregular heartbeat. Diagnostic evaluation involved electrocardiography and laboratory testing to determine etiology. Treatment focused on stabilizing cardiac function and improving circulation through targeted medication. Continuous monitoring ensured timely detection of changes in condition. Medical history revealed contributing factors requiring long-term management strategies. A comprehensive care plan was developed to address both immediate risks and future health considerations, emphasizing prevention and patient adherence to treatment protocols."""
+},
 
-This Agreement shall be governed by and interpreted in accordance with the laws of the State of California. Any disputes that cannot be resolved through negotiation shall be submitted to arbitration in the appropriate jurisdiction. The parties expressly waive their right to a trial by jury and agree to accept the final decision of the arbitrator as binding and enforceable."""
-    },
-    "medical": {
-        "step1_en": """The patient presented to the emergency department with symptoms of severe respiratory distress, including shortness of breath, chest tightness, and persistent coughing. Upon initial evaluation, the medical team observed an elevated heart rate, reduced oxygen saturation levels, and visible signs of fatigue and discomfort. The patient reported that symptoms had progressively worsened over the previous 48 hours, despite the use of prescribed medication.
+"it": {
+"step1_en": """The system experienced critical instability during peak usage, resulting in service interruptions and failed requests. Analysis indicated inefficient handling of concurrent processes, leading to resource exhaustion and degraded performance. Database queries contributed to latency issues, further impacting system reliability. Engineering teams initiated diagnostic procedures, including log analysis and performance monitoring, to identify root causes. Temporary mitigation strategies were implemented while long-term solutions, such as load balancing optimization and improved resource allocation, were developed to enhance system resilience and scalability.""",
 
-Immediate intervention was required to stabilize the patient’s condition. Oxygen therapy was administered, and intravenous medication was initiated to address inflammation and improve airway function. Continuous monitoring of vital signs was implemented, including heart rate, blood pressure, and oxygen levels, in order to assess the patient’s response to treatment and detect any signs of deterioration.
+"step2_en": """Following a recent deployment, system performance degraded across multiple services, affecting user operations. Investigation revealed configuration inconsistencies and inadequate scaling mechanisms under increased demand. Resource limitations caused cascading failures in dependent components. Engineers conducted rollback procedures to stabilize the environment while analyzing system logs to identify underlying issues. Future improvements include enhanced monitoring, robust error handling, and optimized load distribution strategies to ensure consistent performance and prevent recurrence of similar failures."""
+},
 
-Further diagnostic testing was ordered, including blood analysis, chest imaging, and pulmonary function assessments. The patient’s medical history was carefully reviewed to identify any underlying conditions, such as asthma or chronic respiratory disease, that could influence the treatment plan. Based on the findings, the medical team developed a comprehensive care strategy aimed at stabilizing the patient and preventing potential complications.""",
+"software": {
+"step1_en": """The application failed to process asynchronous requests correctly, resulting in delayed responses and inconsistent system behavior. Error handling mechanisms did not adequately manage invalid inputs, causing exceptions that disrupted execution flow. Developers identified issues related to improper state management and insufficient validation logic. Refactoring efforts focused on improving modularity, ensuring reliable API interactions, and implementing fallback strategies. These changes aim to enhance system stability, maintain data integrity, and support scalable application performance under varying workloads.""",
 
-        "step2_en": """The patient was admitted to the hospital following a sudden onset of symptoms, including dizziness, shortness of breath, and irregular heartbeat. Upon arrival, initial assessments indicated potential cardiovascular complications, requiring immediate diagnostic evaluation. Medical staff conducted a series of tests, including blood work, electrocardiography, and imaging studies to determine the underlying cause of the condition.
+"step2_en": """During execution, the system encountered runtime errors caused by improper initialization of configuration parameters. Input validation was insufficient, allowing invalid data to propagate through the application. This resulted in unpredictable behavior and system crashes. Engineers introduced improved validation checks, exception handling, and logging mechanisms to diagnose issues effectively. Additional enhancements included optimizing function performance and ensuring compatibility with asynchronous processes. These measures contribute to more reliable application behavior and improved user experience."""
+},
 
-Treatment was initiated promptly, involving the administration of medication to stabilize heart rhythm and improve circulation. The patient was placed under continuous observation to monitor vital signs and detect any changes in condition. Throughout the treatment process, adjustments were made based on the patient’s response and evolving clinical findings.
+"finance": {
+"step1_en": """The audit identified discrepancies between reported income and documented financial transactions, raising concerns regarding compliance with regulatory standards. Inconsistencies in expense classification suggested potential misreporting, requiring further review. Financial records were analyzed to determine accuracy and adherence to applicable guidelines. Corrective actions must ensure transparency, proper documentation, and alignment with established accounting principles to mitigate risk and maintain regulatory compliance.""",
 
-A thorough review of the patient’s medical history revealed pre-existing conditions that may have contributed to the current episode. As a result, the care team developed a comprehensive treatment plan aimed not only at addressing the immediate symptoms but also at preventing future complications. Follow-up care and lifestyle recommendations were discussed to ensure long-term health and recovery."""
-    },
-    "it": {
-        "step1_en": """The system experienced a critical failure during peak usage hours, resulting in a temporary service outage that affected a significant number of users. Initial reports indicated that requests to the main API endpoint were timing out, preventing data from being retrieved and processed correctly. As a result, several core functionalities of the platform became unavailable, including user authentication and data synchronization features.
+"step2_en": """Tax reporting must accurately reflect income, deductions, and applicable adjustments in accordance with regulatory requirements. Failure to maintain accurate records may result in penalties or further investigation. Financial documentation should support all reported figures and demonstrate compliance with governing standards. Proper classification of transactions is essential to ensure consistency, transparency, and adherence to legal obligations within financial reporting processes."""
+},
 
-Developers began investigating the issue by reviewing system logs and monitoring server performance metrics. Early findings suggested that the problem was related to inefficient handling of concurrent requests, which led to excessive load on the backend infrastructure. Additionally, certain database queries were identified as potential bottlenecks, contributing to increased response times and system instability.
+"biology": {
+"step1_en": """Environmental analysis revealed contamination levels exceeding established safety thresholds, indicating potential ecological impact. Samples collected from affected areas showed deviations from baseline conditions, suggesting the presence of harmful substances. Further investigation is required to determine the source of contamination and assess long-term environmental consequences. Mitigation strategies must be implemented to restore ecological balance and prevent further degradation.""",
 
-To address these issues, the engineering team implemented temporary fixes, including load balancing adjustments and optimization of key database operations. Long-term solutions are being considered, such as improving error handling mechanisms, introducing retry logic for failed requests, and enhancing overall system scalability. Ensuring system reliability and minimizing downtime will be essential to maintaining user trust and supporting future growth of the platform.""",
+"step2_en": """Scientific assessment evaluated the effects of external factors on ecosystem stability, focusing on changes in environmental conditions. Data analysis indicated significant variations that may affect biodiversity and habitat integrity. Continued monitoring and controlled interventions are necessary to ensure recovery and maintain environmental sustainability. Accurate data collection and analysis are essential for informed decision-making and effective resource management."""
+},
 
-        "step2_en": """During a recent deployment, the system encountered unexpected issues that resulted in degraded performance across multiple services. Users reported slow response times, failed transactions, and occasional system errors when attempting to complete standard operations. Initial analysis suggested that the issue may have originated from recent configuration changes introduced during the update.
+"manufacturing": {
+"step1_en": """Production inefficiencies were identified due to equipment malfunctions and disruptions within the supply chain. Delays in material availability and maintenance issues contributed to reduced output and increased operational costs. Process evaluation highlighted the need for improved coordination and resource management. Implementing preventive maintenance and optimizing workflow processes are critical to enhancing efficiency and minimizing downtime.""",
 
-Engineers conducted a detailed investigation by analyzing system logs, monitoring traffic patterns, and reviewing recent code changes. It was determined that certain services were not scaling efficiently under increased load, leading to resource exhaustion and service instability. Additionally, insufficient error handling mechanisms caused cascading failures in dependent systems.
+"step2_en": """Quality assurance procedures must detect defects before products reach distribution channels. Failure to identify inconsistencies can lead to customer dissatisfaction and increased return rates. Standardized processes and regular inspections are essential to maintaining product integrity. Continuous improvement initiatives should focus on reducing errors, improving efficiency, and ensuring compliance with industry standards."""
+},
 
-To mitigate these issues, the team implemented a rollback of the affected components and introduced temporary fixes to stabilize performance. Long-term improvements are currently being developed, including enhanced monitoring, better load distribution strategies, and more robust error handling processes. These measures aim to improve system resilience and ensure a more reliable experience for users."""
-    },
-    "marketing": {
-        "step1_en": """Discover a new standard of everyday luxury with our latest product collection, thoughtfully designed to combine style, functionality, and durability. Each item has been carefully crafted using premium materials, ensuring not only an elegant appearance but also long-lasting performance. Our design team has focused on creating versatile products that seamlessly adapt to the needs of modern consumers.
+"hr": {
+"step1_en": """Employee onboarding processes must ensure compliance with organizational policies and regulatory requirements. Clear communication of responsibilities and expectations is essential for effective role integration. Misalignment between departments can lead to inefficiencies and delays. Structured processes and consistent training programs are necessary to support workforce productivity and organizational effectiveness.""",
 
-Whether you are heading to work, traveling, or simply managing your daily routine, our collection offers practical solutions without compromising on aesthetics. Attention to detail is evident in every aspect, from the precision of the stitching to the selection of high-quality finishes. This commitment to excellence reflects our dedication to delivering products that meet the highest standards.
+"step2_en": """Performance evaluations should be based on measurable objectives aligned with organizational goals. Transparent assessment criteria ensure fairness and accountability. Feedback mechanisms must support employee development and continuous improvement. Effective communication between management and staff is essential to maintain engagement and achieve long-term organizational success."""
+},
 
-In addition to superior design, we are proud to offer a customer experience that prioritizes satisfaction and convenience. With fast shipping options, responsive customer support, and a flexible return policy, we aim to make every interaction with our brand as smooth as possible. Take advantage of our limited-time promotion and experience the difference for yourself. Elevate your daily essentials with products designed to perform and impress.""",
+"education": {
+"step1_en": """The student requires individualized support to enhance comprehension and task completion. Instructional strategies must be adapted to address specific learning needs. Progress should be measured through clearly defined and achievable objectives. Collaboration between educators and support staff is essential to ensure effective implementation of educational plans.""",
 
-        "step2_en": """Our latest collection is designed to meet the evolving needs of modern consumers who seek both functionality and sophistication in their everyday products. By combining innovative design with high-quality materials, we have created a range of items that deliver both performance and style. Each product has been carefully developed to ensure versatility, allowing it to adapt seamlessly to different lifestyles and environments.
+"step2_en": """Educational progress must be evaluated using structured assessment methods tailored to individual needs. Instructional approaches should be flexible to accommodate diverse learning styles. Continuous monitoring and feedback are critical to supporting student development. Effective planning ensures that educational goals are met while addressing potential learning challenges."""
+},
 
-Customer feedback has played a significant role in shaping this collection, guiding improvements in both design and usability. As a result, we have introduced features that enhance convenience while maintaining a refined aesthetic. From improved durability to thoughtful details, every aspect has been considered to provide a superior user experience.
+"healthcare": {
+"step1_en": """The claim was denied due to insufficient documentation supporting medical necessity, highlighting the importance of accurate record submission. Eligibility for coverage depends on policy terms and compliance with administrative requirements. Providers must ensure that all documentation aligns with established guidelines to avoid delays or denials.""",
 
-We are committed to delivering not only exceptional products but also outstanding service. With efficient delivery options, responsive support, and a customer-focused approach, we aim to build long-term relationships based on trust and satisfaction. This collection represents our continued dedication to innovation, quality, and customer value."""
-    },
-    "criminal_justice": {
-    "step1_en": """The suspect was taken into custody following an investigation conducted by local law enforcement authorities. According to official reports, the individual was identified as a person of interest after multiple witnesses provided statements linking them to the incident. Officers executed a search warrant at the suspect’s residence, where additional evidence was collected to support the case.
-
-During the arrest, the suspect was informed of their rights, including the right to remain silent and the right to legal representation. Authorities confirmed that the procedure was carried out in accordance with established legal protocols. The suspect was then transported to a detention facility, where they are currently being held pending further legal proceedings.
-
-Prosecutors are reviewing the evidence to determine the appropriate charges. A preliminary hearing is expected to take place within the coming days, during which a judge will evaluate whether sufficient evidence exists to proceed to trial. If convicted, the suspect could face significant penalties, depending on the severity of the charges and prior criminal history.""",
-
-    "step2_en": """Law enforcement officials responded to a reported incident involving a suspected violation of criminal law. Upon arrival at the scene, officers conducted an initial assessment and gathered statements from individuals present at the location. Based on the information obtained, authorities identified a potential suspect and initiated further investigative procedures.
-
-The individual was later detained for questioning and advised of their legal rights. During the interview process, investigators sought to clarify the sequence of events and determine the extent of the suspect’s involvement. Evidence collected during the investigation is currently being analyzed to establish a clear understanding of the case.
-
-Legal representatives may be appointed to ensure that the suspect’s rights are protected throughout the process. Depending on the outcome of the investigation, formal charges may be filed, leading to court proceedings. The case will ultimately be evaluated within the judicial system to determine responsibility and any applicable legal consequences."""
-    }
+"step2_en": """Insurance coverage is determined by policy conditions and proper documentation of services provided. Inaccurate or incomplete submissions may result in claim rejection. Accurate coding and compliance with procedural requirements are essential to ensure timely reimbursement and effective processing of healthcare claims."""
 }
 
+}
 
 # ---------------------------
 # INIT DB
@@ -974,6 +969,9 @@ as soon as possible to avoid losing customers."""
 
             parts = []
             scores = []
+
+            if domain:
+                parts.append(f"Domain: {domain}")
 
             t_list = [t1, t2, t3, t4]
             rev_list = [rev1, rev2, rev3, rev4]
