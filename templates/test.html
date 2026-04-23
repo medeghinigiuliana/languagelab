@@ -216,6 +216,11 @@
       .new-test-btn:hover {
         background: #4f46e5;
       }
+      select:disabled,
+      input:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
       </style>
 </head>
 
@@ -892,6 +897,7 @@ async function startTest() {
     alert("Please select test type, language, and domain");
     return;
   }
+  lockTestFields();
 
   document.getElementById("submitBtn").style.display = "block";
 
@@ -1246,6 +1252,16 @@ if (form) {
     }
 
   });
+}
+
+function lockTestFields() {
+  const testType = document.getElementById("testType");
+  const language = document.getElementById("languageInput");
+  const domain = document.getElementById("domainSelect");
+
+  if (testType) testType.disabled = true;
+  if (language) language.disabled = true;
+  if (domain) domain.disabled = true;
 }
 
 document.addEventListener("DOMContentLoaded", function () {
