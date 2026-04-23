@@ -801,6 +801,19 @@ def submit():
         last_name = request.form.get("last_name")
         test_type = request.form.get("test_type")
         language = request.form.get("language")
+
+        # ---------------------------
+        # SAFE DEFAULTS FOR INTERPRETATION 
+        # ---------------------------
+        t1 = ""
+        t2 = ""
+        t3 = ""
+        t4 = ""
+
+        rev1 = ""
+        rev2 = ""
+        rev3 = ""
+        rev4 = ""
         if language:
             language = language.strip().capitalize()
         else:
