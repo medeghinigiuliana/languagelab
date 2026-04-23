@@ -266,6 +266,11 @@
 {% endif %}
 {% if not success %}
 <form method="POST" action="/submit" onsubmit="isSubmitting = true;">
+
+  <input type="hidden" name="language" id="finalLanguage">
+
+  <input type="hidden" name="violations" id="violations" value="0">
+
 <input type="hidden" name="violations" id="violations" value="0">
 
 <!-- NAME -->
@@ -1153,13 +1158,22 @@ const form = document.querySelector("form");
 if (form) {
   form.addEventListener("submit", function(e) {
 
+    //  SET LANGUAGE BEFORE SUBMIT
+    const langInput = document.getElementById("languageInput");
+    const finalLang = document.getElementById("finalLanguage");
+
+    if (langInput && finalLang) {
+      finalLang.value = langInput.value;
+    }
+
+    //  BLOCK if uploads still running
     if (uploadsInProgress > 0) {
       e.preventDefault();
       alert(" Please wait, audio is still uploading...");
       return;
     }
 
-    console.log(" Submitting with values:",
+    console.log(" Submitting:",
       document.getElementById("audioData1").value,
       document.getElementById("audioData2").value
     );
