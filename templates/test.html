@@ -1061,24 +1061,30 @@ async function updateLanguage() {
 // ------------------
 // LANGUAGE TOGGLE
 // ------------------
-function toggleLanguage() {
+  function toggleLanguage() {
   const type = document.getElementById("testType").value;
-  const wrapper = document.getElementById("languageWrapper");
+
+  const langWrapper = document.getElementById("languageWrapper");
   const domainWrapper = document.getElementById("domainWrapper");
 
-  // Language needed only for interpretation + translation
-  if (type === "interpretation" || type === "translation") {
-    wrapper.style.display = "block";
-  } else {
-    wrapper.style.display = "none";
+  // Reset
+  langWrapper.style.display = "none";
+  domainWrapper.style.display = "none";
+
+  // Translation → needs BOTH
+  if (type === "translation") {
+    langWrapper.style.display = "block";
+    domainWrapper.style.display = "block";
+    return;
   }
 
-  // Domain only for translation
-  if (type === "translation") {
-    domainWrapper.style.display = "block";
-  } else {
-    domainWrapper.style.display = "none";
+  // Interpretation → ONLY language
+  if (type === "interpretation") {
+    langWrapper.style.display = "block";
+    return;
   }
+
+  // Editing / Post-editing → NONE
 }
 
 // ------------------
@@ -1101,18 +1107,21 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    if (type === "interpretation" && lang) {
+    // Interpretation → needs language
+    if (type === "interpretation") {
       startBtn.style.display = "block";
-      startBtn.disabled = false;
+      startBtn.disabled = !lang;
       return;
     }
 
-    if (type === "translation" && lang && dom) {
+    // Translation → needs language + domain
+    if (type === "translation") {
       startBtn.style.display = "block";
-      startBtn.disabled = false;
+      startBtn.disabled = !(lang && dom);
       return;
     }
 
+    // Default fallback
     startBtn.style.display = "block";
     startBtn.disabled = true;
   }
