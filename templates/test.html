@@ -742,6 +742,7 @@
 <script>
 let uploadsInProgress = 0;
 async function uploadAudio(base64Audio, fieldId) {
+  console.log(" Uploading audio for:", fieldId);
   uploadsInProgress++;
 
   try {
@@ -760,7 +761,7 @@ async function uploadAudio(base64Audio, fieldId) {
       if (field) {
         field.value = data.filename;
       }
-      console.log("✅ Uploaded:", fieldId, data.filename);
+      console.log(" Uploaded:", fieldId, data.filename);
     } else {
       console.error("Upload failed:", data);
     }
@@ -783,7 +784,7 @@ document.addEventListener("visibilitychange", () => {
   if (document.hidden && !isSubmitting) {
     violationCount++;
 
-    alert("⚠️ Leaving the test window is not allowed.");
+    alert(" Leaving the test window is not allowed.");
 
     const field = document.getElementById("violations");
     if (field) field.value = violationCount;

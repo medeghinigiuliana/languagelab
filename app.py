@@ -240,24 +240,10 @@ def detect_ai(text):
         Likelihood (0 to 1) and a short explanation.
         """
 
-        def transcribe_audio(file):
-            try:
-               if not client:
-                   return ""
-
-               print("Transcribing file:", file)
-               response = client.audio.transcriptions.create(
-                   model="gpt-4o-mini-transcribe",
-                   file=file
-               )
-
-               print(" Response:", response)
-
-               return response.text
-
-            except Exception as e:
-                print("Transcription error:", e)
-                return ""
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}]
+        )
 
         output = response.choices[0].message.content
 
@@ -359,13 +345,23 @@ def decode_audio(base64_audio):
 
 def transcribe_audio(file_obj):
     try:
-        file_obj.name = "audio.webm"
+        if not client:
+            print(" No OpenAI client")
+            return ""
+
+        print(" Transcribing file:", file_obj)
+
         response = client.audio.transcriptions.create(
-            file=file_obj,
-            model="gpt-4o-transcribe"
+            model="gpt-4o-mini-transcribe",
+            file=file_obj
         )
+
+        print(" Response:", response)
+
         return response.text
-    except:
+
+    except Exception as e:
+        print(" Transcription error:", e)
         return ""
 
 def translate_to_english(text):
