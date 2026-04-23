@@ -917,25 +917,6 @@ function showTest() {
   section.style.display = "none";
 }
 
-function updateStartButtonState() {
-  const type = document.getElementById("testType").value;
-  const lang = document.getElementById("languageInput").value;
-  const domain = document.getElementById("domainSelect").value;
-
-  const startBtn = document.getElementById("startTestBtn");
-
-  if (!startBtn) return;
-
-  // Only control ENABLE/DISABLE (do NOT touch display)
-  if (type && lang && (type !== "translation" || domain)) {
-    startBtn.disabled = false;
-  } else {
-    startBtn.disabled = true;
-  }
-}
-
-let testStartTime = null;
-let timerInterval = null;
 
 function startTimer() {
   testStartTime = Date.now();
@@ -1348,25 +1329,6 @@ function lockTestFields() {
   if (language) language.disabled = true;
   if (domain) domain.disabled = true;
 }
-
-document.addEventListener("DOMContentLoaded", function () {
-  document.getElementById("testType").addEventListener("change", updateStartButtonState);
-  document.getElementById("languageInput").addEventListener("input", updateStartButtonState);
-  document.getElementById("domainSelect").addEventListener("change", updateStartButtonState);
-
-  const form = document.querySelector("form");
-
-  if (form) {
-    form.addEventListener("submit", function(e) {
-
-      if (uploadsInProgress > 0) {
-        e.preventDefault();
-        alert("Please wait, audio is still uploading...");
-        return;
-      }
-
-    });
-  }
 
 });
 
