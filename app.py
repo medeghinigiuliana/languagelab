@@ -666,7 +666,18 @@ def upload_audio():
 
 @app.route("/submit", methods=["GET", "POST"])
 def submit():
-    print("🧾 FORM DATA:", request.form)
+    print(" FULL FORM:", request.form)
+
+    print(" audio1:", request.form.get("audio1"))
+    print(" audio2:", request.form.get("audio2"))
+    print(" audio3:", request.form.get("audio3"))
+    print(" audio4:", request.form.get("audio4"))
+
+    print(" rev1:", request.form.get("rev_audio1"))
+    print(" rev2:", request.form.get("rev_audio2"))
+    print(" rev3:", request.form.get("rev_audio3"))
+    print(" rev4:", request.form.get("rev_audio4"))
+
     if request.method == "GET":
         return redirect(url_for("home"))
     try:
