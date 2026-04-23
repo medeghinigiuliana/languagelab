@@ -243,9 +243,6 @@
 
 <div class="container">
 
-<div id="loadingIndicator" style="display:none; text-align:center; margin-top:20px;">
-  <p>⏳ Preparing your test...</p>
-</div>
 
 <div style="text-align:center; margin-bottom:20px;">
   <img src="{{ url_for('static', filename='images/logo.png') }}"
@@ -350,6 +347,9 @@
   Start Test
 </button>
 
+<div id="loadingIndicator" style="display:none; margin-top: 15px; text-align:center; opacity:0.8;">
+  Preparing your test...
+</div>
 
 <datalist id="languages">
   <option value="Afrikaans">
