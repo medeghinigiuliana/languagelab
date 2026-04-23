@@ -735,7 +735,10 @@
 </div>
 
 <script>
+let uploadsInProgress = 0;
 async function uploadAudio(base64Audio, fieldId) {
+  uploadsInProgress++;
+
   try {
     const response = await fetch("/upload-audio", {
       method: "POST",
@@ -752,7 +755,7 @@ async function uploadAudio(base64Audio, fieldId) {
       if (field) {
         field.value = data.filename;
       }
-      console.log("Uploaded:", fieldId, data.filename);
+      console.log("✅ Uploaded:", fieldId, data.filename);
     } else {
       console.error("Upload failed:", data);
     }
@@ -760,8 +763,9 @@ async function uploadAudio(base64Audio, fieldId) {
   } catch (err) {
     console.error("Upload error:", err);
   }
-}
 
+  uploadsInProgress--;
+}
 let violationCount = 0;
 let isSubmitting = false;
 
@@ -1145,6 +1149,22 @@ function stopRecording(id){
   recorder.stop();
 }
 const form = document.querySelector("form");
+
+if (form) {
+  form.addEventListener("submit", function(e) {
+
+    if (uploadsInProgress > 0) {
+      e.preventDefault();
+      alert(" Please wait, audio is still uploading...");
+      return;
+    }
+
+    console.log(" Submitting with values:",
+      document.getElementById("audioData1").value,
+      document.getElementById("audioData2").value
+    );
+  });
+}
 
 // if (form) {
 //   form.addEventListener("submit", function(e) {
