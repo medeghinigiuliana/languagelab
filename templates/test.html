@@ -343,7 +343,7 @@
   >
 </div>
 
-<button type="button" id="startTestBtn" class="button" style="display:none;" onclick="startTest()" disabled>
+<button type="button" id="startTestBtn" class="button" style="display:block;" onclick="startTest()" disabled>
   Start Test
 </button>
 
@@ -1103,15 +1103,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (type === "interpretation" && lang) {
       startBtn.style.display = "block";
+      startBtn.disabled = false;
       return;
     }
 
     if (type === "translation" && lang && dom) {
       startBtn.style.display = "block";
+      startBtn.disabled = false;
       return;
     }
 
-    startBtn.style.display = "none";
+    startBtn.style.display = "block";
+    startBtn.disabled = true;
   }
 
   if (testType) {
