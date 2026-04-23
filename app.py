@@ -457,6 +457,48 @@ Rules:
         print("Translate to English error:", e)
         return ""
 
+def semantic_similarity(reference, candidate):
+    try:
+        if not reference or not candidate:
+            return 0
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            temperature=0,
+            messages=[
+                {
+                    "role": "system",
+                    "content": """
+Evaluate semantic similarity between two texts.
+
+Score from 0 to 10 based ONLY on meaning preservation:
+- 10 = identical meaning
+- 7–9 = minor differences
+- 4–6 = partial meaning
+- 0–3 = incorrect meaning
+
+Return ONLY:
+SCORE: X/10
+"""
+                },
+                {
+                    "role": "user",
+                    "content": f"""
+REFERENCE:
+{reference}
+
+CANDIDATE:
+{candidate}
+"""
+                }
+            ]
+        )
+
+        return get_score(response.choices[0].message.content)
+
+    except:
+        return 0
+
 def translate_to_target(text, language):
     try:
         response = client.chat.completions.create(
@@ -579,16 +621,28 @@ def score_post_edit(mt_text, edited):
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": """Evaluate the post-edited text.
+                {"role": "system", "content": """
+                Evaluate the post-edited text.
 
-                1. Check if the FULL text was post-edited. If parts are missing or incomplete, clearly state that the response is incomplete.
-                2. Evaluate fluency, accuracy, and corrections.
-                3. Penalize incomplete submissions heavily.
+                CRITERIA:
 
-                Return:
-                FINAL_SCORE: X/10
-                Explanation: Explain the quality AND whether the submission is complete or incomplete.
-                """},
+                1. COMPLETENESS (0–10)
+                - Is the FULL text edited?
+
+                2. ACCURACY (0–10)
+                - Is meaning preserved?
+
+                3. NATURALNESS (0–10)
+                - Does it sound like a native speaker wrote it?
+                - Penalize awkward phrasing
+
+                Return EXACTLY:
+
+                COMPLETENESS: X/10
+                ACCURACY: X/10
+                NATURALNESS: X/10
+                FINAL: X/10
+                """}
                 {"role": "user", "content": f"{mt_text}\n{edited}"}
             ]
         )
@@ -875,10 +929,13 @@ def submit():
                 # ---------------------------
                 # FINAL SCORE (WEIGHTED)
                 # ---------------------------
+                semantic_score = semantic_similarity(step1_en, step1)
+
                 final_translation_score = round(
-                    (score1 * 0.4) +
-                    (score2 * 0.4) +
-                    (round_trip_score * 0.2),
+                    (score1 * 0.3) +
+                    (score2 * 0.3) +
+                    (round_trip_score * 0.2) +
+                    (semantic_score * 0.2),
                     2
                 )
 

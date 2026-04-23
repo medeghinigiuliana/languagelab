@@ -347,6 +347,10 @@
   Start Test
 </button>
 
+<div id="testTimer" style="display:none; margin-top:10px; text-align:center; font-weight:bold;">
+  Time: <span id="timeValue">00:00</span>
+</div>
+
 <div id="loadingIndicator" style="display:none; margin-top: 15px; text-align:center; opacity:0.8;">
   Preparing your test...
 </div>
@@ -885,6 +889,30 @@ function updateStartButtonState() {
     startBtn.disabled = true;
   }
 }
+
+let testStartTime = null;
+let timerInterval = null;
+
+function startTimer() {
+  testStartTime = Date.now();
+
+  document.getElementById("testTimer").style.display = "block";
+
+  timerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - testStartTime) / 1000);
+
+    const minutes = String(Math.floor(elapsed / 60)).padStart(2, '0');
+    const seconds = String(elapsed % 60).padStart(2, '0');
+
+    document.getElementById("timeValue").innerText = `${minutes}:${seconds}`;
+
+    if (elapsed > 1200) { // 20 min
+      alert("Time is up. Submitting test.");
+      document.querySelector("form").submit();
+    }
+
+  }, 1000);
+}
 // ------------------
 // LANGUAGE TRANSLATION 
 // ------------------
@@ -902,6 +930,7 @@ async function startTest() {
   document.getElementById("submitBtn").style.display = "block";
 
   document.getElementById("loadingIndicator").style.display = "block";
+  startTimer();
 
   // Hide all tests
   document.querySelectorAll('[id$="Test"]').forEach(el => {
