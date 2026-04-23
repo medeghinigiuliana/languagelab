@@ -663,10 +663,10 @@ def upload_audio():
 # ---------------------------
 # SUBMIT
 # ---------------------------
-print("🧾 FORM DATA:", request.form)
 
 @app.route("/submit", methods=["GET", "POST"])
 def submit():
+    print("🧾 FORM DATA:", request.form)
     if request.method == "GET":
         return redirect(url_for("home"))
     try:
