@@ -664,15 +664,7 @@ def upload_audio():
 def submit():
     print(" FULL FORM:", request.form)
 
-    print(" audio1:", request.form.get("audio1"))
-    print(" audio2:", request.form.get("audio2"))
-    print(" audio3:", request.form.get("audio3"))
-    print(" audio4:", request.form.get("audio4"))
-
-    print(" rev1:", request.form.get("rev_audio1"))
-    print(" rev2:", request.form.get("rev_audio2"))
-    print(" rev3:", request.form.get("rev_audio3"))
-    print(" rev4:", request.form.get("rev_audio4"))
+    print(" Submit received")
 
     if request.method == "GET":
         return redirect(url_for("home"))
