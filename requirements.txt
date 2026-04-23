@@ -48,7 +48,6 @@ pydantic_core==2.41.5
 Pygments==2.20.0
 python-dateutil==2.9.0.post0
 pytz==2026.1.post1
-pywin32==311
 pyzmq==27.1.0
 regex==2026.4.4
 s3transfer==0.16.0
