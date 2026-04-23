@@ -8,10 +8,11 @@ import os
 api_key = os.getenv("OPENAI_API_KEY")
 
 if not api_key:
-    print("⚠️ Missing OPENAI_API_KEY")
-
-client = OpenAI(api_key=api_key) if api_key else None
-import base64
+    print(" Missing OPENAI_API_KEY")
+    client = None
+else:
+    print(" OPENAI_API_KEY loaded")
+    client = OpenAI(api_key=api_key)import base64
 import io
 import re
 from nltk.translate.gleu_score import sentence_gleu
@@ -26,6 +27,10 @@ from flask import session
 # ---------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "db.db")
+import uuid
+
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 try:
     nltk.data.find('tokenizers/punkt')
@@ -204,6 +209,24 @@ REVERSE_TEXTS = [
 # ---------------------------
 # HELPERS
 # ---------------------------
+def process_audio_file(filename):
+    try:
+        if not filename:
+            return ""
+
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+
+        if not os.path.exists(filepath):
+            print("File not found:", filepath)
+            return ""
+
+        with open(filepath, "rb") as f:
+            return transcribe_audio(f)
+
+    except Exception as e:
+        print("Audio file error:", e)
+        return ""
+
 def detect_ai(text):
     try:
         prompt = f"""
@@ -599,6 +622,29 @@ def get_translation():
         print("TRANSLATION ERROR:", e)
         return {"target_texts": ORIGINAL_AUDIO_TEXTS}
 
+@app.route("/upload-audio", methods=["POST"])
+def upload_audio():
+    try:
+        data = request.json.get("audio")
+
+        if not data:
+            return {"error": "No audio received"}, 400
+
+        header, encoded = data.split(",", 1)
+        audio_bytes = base64.b64decode(encoded)
+
+        filename = f"{uuid.uuid4()}.webm"
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+
+        with open(filepath, "wb") as f:
+            f.write(audio_bytes)
+
+        return {"filename": filename}
+
+    except Exception as e:
+        print("Upload error:", e)
+        return {"error": str(e)}, 500
+
 # ---------------------------
 # SUBMIT
 # ---------------------------
@@ -819,18 +865,15 @@ as soon as possible to avoid losing customers."""
 
         # AUDIO 
         if test_type == "interpretation":
-            t1 = process_audio(request.form.get("audio1"))
-            t2 = process_audio(request.form.get("audio2"))
-            t3 = process_audio(request.form.get("audio3"))
-            t4 = process_audio(request.form.get("audio4"))
+            t1 = process_audio_file(request.form.get("audio1"))
+            t2 = process_audio_file(request.form.get("audio2"))
+            t3 = process_audio_file(request.form.get("audio3"))
+            t4 = process_audio_file(request.form.get("audio4"))
 
-            rev1 = process_audio(request.form.get("rev_audio1"))
-            rev2 = process_audio(request.form.get("rev_audio2"))
-            rev3 = process_audio(request.form.get("rev_audio3"))
-            rev4 = process_audio(request.form.get("rev_audio4"))
-        else:
-            t1 = t2 = t3 = t4 = ""
-            rev1 = rev2 = rev3 = rev4 = ""
+            rev1 = process_audio_file(request.form.get("rev_audio1"))
+            rev2 = process_audio_file(request.form.get("rev_audio2"))
+            rev3 = process_audio_file(request.form.get("rev_audio3"))
+            rev4 = process_audio_file(request.form.get("rev_audio4"))
 
         t1_en = ""
         t2_en = ""
@@ -1041,6 +1084,9 @@ as soon as possible to avoid losing customers."""
 
     except Exception as e:
         return str(e)
+
+if __name__ == "__main__":
+    app.run(debug=True)
 
 # ---------------------------
 # AUTH ROUTES

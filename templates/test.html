@@ -735,6 +735,32 @@
 </div>
 
 <script>
+async function uploadAudio(base64Audio, fieldId) {
+  try {
+    const response = await fetch("/upload-audio", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ audio: base64Audio })
+    });
+
+    const data = await response.json();
+
+    if (data.filename) {
+      const field = document.getElementById(fieldId);
+      if (field) {
+        field.value = data.filename;
+      }
+      console.log("Uploaded:", fieldId, data.filename);
+    } else {
+      console.error("Upload failed:", data);
+    }
+
+  } catch (err) {
+    console.error("Upload error:", err);
+  }
+}
 
 let violationCount = 0;
 let isSubmitting = false;
@@ -1079,7 +1105,7 @@ async function startRecording(id){
       const field = document.getElementById(fieldId);
 
       if (field) {
-        field.value = reader.result;
+        uploadAudio(reader.result, fieldId);
       }
 
         
