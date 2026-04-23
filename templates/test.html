@@ -59,8 +59,31 @@
         cursor: pointer;
       }
 
-      #submitBtn:disabled {
-        transition: all 0.2s ease;
+      #submitBtn.processing {
+        position: relative;
+        overflow: hidden;
+      }
+
+      #submitBtn.processing::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          120deg,
+          transparent,
+          rgba(255,255,255,0.2),
+          transparent
+        );
+        animation: shimmer 1.5s infinite;
+      }
+
+      @keyframes shimmer {
+        100% {
+          left: 100%;
+        }
       }
 
       .controls {
@@ -275,7 +298,6 @@
 
   <input type="hidden" name="violations" id="violations" value="0">
 
-<input type="hidden" name="violations" id="violations" value="0">
 
 <!-- NAME -->
 <input type="text" name="first_name" placeholder="First Name" required>
@@ -733,9 +755,9 @@
 </div>
 </div>
 <div style="margin-top:20px;">
-  <button type="submit" id="submitBtn" class="submit-btn">
+  <button type="submit" id="submitBtn" class="button" style="display:none;">
   <span id="submitText">Submit</span>
-  <span id="submitLoading" style="display:none;">⏳ Submitting...</span>
+  <span id="submitLoading" style="display:none;"> Submitting...</span>
 </button>
 </div>
 
@@ -845,6 +867,8 @@ async function startTest() {
     alert("Please select test type, language, and domain");
     return;
   }
+
+  document.getElementById("submitBtn").style.display = "block";
 
   document.getElementById("loadingIndicator").style.display = "block";
 
@@ -1164,7 +1188,7 @@ const form = document.querySelector("form");
 if (form) {
   form.addEventListener("submit", function(e) {
 
-    // ✅ SET LANGUAGE BEFORE SUBMIT
+    //  SET LANGUAGE BEFORE SUBMIT
     const langInput = document.getElementById("languageInput");
     const finalLang = document.getElementById("finalLanguage");
 
@@ -1172,25 +1196,26 @@ if (form) {
       finalLang.value = langInput.value;
     }
 
-    // 🚫 BLOCK if uploads still running
+    //  BLOCK if uploads still running
     if (uploadsInProgress > 0) {
       e.preventDefault();
-      alert("⏳ Please wait, audio is still uploading...");
+      alert(" Please wait, audio is still uploading...");
       return;
     }
 
-    console.log("📤 Submitting:",
+    console.log(" Submitting:",
       document.getElementById("audioData1").value,
       document.getElementById("audioData2").value
     );
 
-    // ✅ ADD THIS PART (loading state)
+    //  ADD THIS PART (loading state)
     const submitBtn = document.getElementById("submitBtn");
     const submitText = document.getElementById("submitText");
     const submitLoading = document.getElementById("submitLoading");
 
     if (submitBtn && submitText && submitLoading) {
       submitBtn.disabled = true;
+      submitBtn.classList.add("processing");
       submitText.style.display = "none";
       submitLoading.style.display = "inline";
     }
