@@ -642,7 +642,7 @@ def score_post_edit(mt_text, edited):
                 ACCURACY: X/10
                 NATURALNESS: X/10
                 FINAL: X/10
-                """}
+                """},
                 {"role": "user", "content": f"{mt_text}\n{edited}"}
             ]
         )
