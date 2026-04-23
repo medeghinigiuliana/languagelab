@@ -240,10 +240,24 @@ def detect_ai(text):
         Likelihood (0 to 1) and a short explanation.
         """
 
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}]
-        )
+        def transcribe_audio(file):
+            try:
+               if not client:
+                   return ""
+
+               print("Transcribing file:", file)
+               response = client.audio.transcriptions.create(
+                   model="gpt-4o-mini-transcribe",
+                   file=file
+               )
+
+               print(" Response:", response)
+
+               return response.text
+
+            except Exception as e:
+                print("Transcription error:", e)
+                return ""
 
         output = response.choices[0].message.content
 
