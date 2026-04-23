@@ -59,6 +59,10 @@
         cursor: pointer;
       }
 
+      #submitBtn:disabled {
+        transition: all 0.2s ease;
+      }
+
       .controls {
         margin-top: 12px;
         display: flex;
@@ -729,9 +733,10 @@
 </div>
 </div>
 <div style="margin-top:20px;">
-  <button type="submit" class="button" id="submitBtn">
-    Submit
-  </button>
+  <button type="submit" id="submitBtn" class="submit-btn">
+  <span id="submitText">Submit</span>
+  <span id="submitLoading" style="display:none;">⏳ Submitting...</span>
+</button>
 </div>
 
 </form>
@@ -1159,7 +1164,7 @@ const form = document.querySelector("form");
 if (form) {
   form.addEventListener("submit", function(e) {
 
-    //  SET LANGUAGE BEFORE SUBMIT
+    // ✅ SET LANGUAGE BEFORE SUBMIT
     const langInput = document.getElementById("languageInput");
     const finalLang = document.getElementById("finalLanguage");
 
@@ -1167,17 +1172,29 @@ if (form) {
       finalLang.value = langInput.value;
     }
 
-    //  BLOCK if uploads still running
+    // 🚫 BLOCK if uploads still running
     if (uploadsInProgress > 0) {
       e.preventDefault();
-      alert(" Please wait, audio is still uploading...");
+      alert("⏳ Please wait, audio is still uploading...");
       return;
     }
 
-    console.log(" Submitting:",
+    console.log("📤 Submitting:",
       document.getElementById("audioData1").value,
       document.getElementById("audioData2").value
     );
+
+    // ✅ ADD THIS PART (loading state)
+    const submitBtn = document.getElementById("submitBtn");
+    const submitText = document.getElementById("submitText");
+    const submitLoading = document.getElementById("submitLoading");
+
+    if (submitBtn && submitText && submitLoading) {
+      submitBtn.disabled = true;
+      submitText.style.display = "none";
+      submitLoading.style.display = "inline";
+    }
+
   });
 }
 
