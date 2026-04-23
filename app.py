@@ -832,7 +832,7 @@ def submit():
         violations = int(request.form.get("violations", 0))
 
         if violations >= 2:
-            flag = "⚠️ Suspicious (left test window)"
+            flag = "Suspicious (left test window)"
 
         if test_type == "translation":
             if step1 or step2:
@@ -1035,6 +1035,7 @@ as soon as possible to avoid losing customers."""
 
 
         # INTERPRETATION
+        domain = request.form.get("domain")
         if test_type == "interpretation":
 
             parts = []
@@ -1100,7 +1101,7 @@ as soon as possible to avoid losing customers."""
             interpretation_score = "\n".join(parts)
 
             valid_scores = [s for s in scores if s > 0]
-            if not scores:
+            if not any(scores):
                 i_score = 0
 
             if valid_scores:

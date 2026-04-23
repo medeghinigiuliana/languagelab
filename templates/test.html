@@ -820,6 +820,50 @@ async function uploadAudio(base64Audio, fieldId) {
 let violationCount = 0;
 let isSubmitting = false;
 
+let recorders = {};
+let audioChunks = {};
+
+async function startRecording(id) {
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+  const recorder = new MediaRecorder(stream);
+
+  audioChunks[id] = [];
+
+  recorder.ondataavailable = event => {
+    audioChunks[id].push(event.data);
+  };
+
+  recorder.onstop = function () {
+    const blob = new Blob(audioChunks[id], { type: "audio/webm" });
+
+    const reader = new FileReader();
+
+    reader.onloadend = function () {
+      const base64Audio = reader.result;
+
+      
+      uploadAudio(base64Audio, "audioData" + id.replace("audio","").replace("rev","rev"));
+    };
+
+    reader.readAsDataURL(blob);
+  };
+
+  recorder.start();
+  recorders[id] = recorder;
+
+  document.getElementById("status-" + id).innerText = "Recording...";
+}
+
+function stopRecording(id) {
+  const recorder = recorders[id];
+
+  if (recorder && recorder.state === "recording") {
+    recorder.stop();
+    document.getElementById("status-" + id).innerText = "Uploading...";
+  }
+}
+
 // disable detection on success page
 if (window.location.search.includes("success=1")) {
   isSubmitting = true;
@@ -1297,6 +1341,21 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("testType").addEventListener("change", updateStartButtonState);
   document.getElementById("languageInput").addEventListener("input", updateStartButtonState);
   document.getElementById("domainSelect").addEventListener("change", updateStartButtonState);
+
+  const form = document.querySelector("form");
+
+  if (form) {
+    form.addEventListener("submit", function(e) {
+
+      if (uploadsInProgress > 0) {
+        e.preventDefault();
+        alert("Please wait, audio is still uploading...");
+        return;
+      }
+
+    });
+  }
+
 });
 
 // if (form) {
