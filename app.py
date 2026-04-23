@@ -340,6 +340,23 @@ def get_score(text):
     except:
         return 0
 
+def extract_detailed_scores(text):
+    try:
+        acc = re.search(r'ACCURACY:\s*(\d+)', text)
+        comp = re.search(r'COMPLETENESS:\s*(\d+)', text)
+        flu = re.search(r'FLUENCY:\s*(\d+)', text)
+
+        acc = int(acc.group(1)) if acc else 0
+        comp = int(comp.group(1)) if comp else 0
+        flu = int(flu.group(1)) if flu else 0
+
+        final = round((acc * 0.5) + (comp * 0.3) + (flu * 0.2), 2)
+
+        return acc, comp, flu, final
+
+    except:
+        return 0, 0, 0, 0
+
 def decode_audio(base64_audio):
     try:
         header, encoded = base64_audio.split(",", 1)
@@ -501,21 +518,29 @@ SOURCE (original meaning):
 CANDIDATE OUTPUT:
 {interpreted}
 
-Evaluate strictly:
+Evaluate STRICTLY using these criteria:
 
-1. Accuracy → Did they preserve meaning?
-2. Completeness → Did they miss any information?
-3. Fluency → Is it natural and correct?
+1. ACCURACY (0–10)
+- Did they preserve the meaning?
+- Penalize distortions or incorrect meaning
 
-Be strict. Penalize:
-- Missing information
-- Distorted meaning
-- Awkward phrasing
+2. COMPLETENESS (0–10)
+- Did they include ALL information?
+- Penalize omissions
 
-Return ONLY:
+3. FLUENCY (0–10)
+- Is the language natural and correct?
 
-SCORE: X/10
-Explanation: 1–2 short sentences.
+IMPORTANT:
+- Be strict
+- Do NOT give high scores easily
+
+Return EXACTLY in this format:
+
+ACCURACY: X/10
+COMPLETENESS: X/10
+FLUENCY: X/10
+FINAL: X/10
 """
                 }
             ]
@@ -963,9 +988,9 @@ as soon as possible to avoid losing customers."""
                 if t_list[i]:
                     translated_back = translate_to_english(t_list[i])
 
-                    if not translated_back:
-                        parts.append(f"\n📌 AUDIO {i+1} (EN → {language})")
-                        parts.append("SCORE: 0/10\nExplanation: Could not process response.")
+                    if not translated_back or len(translated_back.split()) < 5:
+                        parts.append(f"\n AUDIO {i+1} (EN → {language})")
+                        parts.append("SCORE: 0/10\nExplanation: Response too short or incomplete.")
                         scores.append(0)
                         continue
 
@@ -975,11 +1000,12 @@ as soon as possible to avoid losing customers."""
                         language
                     )
 
-                    parts.append(f"\n📌 AUDIO {i+1} (EN → {language})")
+                    parts.append(f"\n AUDIO {i+1} (EN → {language})")
                     parts.append(score_text)
 
-                    score_value = get_score(score_text)
-                    scores.append(score_value)
+                    acc, comp, flu, final_score = extract_detailed_scores(score_text)
+
+                    scores.append(final_score)
 
                     if i == 0: t1_en = translated_back
                     elif i == 1: t2_en = translated_back
@@ -999,8 +1025,9 @@ as soon as possible to avoid losing customers."""
                     parts.append(f"\n📌 AUDIO {i+1} (Reverse → English)")
                     parts.append(score_text)
 
-                    score_value = get_score(score_text)
-                    scores.append(score_value)
+                    acc, comp, flu, final_score = extract_detailed_scores(score_text)
+
+                    scores.append(final_score)
 
             interpretation_score = "\n".join(parts)
 
