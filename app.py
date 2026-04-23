@@ -210,7 +210,7 @@ REVERSE_TEXTS = [
 # ---------------------------
 # HELPERS
 # ---------------------------
-def process_audio_file(filename):
+def process_audio_file(filename, language=None):
     try:
         if not filename:
             return ""
@@ -221,8 +221,12 @@ def process_audio_file(filename):
             print("File not found:", filepath)
             return ""
 
+        if os.path.getsize(filepath) < 2000:
+            print(" Audio too small or invalid:", filepath)
+            return ""
+
         with open(filepath, "rb") as f:
-            return transcribe_audio(f)
+            return transcribe_audio(f, language)
 
     except Exception as e:
         print("Audio file error:", e)
@@ -343,22 +347,55 @@ def decode_audio(base64_audio):
     except:
         return None
 
-def transcribe_audio(file_obj):
+def transcribe_audio(file_obj, language=None):
     try:
         if not client:
             print(" No OpenAI client")
             return ""
 
-        print(" Transcribing file:", file_obj)
+        print(" Transcribing... Language:", language)
+
+        prompt_text = None
+        if language:
+            prompt_text = f"""
+        The speaker is speaking in {language}.
+
+        TASK:
+        Transcribe EXACTLY what is said.
+
+        RULES:
+        - Do NOT translate
+        - Do NOT summarize
+        - Do NOT explain
+        - Do NOT add anything
+        - Do NOT refuse or respond as an assistant
+        - Only output the spoken words
+
+        Output only the transcription.
+        """
+        if prompt_text:
+            prompt_text += "\nThe audio may contain background noise. Ignore noise and transcribe only spoken words."
 
         response = client.audio.transcriptions.create(
-            model="gpt-4o-mini-transcribe",
-            file=file_obj
+            model="gpt-4o-transcribe",
+            file=file_obj,
+            prompt=prompt_text
         )
 
-        print(" Response:", response)
+        text = response.text.strip()
 
-        return response.text
+        print(" TRANSCRIBED:", text)
+
+
+        if not text:
+            print(" Empty transcription")
+            return ""
+
+        if "sorry" in text.lower() or "cannot assist" in text.lower():
+            print(" Hallucinated transcription:", text)
+            return ""
+
+        return text
 
     except Exception as e:
         print(" Transcription error:", e)
@@ -690,6 +727,10 @@ def submit():
         last_name = request.form.get("last_name")
         test_type = request.form.get("test_type")
         language = request.form.get("language")
+        if language:
+            language = language.strip().capitalize()
+        else:
+            language = "English"
 
 
         a1 = request.form.get("answer1","")
@@ -880,15 +921,21 @@ as soon as possible to avoid losing customers."""
 
         # AUDIO 
         if test_type == "interpretation":
-            t1 = process_audio_file(request.form.get("audio1"))
-            t2 = process_audio_file(request.form.get("audio2"))
-            t3 = process_audio_file(request.form.get("audio3"))
-            t4 = process_audio_file(request.form.get("audio4"))
+            t1 = process_audio_file(request.form.get("audio1"), language)
+            t2 = process_audio_file(request.form.get("audio2"), language)
+            t3 = process_audio_file(request.form.get("audio3"), language)
+            t4 = process_audio_file(request.form.get("audio4"), language)
 
-            rev1 = process_audio_file(request.form.get("rev_audio1"))
-            rev2 = process_audio_file(request.form.get("rev_audio2"))
-            rev3 = process_audio_file(request.form.get("rev_audio3"))
-            rev4 = process_audio_file(request.form.get("rev_audio4"))
+
+            rev1 = process_audio_file(request.form.get("rev_audio1"), language)
+            rev2 = process_audio_file(request.form.get("rev_audio2"), language)
+            rev3 = process_audio_file(request.form.get("rev_audio3"), language)
+            rev4 = process_audio_file(request.form.get("rev_audio4"), language)
+
+            if not any([t1, t2, t3, t4]):
+                print(" No valid transcriptions detected")
+            else:
+                print(" Transcriptions received:", t1, t2, t3, t4)
 
         t1_en = ""
         t2_en = ""
