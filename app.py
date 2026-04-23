@@ -13,6 +13,7 @@ if not api_key:
 else:
     print(" OPENAI_API_KEY loaded")
     client = OpenAI(api_key=api_key)import base64
+import base64
 import io
 import re
 from nltk.translate.gleu_score import sentence_gleu
