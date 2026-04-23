@@ -315,6 +315,7 @@
 </select>
 <div id="domainWrapper" style="display:none;">
   <select name="domain" id="domainSelect">
+    <option value="" disabled selected>Select Domain</option>
     <option value="biology">Biology / Natural Sciences</option>
     <option value="criminal_justice">Criminal Justice</option>
     <option value="education">Education</option>
@@ -340,9 +341,10 @@
   >
 </div>
 
-<button type="button" id="startTestBtn" class="button" style="display:none;" onclick="startTest()">
+<button type="button" id="startTestBtn" class="button" style="display:none;" onclick="startTest()" disabled>
   Start Test
 </button>
+
 
 <datalist id="languages">
   <option value="Afrikaans">
@@ -862,6 +864,22 @@ function showTest() {
   section.style.display = "none";
 }
 
+function updateStartButtonState() {
+  const type = document.getElementById("testType").value;
+  const lang = document.getElementById("languageInput").value;
+  const domain = document.getElementById("domainSelect").value;
+
+  const startBtn = document.getElementById("startTestBtn");
+
+  if (!startBtn) return;
+
+  // Only control ENABLE/DISABLE (do NOT touch display)
+  if (type && lang && (type !== "translation" || domain)) {
+    startBtn.disabled = false;
+  } else {
+    startBtn.disabled = true;
+  }
+}
 // ------------------
 // LANGUAGE TRANSLATION 
 // ------------------
@@ -1229,6 +1247,12 @@ if (form) {
 
   });
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("testType").addEventListener("change", updateStartButtonState);
+  document.getElementById("languageInput").addEventListener("input", updateStartButtonState);
+  document.getElementById("domainSelect").addEventListener("change", updateStartButtonState);
+});
 
 // if (form) {
 //   form.addEventListener("submit", function(e) {

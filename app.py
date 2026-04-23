@@ -971,7 +971,7 @@ as soon as possible to avoid losing customers."""
             scores = []
 
             if domain:
-                parts.append(f"Domain: {domain}")
+                parts.append(f"Domain: {domain}\n")
 
             t_list = [t1, t2, t3, t4]
             rev_list = [rev1, rev2, rev3, rev4]
