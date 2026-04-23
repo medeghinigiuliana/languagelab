@@ -12,7 +12,7 @@ if not api_key:
     client = None
 else:
     print(" OPENAI_API_KEY loaded")
-    client = OpenAI(api_key=api_key)import base64
+    client = OpenAI(api_key=api_key)
 import base64
 import io
 import re
