@@ -933,9 +933,14 @@ let maxTime = 1200;
 
 function startTimer() {
   if (timerInterval) clearInterval(timerInterval);
+
   testStartTime = Date.now();
 
   document.getElementById("testTimer").style.display = "block";
+
+
+  const initialMinutes = String(Math.floor(maxTime / 60)).padStart(2, '0');
+  document.getElementById("timeValue").innerText = `${initialMinutes}:00`;
 
   timerInterval = setInterval(() => {
     const elapsed = Math.floor((Date.now() - testStartTime) / 1000);
@@ -947,6 +952,7 @@ function startTimer() {
     document.getElementById("timeValue").innerText = `${minutes}:${seconds}`;
 
     if (remaining <= 0) {
+      clearInterval(timerInterval);
       alert("Time is up. Submitting test.");
       document.querySelector("form").submit();
     }
@@ -959,6 +965,8 @@ function startTimer() {
 async function startTest() {
   const type = document.getElementById("testType").value;
   setMaxTime(type);
+  document.getElementById("testTimer").style.display = "none";
+  document.getElementById("timeValue").innerText = "00:00";
   const lang = document.getElementById("languageInput").value;
   const domainEl = document.getElementById("domainSelect");
   const domain = domainEl ? domainEl.value : "";
@@ -1042,7 +1050,7 @@ if (type === "interpretation" && !lang) {
       section.style.display = "block";
       section.scrollIntoView({ behavior: "smooth" });
 
-      startTimer(); // moved here
+      startTimer();
     }
   } catch (err) {
     document.getElementById("loadingIndicator").style.display = "none";
