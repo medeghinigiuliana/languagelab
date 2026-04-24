@@ -1236,7 +1236,7 @@ as soon as possible to avoid losing customers."""
 
                     transcription_score = score_transcription(original_en, translated_back)
 
-                    combined_score = max(0, round((final_ai * 0.6) + (transcription_score * 0.4), 2)
+                    combined_score = max(0, round((final_ai * 0.6) + (transcription_score * 0.4), 2))
                
                     print("AI:", final_ai, "Transcription:", transcription_score, "Final:", combined_score)
 
