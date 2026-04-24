@@ -923,9 +923,9 @@ function showTest() {
   }
 
   if (type === "editing" || type === "post_editing") {
-    section.style.display = "block";
-    if (startBtn) startBtn.style.display = "none";
-    if (submitBtn) submitBtn.style.display = "block";
+    section.style.display = "none"; 
+    if (startBtn) startBtn.style.display = "block";
+    startBtn.disabled = false; // no requirements
     return;
   }
 
