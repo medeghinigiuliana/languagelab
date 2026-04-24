@@ -720,9 +720,11 @@ def home():
     )
 
 @app.route("/get_translation")
+
 def get_translation():
     language = request.args.get("lang")
     domain = request.args.get("domain")
+    session["test_start"] = datetime.now(pytz.utc).isoformat()
 
     try:
         if domain:
@@ -842,6 +844,38 @@ def submit():
         step2 = request.form.get("step2_answer", "")
 
         violations = int(request.form.get("violations", 0))
+
+        # ---------------------------
+        # TIMER (PHASE 2 - SAFE)
+        # ---------------------------
+        time_taken = 0
+
+        if test_type == "translation":
+            MAX_TIME = 30 * 60
+        elif test_type == "editing":
+            MAX_TIME = 25 * 60
+        elif test_type == "post_editing":
+            MAX_TIME = 20 * 60
+        elif test_type == "interpretation":
+            MAX_TIME = 20 * 60
+        else:
+            MAX_TIME = 25 * 60
+
+        start_time_str = session.get("test_start")
+
+        if start_time_str:
+            try:
+               start_time = datetime.fromisoformat(start_time_str)
+               now = datetime.now(pytz.utc)
+
+               elapsed = (now - start_time).total_seconds()
+               time_taken = int(elapsed)
+
+               if elapsed > MAX_TIME:
+                   flag = "⏰ Time exceeded"
+
+            except Exception as e:
+                print("Timer error:", e)
 
         if violations >= 2:
             flag = "Suspicious (left test window)"

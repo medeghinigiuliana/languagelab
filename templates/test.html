@@ -922,8 +922,17 @@ function showTest() {
   checkReady();
 }
 
+let maxTime = 1200;
+
+    function setMaxTime(type) {
+      if (type === "translation") maxTime = 1800;      // 30 min
+      else if (type === "editing") maxTime = 1500;     // 25 min
+      else if (type === "post_editing") maxTime = 1200; // 20 min
+      else if (type === "interpretation") maxTime = 1200; // 20 min
+    }
 
 function startTimer() {
+  if (timerInterval) clearInterval(timerInterval);
   testStartTime = Date.now();
 
   document.getElementById("testTimer").style.display = "block";
@@ -936,7 +945,7 @@ function startTimer() {
 
     document.getElementById("timeValue").innerText = `${minutes}:${seconds}`;
 
-    if (elapsed > 1200) { // 20 min
+    if (elapsed > maxTime) {
       alert("Time is up. Submitting test.");
       document.querySelector("form").submit();
     }
@@ -948,6 +957,7 @@ function startTimer() {
 // ------------------
 async function startTest() {
   const type = document.getElementById("testType").value;
+  setMaxTime(type);
   const lang = document.getElementById("languageInput").value;
   const domainEl = document.getElementById("domainSelect");
   const domain = domainEl ? domainEl.value : "";
@@ -1031,6 +1041,8 @@ if (type === "interpretation" && !lang) {
     if (section) {
       section.style.display = "block";
       section.scrollIntoView({ behavior: "smooth" });
+
+      startTimer(); // moved here
     }
   } catch (err) {
     document.getElementById("loadingIndicator").style.display = "none";
