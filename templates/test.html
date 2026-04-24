@@ -828,8 +828,6 @@ document.addEventListener("visibilitychange", () => {
   if (document.hidden && !isSubmitting) {
     violationCount++;
 
-    alert(" Leaving the test window is not allowed.");
-
     const field = document.getElementById("violations");
     if (field) field.value = violationCount;
   }
