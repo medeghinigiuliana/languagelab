@@ -347,7 +347,7 @@
 </button>
 
 <div id="testTimer" style="display:none; margin-top:10px; text-align:center; font-weight:bold;">
-  Time: <span id="timeValue">00:00</span>
+  Time Remaining: <span id="timeValue">00:00</span>
 </div>
 
 <div id="loadingIndicator" style="display:none; margin-top: 15px; text-align:center; opacity:0.8;">
@@ -939,13 +939,14 @@ function startTimer() {
 
   timerInterval = setInterval(() => {
     const elapsed = Math.floor((Date.now() - testStartTime) / 1000);
+    const remaining = maxTime - elapsed;
 
-    const minutes = String(Math.floor(elapsed / 60)).padStart(2, '0');
-    const seconds = String(elapsed % 60).padStart(2, '0');
+    const minutes = String(Math.floor(remaining / 60)).padStart(2, '0');
+    const seconds = String(remaining % 60).padStart(2, '0');
 
     document.getElementById("timeValue").innerText = `${minutes}:${seconds}`;
 
-    if (elapsed > maxTime) {
+    if (remaining <= 0) {
       alert("Time is up. Submitting test.");
       document.querySelector("form").submit();
     }
@@ -990,7 +991,6 @@ if (type === "interpretation" && !lang) {
   document.getElementById("submitBtn").style.display = "block";
 
   document.getElementById("loadingIndicator").style.display = "block";
-  startTimer();
 
   // Hide all tests
   document.querySelectorAll('[id$="Test"]').forEach(el => {
