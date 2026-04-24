@@ -319,7 +319,6 @@
   <select name="domain" id="domainSelect">
     <option value="" disabled selected>Select Domain</option>
     <option value="biology">Biology / Natural Sciences</option>
-    <option value="criminal_justice">Criminal Justice</option>
     <option value="education">Education</option>
     <option value="finance">Finance</option>
     <option value="healthcare">Healthcare</option>
@@ -327,7 +326,6 @@
     <option value="it">IT (Infrastructure / Systems)</option>
     <option value="legal">Legal</option>
     <option value="manufacturing">Manufacturing</option>
-    <option value="marketing">Marketing</option>
     <option value="medical">Medical</option>
     <option value="software">Software (Applications / Code)</option>
   </select>
@@ -337,7 +335,6 @@
 <div id="languageWrapper" style="display:none;">
   <input 
     list="languages" 
-    name="language" 
     id="languageInput"
     placeholder="Select language"
   >
@@ -820,50 +817,6 @@ async function uploadAudio(base64Audio, fieldId) {
 let violationCount = 0;
 let isSubmitting = false;
 
-let recorders = {};
-let audioChunks = {};
-
-async function startRecording(id) {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-  const recorder = new MediaRecorder(stream);
-
-  audioChunks[id] = [];
-
-  recorder.ondataavailable = event => {
-    audioChunks[id].push(event.data);
-  };
-
-  recorder.onstop = function () {
-    const blob = new Blob(audioChunks[id], { type: "audio/webm" });
-
-    const reader = new FileReader();
-
-    reader.onloadend = function () {
-      const base64Audio = reader.result;
-
-      
-      uploadAudio(base64Audio, "audioData" + id.replace("audio","").replace("rev","rev"));
-    };
-
-    reader.readAsDataURL(blob);
-  };
-
-  recorder.start();
-  recorders[id] = recorder;
-
-  document.getElementById("status-" + id).innerText = "Recording...";
-}
-
-function stopRecording(id) {
-  const recorder = recorders[id];
-
-  if (recorder && recorder.state === "recording") {
-    recorder.stop();
-    document.getElementById("status-" + id).innerText = "Uploading...";
-  }
-}
-
 // disable detection on success page
 if (window.location.search.includes("success=1")) {
   isSubmitting = true;
@@ -889,27 +842,76 @@ document.addEventListener("keydown", function(e) {
 document.addEventListener("contextmenu", e => e.preventDefault());
 
 let timers = {};
+let testStartTime = null;
+let timerInterval = null;
 
 // ------------------
 // SHOW / HIDE TEST
 // ------------------
+function checkReady() {
+  const testType = document.getElementById("testType");
+  const languageInput = document.getElementById("languageInput");
+  const startBtn = document.getElementById("startTestBtn");
+  const domain = document.getElementById("domainSelect");
+
+  if (!testType || !languageInput || !startBtn) return;
+
+  const type = testType.value;
+  const lang = languageInput.value.trim();
+  const dom = domain ? domain.value : "";
+
+  if (type === "editing" || type === "post_editing") {
+    startBtn.style.display = "none";
+    startBtn.disabled = true;
+    return;
+  }
+
+  if (type === "interpretation") {
+    startBtn.style.display = "block";
+    startBtn.disabled = !lang;
+    return;
+  }
+
+  if (type === "translation") {
+    startBtn.style.display = "block";
+    startBtn.disabled = !(lang && dom);
+    return;
+  }
+
+  startBtn.style.display = "block";
+  startBtn.disabled = true;
+}
+
 function showTest() {
-  const type = document.getElementById("testType").value;
+  const testType = document.getElementById("testType");
+  if (!testType) return;
+
+  const type = testType.value;
+  const startBtn = document.getElementById("startTestBtn");
+  const submitBtn = document.getElementById("submitBtn");
+  const loadingIndicator = document.getElementById("loadingIndicator");
 
   // Hide all
   document.querySelectorAll('[id$="Test"]').forEach(el => {
     el.style.display = "none";
   });
 
+  if (submitBtn) submitBtn.style.display = "none";
+  if (loadingIndicator) loadingIndicator.style.display = "none";
+
   toggleLanguage();
 
   const section = document.getElementById(type + "Test");
 
-  if (!section) return;
+  if (!section) {
+    checkReady();
+    return;
+  }
 
   if (type === "editing" || type === "post_editing") {
     section.style.display = "block";
-    document.getElementById("startTestBtn").style.display = "none";
+    if (startBtn) startBtn.style.display = "none";
+    if (submitBtn) submitBtn.style.display = "block";
     return;
   }
 
@@ -969,6 +971,9 @@ if (type === "interpretation" && !lang) {
 
 
   lockTestFields();
+
+  const startBtn = document.getElementById("startTestBtn");
+  if (startBtn) startBtn.style.display = "none";
 
   document.getElementById("submitBtn").style.display = "block";
 
@@ -1093,7 +1098,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const startBtn = document.getElementById("startTestBtn");
   const domain = document.getElementById("domainSelect"); 
 
-  function checkReady() {
+  function updateStartButton() {
     const type = testType.value;
     const lang = languageInput.value;
     const dom = domain ? domain.value : "";
@@ -1124,10 +1129,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   if (testType) {
-    testType.addEventListener("change", function () {
-      toggleLanguage();
-      checkReady();
-    });
+    testType.addEventListener("change", showTest);
   }
 
   if (languageInput) {
@@ -1143,12 +1145,7 @@ document.addEventListener("DOMContentLoaded", function () {
     startBtn.addEventListener("click", startTest);
   }
 
-  toggleLanguage();
-  checkReady();
-
-  document.querySelectorAll('[id$="Test"]').forEach(el => {
-    el.style.display = "none";
-  });
+  showTest();
 });
 
 // ------------------
@@ -1341,13 +1338,14 @@ function lockTestFields() {
   const language = document.getElementById("languageInput");
   const domain = document.getElementById("domainSelect");
 
-  if (testType) testType.disabled = true;
-  if (language) language.disabled = true;
-  if (domain) domain.disabled = true;
+  [testType, language, domain].forEach(field => {
+    if (!field) return;
+    field.setAttribute("aria-disabled", "true");
+    field.style.pointerEvents = "none";
+    field.style.opacity = "0.6";
+    field.tabIndex = -1;
+  });
 }
-
-
-});
 
 // if (form) {
 //   form.addEventListener("submit", function(e) {
