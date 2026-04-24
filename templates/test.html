@@ -343,7 +343,7 @@
   >
 </div>
 
-<button type="button" id="startTestBtn" class="button" style="display:block;" onclick="startTest()" disabled>
+<button type="button" id="startTestBtn" class="button" style="display:block;" disabled>
   Start Test
 </button>
 
@@ -944,12 +944,29 @@ function startTimer() {
 async function startTest() {
   const type = document.getElementById("testType").value;
   const lang = document.getElementById("languageInput").value;
-  const domain = document.getElementById("domainSelect").value;
+  const domainEl = document.getElementById("domainSelect");
+  const domain = domainEl ? domainEl.value : "";
 
-  if (!type || !lang || (type === "translation" && !domain)) {
-    alert("Please select test type, language, and domain");
-    return;
-  }
+if (!type) {
+  alert("Please select test type");
+  return;
+}
+
+// Translation → needs language + domain
+if (type === "translation" && (!lang || !domain)) {
+  alert("Please select language and domain");
+  return;
+}
+
+// Interpretation → needs language only
+if (type === "interpretation" && !lang) {
+  alert("Please select language");
+  return;
+}
+
+// Editing / Post-editing → no requirements
+
+
   lockTestFields();
 
   document.getElementById("submitBtn").style.display = "block";
@@ -1329,6 +1346,7 @@ function lockTestFields() {
   if (language) language.disabled = true;
   if (domain) domain.disabled = true;
 }
+
 
 });
 
