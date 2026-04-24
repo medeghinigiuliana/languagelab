@@ -863,14 +863,19 @@ function checkReady() {
   const dom = domain ? domain.value : "";
 
   if (type === "editing" || type === "post_editing") {
-    startBtn.style.display = "none";
-    startBtn.disabled = true;
+    section.style.display = "block";
+
+    if (startBtn) startBtn.style.display = "none";
+    if (submitBtn) submitBtn.style.display = "block";
+
     setMaxTime(type);
 
     document.getElementById("testTimer").style.display = "none";
     document.getElementById("timeValue").innerText = "00:00";
 
-    startTimer();
+    setTimeout(() => {
+      startTimer();
+    }, 100);
 
     return;
   }
