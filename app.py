@@ -57,6 +57,12 @@ DOMAIN_TESTS = {
 "step2_en": """All confidential information disclosed under this Agreement shall remain protected and shall not be shared without prior written authorization. This obligation shall survive termination for a specified period and applies to all proprietary materials, including financial data and operational processes. Parties must implement safeguards to prevent unauthorized disclosure or misuse. Any breach may result in legal action, including compensation for damages and enforcement measures. This Agreement shall be governed by applicable jurisdictional laws, and disputes unresolved through negotiation shall be submitted to arbitration, with decisions considered final and legally binding."""
 },
 
+"criminal_justice": {
+"step1_en": """The investigation report documented a sequence of events related to the alleged offense, including witness statements, evidence collection procedures, and the initial response by law enforcement personnel. Officers were required to preserve the integrity of the scene, maintain a clear chain of custody, and ensure that all actions complied with constitutional protections. Any procedural error could affect the admissibility of evidence and influence subsequent prosecutorial decisions. Accurate documentation and impartial analysis are essential to support a fair judicial process and protect the rights of all parties involved.""",
+
+"step2_en": """Court proceedings require careful coordination among law enforcement, prosecutors, defense counsel, and judicial staff. Evidence must be reviewed according to established legal standards, and testimony should be presented clearly and accurately. Victim and witness information must be handled with appropriate confidentiality to prevent intimidation or unnecessary disclosure. Sentencing recommendations may consider statutory guidelines, aggravating factors, mitigating circumstances, and rehabilitation options. Effective communication throughout the criminal justice process helps ensure accountability, procedural fairness, and respect for due process."""
+},
+
 "medical": {
 "step1_en": """The patient presented with acute respiratory distress, characterized by reduced oxygen saturation and increased heart rate. Clinical evaluation indicated progressive symptom escalation despite prior treatment. Immediate intervention was required, including oxygen therapy and pharmacological support to stabilize airway function. Continuous monitoring was initiated to assess vital parameters and response to treatment. Diagnostic procedures, including imaging and laboratory analysis, were conducted to identify underlying causes and guide clinical decisions aimed at preventing further complications.""",
 
@@ -91,6 +97,12 @@ DOMAIN_TESTS = {
 "step1_en": """Production inefficiencies were identified due to equipment malfunctions and disruptions within the supply chain. Delays in material availability and maintenance issues contributed to reduced output and increased operational costs. Process evaluation highlighted the need for improved coordination and resource management. Implementing preventive maintenance and optimizing workflow processes are critical to enhancing efficiency and minimizing downtime.""",
 
 "step2_en": """Quality assurance procedures must detect defects before products reach distribution channels. Failure to identify inconsistencies can lead to customer dissatisfaction and increased return rates. Standardized processes and regular inspections are essential to maintaining product integrity. Continuous improvement initiatives should focus on reducing errors, improving efficiency, and ensuring compliance with industry standards."""
+},
+
+"marketing": {
+"step1_en": """The campaign strategy focused on increasing brand awareness among targeted customer segments through coordinated digital channels, audience research, and performance measurement. Initial analysis identified gaps in messaging consistency and limited engagement across key platforms. The marketing team developed revised content guidelines, adjusted media placements, and implemented tracking metrics to evaluate conversion behavior. Effective execution requires alignment between creative direction, customer insights, budget allocation, and measurable business objectives to ensure that promotional efforts generate meaningful results and support long-term brand positioning.""",
+
+"step2_en": """Market research indicated that customer expectations are shifting toward personalized communication, transparent product information, and faster response times. Promotional materials must therefore communicate value clearly while maintaining consistency with brand identity and regulatory requirements. Campaign performance should be evaluated using reliable data, including reach, engagement, conversion rates, and customer retention indicators. Collaboration among sales, marketing, and product teams is necessary to refine messaging, optimize channel selection, and improve the customer journey across all major touchpoints."""
 },
 
 "hr": {
