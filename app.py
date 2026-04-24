@@ -5,6 +5,64 @@ from openai import OpenAI
 import os
 
 
+# ---------------------------
+# SCORING FUNCTIONS (PHASE 2)
+# ---------------------------
+import re
+from difflib import SequenceMatcher
+
+
+def normalize_text(text):
+    if not text:
+        return ""
+    text = text.lower()
+    text = re.sub(r"[^\w\s]", "", text)
+    return text.strip()
+
+
+def similarity(a, b):
+    return SequenceMatcher(None, a, b).ratio()
+
+
+def score_translation(answer, reference):
+    if not answer or not reference:
+        return 0
+
+    a = normalize_text(answer)
+    r = normalize_text(reference)
+
+    sim = similarity(a, r)
+
+    len_ratio = len(a) / max(len(r), 1)
+
+    if len_ratio < 0.5 or len_ratio > 1.8:
+        penalty = 0.7
+    else:
+        penalty = 1.0
+
+    score = sim * 10 * penalty
+    return round(score, 2)
+
+
+def score_editing(answer, original):
+    if not answer or not original:
+        return 0
+
+    a = normalize_text(answer)
+    o = normalize_text(original)
+
+    change_ratio = 1 - similarity(a, o)
+
+    len_ratio = len(a) / max(len(o), 1)
+
+    if len_ratio < 0.6:
+        length_penalty = 0.6
+    else:
+        length_penalty = 1.0
+
+    score = (change_ratio * 6 + similarity(a, o) * 4) * length_penalty
+    return round(score, 2)
+
 api_key = os.getenv("OPENAI_API_KEY")
 
 if not api_key:
@@ -667,16 +725,68 @@ def score_translation_step(source, candidate, direction):
         if not candidate or not candidate.strip():
             return 0
 
-        return 5
-    except:
+        # SEMANTIC (AI)
+        semantic = semantic_similarity(source, candidate)
+
+        # BLEU (0–1 → 0–10)
+        bleu = calculate_bleu(source, candidate) * 10
+
+        # TER (lower is better → invert)
+        ter = calculate_ter(source, candidate)
+        ter_score = max(0, 10 - (ter / 10))
+
+        final = (
+            semantic * 0.5 +
+            bleu * 0.3 +
+            ter_score * 0.2
+        )
+
+        return round(final, 2)
+
+    except Exception as e:
+        print("Translation scoring error:", e)
         return 0
 
-def score_translation_step(source, candidate, direction):
+def score_transcription(original, transcription):
     try:
-        if not candidate or not candidate.strip():
+        if not transcription or len(transcription.split()) < 3:
             return 0
-        return 5
-    except:
+
+        # ---------------------------
+        # SEMANTIC ACCURACY (0–10)
+        # ---------------------------
+        semantic = semantic_similarity(original, transcription)
+
+        # ---------------------------
+        # COMPLETENESS (length ratio)
+        # ---------------------------
+        len_ratio = len(transcription.split()) / max(len(original.split()), 1)
+
+        if len_ratio < 0.5:
+            completeness = 3
+        elif len_ratio < 0.8:
+            completeness = 6
+        else:
+            completeness = 10
+
+        # ---------------------------
+        # HALLUCINATION PENALTY
+        # ---------------------------
+        overlap = len(set(original.split()) & set(transcription.split())) / max(len(original.split()), 1)
+
+        hallucination_penalty = 0
+        if overlap < 0.4:
+            hallucination_penalty = 3
+
+        # ---------------------------
+        # FINAL SCORE
+        # ---------------------------
+        final = (semantic * 0.6 + completeness * 0.4) - hallucination_penalty
+
+        return round(max(0, final), 2)
+
+    except Exception as e:
+        print("Transcription scoring error:", e)
         return 0
 
 
@@ -797,6 +907,9 @@ def submit():
         gleu_score = None
         bleu_score = 0
         ter_score = 100
+
+        p_score = 0
+
         # ---------------------------
         # SAFE DEFAULTS (DO NOT REMOVE)
         # ---------------------------
@@ -1047,6 +1160,7 @@ as soon as possible to avoid losing customers."""
 
             # post_edit_score = score_post_edit(mt_original, mt1)
             post_edit_score = score_post_edit(mt_original, mt1)
+            p_score = get_score(post_edit_score)
 
             gleu_score = calculate_gleu(
                 "The system presents many errors and does not work correctly on all devices. Users are reporting that the application crashes frequently when they try to upload files, and the interface is not intuitive, causing confusion. Also, the loading times are too long, making the experience very frustrating for clients. Improvements must be made as soon as possible to avoid losing customers.",
@@ -1118,9 +1232,15 @@ as soon as possible to avoid losing customers."""
                     parts.append(f"\n AUDIO {i+1} (EN → {language})")
                     parts.append(score_text)
 
-                    acc, comp, flu, final_score = extract_detailed_scores(score_text)
+                    acc, comp, flu, final_ai = extract_detailed_scores(score_text)
 
-                    scores.append(final_score)
+                    transcription_score = score_transcription(original_en, translated_back)
+
+                    combined_score = max(0, round((final_ai * 0.6) + (transcription_score * 0.4), 2)
+               
+                    print("AI:", final_ai, "Transcription:", transcription_score, "Final:", combined_score)
+
+                    scores.append(combined_score)
 
                     if i == 0: t1_en = translated_back
                     elif i == 1: t2_en = translated_back
@@ -1193,34 +1313,49 @@ as soon as possible to avoid losing customers."""
                     completeness_penalty = 0.75
 
             # ---------------------------
-            # FINAL EDITING SCORE
+            # IMPROVED EDITING SCORING
             # ---------------------------
+            ter_scaled = max(0, 10 - (ter_score / 10))
+
+            # Reward improvement vs original
+            improvement_bonus = max(0, (bleu_edited - bleu_original) * 10)
+
+            # Penalize if too similar to original (no editing)
+            similarity_penalty = 0
+            if similarity(normalize_text(original_text), normalize_text(edit1)) > 0.9:
+                similarity_penalty = 2
+
             editing_final_score = round(
                 (
-                    (e_score * 0.6) +
-                    (bleu_bonus * 0.2) +
-                    (ter_scaled * 0.2)
-                ) * completeness_penalty,
+                    (e_score * 0.5) +           # AI quality
+                    (ter_scaled * 0.3) +        # correctness
+                    (improvement_bonus * 0.2)   # actual editing improvement
+                ) - similarity_penalty,
                 2
             )
-
-        p_score = get_score(post_edit_score)
-        if test_type == "post_editing" and mt_original:
-            p_score = apply_completion_penalty(mt_original, mt1, p_score)
-
-        final_score = None
 
         # ---------------------------
         # FINAL SCORE SELECTION
         # ---------------------------
-        if test_type == "post_editing":
-            gleu_scaled = (gleu_score or 0) * 10
-            ter_scaled = max(0, 10 - (ter_score / 10))
+        ter_scaled = max(0, 10 - (ter_score / 10))
+        gleu_scaled = (gleu_score or 0) * 10
 
+        # Detect overly literal MT (low improvement)
+        similarity_to_mt = 0
+        if test_type == "post_editing" and mt_original and mt1:
+            similarity_to_mt = similarity(normalize_text(mt_original), normalize_text(mt1))
+
+        literal_penalty = 0
+        if similarity_to_mt > 0.9:
+            literal_penalty = 2
+
+        if test_type == "post_editing":
             final_score = round(
-                (p_score * 0.5) +
-                (gleu_scaled * 0.3) +
-                (ter_scaled * 0.2),
+                (
+                    (p_score * 0.5) +
+                    (gleu_scaled * 0.3) +
+                    (ter_scaled * 0.2)
+                ) - literal_penalty,
                 2
             )
 
@@ -1233,7 +1368,8 @@ as soon as possible to avoid losing customers."""
         elif test_type == "interpretation":
             final_score = i_score
 
-        final_score = final_score if final_score is not None else 0
+        final_score = max(0, final_score or 0)
+        editing_final_score = max(0, editing_final_score or 0)
        
 
         # ---------------------------
