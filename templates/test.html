@@ -865,6 +865,13 @@ function checkReady() {
   if (type === "editing" || type === "post_editing") {
     startBtn.style.display = "none";
     startBtn.disabled = true;
+    setMaxTime(type);
+
+    document.getElementById("testTimer").style.display = "none";
+    document.getElementById("timeValue").innerText = "00:00";
+
+    startTimer();
+
     return;
   }
 
