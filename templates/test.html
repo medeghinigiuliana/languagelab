@@ -308,7 +308,7 @@
 
 <!-- EMAIL -->
 <input type="email" name="email" placeholder="Your email" required>
-<select name="test_type" id="testType" onchange="showTest();" required>
+<select name="test_type" id="testType" required>
   <option value="">Select Test Type</option>
   <option value="translation">Translation</option>
   <option value="editing">Editing</option>
@@ -334,7 +334,7 @@
 </div>
 
 <!-- LANGUAGE -->
-<div id="languageWrapper">
+<div id="languageWrapper" style="display:none;">
   <input 
     list="languages" 
     name="language" 
@@ -915,6 +915,7 @@ function showTest() {
 
   // Other tests → wait for Start
   section.style.display = "none";
+  checkReady();
 }
 
 
@@ -1065,24 +1066,22 @@ async function updateLanguage() {
   const langWrapper = document.getElementById("languageWrapper");
   const domainWrapper = document.getElementById("domainWrapper");
 
+  if (!langWrapper || !domainWrapper) return;
+
   // Reset
   langWrapper.style.display = "none";
   domainWrapper.style.display = "none";
 
-  // Translation → needs BOTH
   if (type === "translation") {
     langWrapper.style.display = "block";
     domainWrapper.style.display = "block";
-    return;
   }
 
-  // Interpretation → ONLY language
-  if (type === "interpretation") {
+  else if (type === "interpretation") {
     langWrapper.style.display = "block";
-    return;
   }
 
-  // Editing / Post-editing → NONE
+  // Editing / Post-editing → nothing shown
 }
 
 // ------------------
