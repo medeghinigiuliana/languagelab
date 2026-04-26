@@ -65,6 +65,7 @@ def score_editing(answer, original):
     return round(score, 2)
 
 api_key = os.getenv("OPENAI_API_KEY")
+LAST_TRANSLATION_ERROR = None
 
 
 import base64
@@ -631,6 +632,9 @@ CANDIDATE:
         return 0
 
 def translate_to_target(text, language):
+    global LAST_TRANSLATION_ERROR
+    LAST_TRANSLATION_ERROR = None
+
     try:
         response = client.chat.completions.create(
             model="gpt-4o-mini",
@@ -652,6 +656,7 @@ def translate_to_target(text, language):
         return result
 
     except Exception as e:
+        LAST_TRANSLATION_ERROR = str(e)
         print("Translation error:", e)
         return text
 
@@ -935,7 +940,17 @@ def get_translation():
             for text in REVERSE_TEXTS
         ]
 
-        return {"target_texts": target_texts}
+        response = {"target_texts": target_texts}
+
+        if request.args.get("debug") == "1":
+            response["debug"] = {
+                "language": language or "Spanish",
+                "api_key_present": bool(os.getenv("OPENAI_API_KEY")),
+                "last_translation_error": LAST_TRANSLATION_ERROR,
+                "first_text_changed": target_texts[0] != REVERSE_TEXTS[0]
+            }
+
+        return response
 
     except Exception as e:
         print("TRANSLATION ERROR:", e)
