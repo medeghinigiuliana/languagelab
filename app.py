@@ -342,9 +342,13 @@ def calculate_ter(reference, candidate):
     try:
         ter = TER()
         score = ter.sentence_score(candidate, [reference]).score
-        return round(score, 2)
+
+        # Normalize to 0-1
+        score = score / 100
+
+        return round(score, 4)
     except:
-        return 100
+        return 1.0
 
 def calculate_bleu(reference, candidate):
     try:
@@ -804,7 +808,7 @@ def score_translation_step(source, candidate, direction):
 
         # TER (lower is better → invert)
         ter = calculate_ter(source, candidate)
-        ter_score = max(0, 10 - (ter / 10))
+        ter_score = (1 - ter) * 10
 
         final = (
             semantic * 0.5 +
@@ -885,19 +889,20 @@ def home():
     language = request.args.get("lang") or request.form.get("language")
     print("LANG RECEIVED:", language)
 
-    if language:
-        target_texts = [
-            translate_to_target(text, language)
-            for text in REVERSE_TEXTS
-        ]
-    else:
-        target_texts = REVERSE_TEXTS
+    target_texts = [
+        translate_to_target(text, language or "Spanish")
+        for text in REVERSE_TEXTS
+    ]
+    t1 = target_texts[0]
+    t2 = target_texts[1]
 
     return render_template(
         "test.html",
         success=success,
         target_texts=target_texts,
-        language=language
+        language=language,
+        t1=t1,
+        t2=t2
     )
 
 @app.route("/get_translation")
@@ -917,7 +922,7 @@ def get_translation():
             step1_original = step1_en
             step2_original = step2_en
 
-            step2_target = translate_to_target(step2_en, language)
+            step2_target = translate_to_target(step2_en, language or "Spanish")
 
             return {
                 "step1_en": step1_en,
@@ -925,13 +930,10 @@ def get_translation():
                 "step2_en": step2_en
             }
 
-        if language:
-            target_texts = [
-                translate_to_target(text, language)
-                for text in REVERSE_TEXTS
-            ]
-        else:
-            target_texts = REVERSE_TEXTS
+        target_texts = [
+            translate_to_target(text, language or "Spanish")
+            for text in REVERSE_TEXTS
+        ]
 
         return {"target_texts": target_texts}
 
