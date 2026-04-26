@@ -2,7 +2,11 @@ from flask import Flask, render_template, request, Response, redirect, url_for
 import sqlite3
 import os
 from openai import OpenAI
-import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+print("API KEY LOADED:", os.getenv("OPENAI_API_KEY"))
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
