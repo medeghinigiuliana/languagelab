@@ -4,6 +4,7 @@ import os
 from openai import OpenAI
 import os
 
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # ---------------------------
 # SCORING FUNCTIONS (PHASE 2)
@@ -65,12 +66,7 @@ def score_editing(answer, original):
 
 api_key = os.getenv("OPENAI_API_KEY")
 
-if not api_key:
-    print(" Missing OPENAI_API_KEY")
-    client = None
-else:
-    print(" OPENAI_API_KEY loaded")
-    client = OpenAI(api_key=api_key)
+
 import base64
 import io
 import re
@@ -405,6 +401,67 @@ def get_score(text):
     except:
         return 0
 
+def extract_editing_scores(text):
+    try:
+        def get(label):
+            match = re.search(rf"{label}:\s*(\d+)/10", text)
+            return int(match.group(1)) if match else 0
+
+        return {
+            "grammar": get("GRAMMAR"),
+            "clarity": get("CLARITY"),
+            "completeness": get("COMPLETENESS"),
+            "final": get("FINAL_SCORE")
+        }
+    except:
+        return {
+            "grammar": 0,
+            "clarity": 0,
+            "completeness": 0,
+            "final": 0
+        }
+
+def detect_mt_similarity(source_text, candidate_translation):
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """You are detecting machine translation usage.
+
+Compare the candidate translation to typical machine translation output.
+
+Return ONLY:
+
+MT_SIMILARITY: X/10
+LIKELY_MT: YES or NO
+"""
+                },
+                {
+                    "role": "user",
+                    "content": f"Source:\n{source_text}\n\nCandidate:\n{candidate_translation}"
+                }
+            ]
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        print("MT DETECTION ERROR:", e)
+        return "MT_SIMILARITY: 0/10\nLIKELY_MT: NO"
+
+def extract_mt_info(text):
+    try:
+        similarity_match = re.search(r"MT_SIMILARITY:\s*(\d+)/10", text)
+        likely_match = re.search(r"LIKELY_MT:\s*(YES|NO)", text)
+
+        return {
+            "mt_score": int(similarity_match.group(1)) if similarity_match else 0,
+            "likely_mt": likely_match.group(1) if likely_match else "NO"
+        }
+    except:
+        return {"mt_score": 0, "likely_mt": "NO"}
+
+
 def extract_detailed_scores(text):
     try:
         acc = re.search(r'ACCURACY:\s*(\d+)', text)
@@ -653,7 +710,12 @@ FINAL: X/10
             ]
         )
 
-        return response.choices[0].message.content.strip()
+        return {
+            "raw": response.choices[0].message.content.strip(),
+            "grammar": None,
+            "clarity": None,
+            "completeness": None
+        }
 
     except:
         return "SCORE: 0/10\nExplanation: Evaluation failed."
@@ -666,21 +728,30 @@ def score_editing(original, edited):
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": """Evaluate the edited text.
+                {
+                    "role": "system",
+                    "content": """Evaluate the edited text.
 
-                1. Check if the FULL text was edited. If parts are missing or only partially edited, clearly state that the response is incomplete.
-                2. Evaluate grammar, clarity, and naturalness.
-                3. Penalize heavily if the response is incomplete.
+Score from 1–10:
 
-                Return:
-                FINAL_SCORE: X/10
-                Explanation: Brief explanation including whether the response is complete or incomplete.
-                """},
-                {"role": "user", "content": f"{original}\n{edited}"}
-            ]
-        )
+1. Grammar accuracy
+2. Clarity and readability
+3. Completeness (was the full text edited?)
+
+Return ONLY in this format:
+
+GRAMMAR: X/10
+CLARITY: X/10
+COMPLETENESS: X/10
+FINAL_SCORE: X/10
+"""
+        },
+        {"role": "user", "content": f"{original}\n{edited}"}
+    ]
+)
         return response.choices[0].message.content.strip()
-    except:
+    except Exception as e:
+        print("EDITING ERROR:", e)
         return "SCORE: 0/10"
 
 def score_post_edit(mt_text, edited):
@@ -1031,6 +1102,7 @@ def submit():
         # ---------------------------
         # TRANSLATION SCORING (UPGRADED)
         # ---------------------------
+        step1 = request.form.get("step1_answer")
         if test_type == "translation":
             domain = request.form.get("domain")
 
@@ -1039,6 +1111,16 @@ def submit():
                 step2_en = DOMAIN_TESTS[domain]["step2_en"]
                 step1_original = step1_en
                 step2_original = step2_en
+
+                if step1:
+                    mt_result = detect_mt_similarity(step1_en, step1)
+                    print("MT CHECK:", mt_result)
+                    mt_data = extract_mt_info(mt_result)
+                    print("MT PARSED:", mt_data)
+                else:
+                    mt_result = "MT_SIMILARITY: 0/10\nLIKELY_MT: NO"
+                    mt_data = {"mt_score": 0, "likely_mt": "NO"}
+                
 
                 score1 = 0
                 score2 = 0
@@ -1071,13 +1153,13 @@ def submit():
                 # ANTI-CHEAT CHECK
                 # ---------------------------
                 if detect_suspicious_behavior(step1_en, step1):
-                    flag = "⚠️ Suspicious (Step 1)"
+                    flag = "Suspicious (Step 1)"
 
                 if detect_suspicious_behavior(step2_en, step2):
                     if "Suspicious" in flag:
                         flag += " + Step 2"
                     else:
-                        flag = "⚠️ Suspicious (Step 2)"
+                        flag = "Suspicious (Step 2)"
 
                 # ---------------------------
                 # ROUND-TRIP CONSISTENCY
@@ -1102,14 +1184,66 @@ def submit():
                 # FINAL SCORE (WEIGHTED)
                 # ---------------------------
                 semantic_score = semantic_similarity(step1_en, step1)
+                mt_penalty = 0
 
-                final_translation_score = round(
+                if mt_data["likely_mt"] == "YES":
+                    mt_penalty = mt_data["mt_score"] * 0.3
+
+                final_translation_score = max(0,round(
+                    (
+                        (score1 * 0.3) +
+                        (score2 * 0.3) +
+                        (round_trip_score * 0.2) +
+                        (semantic_score * 0.2)
+                    ) - mt_penalty,
+                    2
+                ))
+                # ---------------------------
+                # DECISION ENGINE (FINAL LAYER)
+                # ---------------------------
+                decision = "REVIEW"
+                confidence = "MEDIUM"
+                reason = []
+
+                # AUTO FAIL (high MT usage)
+                if mt_data["mt_score"] >= 8:
+                    decision = "FAIL"
+                    confidence = "HIGH"
+                    reason.append("High similarity to machine translation output")
+
+                # LOW QUALITY FAIL
+                elif final_translation_score < 4:
+                    decision = "FAIL"
+                    confidence = "HIGH"
+                    reason.append("Translation quality is too low")
+
+                # REVIEW
+                elif 4 <= final_translation_score < 7:
+                    decision = "REVIEW"
+                    confidence = "MEDIUM"
+                    reason.append("Moderate quality — requires human review")
+
+                # PASS
+                elif final_translation_score >= 7:
+                    decision = "PASS"
+                    confidence = "HIGH"
+                    reason.append("Good translation quality with low MT risk")
+
+                explanation = " | ".join(reason)
+
+                print("---- DEBUG MT PENALTY ----")
+                print("MT DATA:", mt_data)
+                print("MT PENALTY:", mt_penalty)
+
+                print("FINAL BEFORE PENALTY:", 
                     (score1 * 0.3) +
                     (score2 * 0.3) +
                     (round_trip_score * 0.2) +
-                    (semantic_score * 0.2),
-                    2
+                    (semantic_score * 0.2)
                 )
+
+                print("FINAL AFTER PENALTY:", final_translation_score)
+                print("--------------------------")
 
                 translation_score = f"""
 STEP 1 SCORE: {score1}/10
@@ -1117,6 +1251,10 @@ STEP 2 SCORE: {score2}/10
 CONSISTENCY: {round_trip_score}/10
 
 FINAL: {final_translation_score}/10
+
+DECISION: {decision}
+CONFIDENCE: {confidence}
+REASON: {explanation}
 """
             else:
                 final_translation_score = 0
@@ -1135,8 +1273,17 @@ between departments, which affect negatively the overall performance."""
             reference_text = "The company doesn't have enough information to make a decision about the project."
 
             # AI score
-            # editing_score = score_editing(original_text, edit1)
             editing_score = score_editing(original_text, edit1)
+
+            editing_details = extract_editing_scores(editing_score)
+
+            print("RAW:", editing_score)
+            print("PARSED:", editing_details)
+
+            grammar_score = editing_details["grammar"]
+            clarity_score = editing_details["clarity"]
+            completeness_score = editing_details["completeness"]
+            final_edit_score = editing_details["final"]
 
             # BLEU
             bleu_original = calculate_bleu(reference_text, original_text)
@@ -1327,10 +1474,11 @@ as soon as possible to avoid losing customers."""
 
             editing_final_score = round(
                 (
-                    (e_score * 0.5) +           # AI quality
-                    (ter_scaled * 0.3) +        # correctness
-                    (improvement_bonus * 0.2)   # actual editing improvement
-                ) - similarity_penalty,
+                    (grammar_score * 0.3) +
+                    (clarity_score * 0.3) +
+                    (completeness_score * 0.4) +
+                    (ter_scaled * 0.2)
+                ),
                 2
             )
 
