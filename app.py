@@ -51,7 +51,7 @@ def score_translation(answer, reference):
     return round(score, 2)
 
 
-def score_editing(answer, original):
+def score_editing_rule_based(answer, original):
     if not answer or not original:
         return 0
 
@@ -357,12 +357,21 @@ def calculate_ter(reference, candidate):
     except:
         return 1.0
 
+from nltk.translate.bleu_score import SmoothingFunction
+
 def calculate_bleu(reference, candidate):
     try:
         ref_tokens = reference.split()
         cand_tokens = candidate.split()
 
-        score = sentence_bleu([ref_tokens], cand_tokens)
+        smooth = SmoothingFunction().method1
+
+        score = sentence_bleu(
+            [ref_tokens],
+            cand_tokens,
+            smoothing_function=smooth
+        )
+
         return round(score, 2)
     except:
         return 0
@@ -415,14 +424,14 @@ def get_score(text):
 def extract_editing_scores(text):
     try:
         def get(label):
-            match = re.search(rf"{label}:\s*(\d+)/10", text)
+            match = re.search(rf"{label}:\s*(\d+)/10", text, re.IGNORECASE)
             return int(match.group(1)) if match else 0
 
         return {
             "grammar": get("GRAMMAR"),
             "clarity": get("CLARITY"),
             "completeness": get("COMPLETENESS"),
-            "final": get("FINAL_SCORE")
+            "final": get("FINAL_SCORE") or get("FINAL")
         }
     except:
         return {
@@ -735,7 +744,7 @@ FINAL: X/10
     except:
         return "SCORE: 0/10\nExplanation: Evaluation failed."
 
-def score_editing(original, edited):
+def score_editing_ai(original, edited):
     try:
         if not edited.strip():
             return "SCORE: 0/10"
@@ -768,6 +777,72 @@ FINAL_SCORE: X/10
     except Exception as e:
         print("EDITING ERROR:", e)
         return "SCORE: 0/10"
+
+def evaluate_editing_combined(original, edited):
+    try:
+        if not edited.strip():
+            return {
+                "grammar": 0,
+                "clarity": 0,
+                "completeness": 0,
+                "final": 0
+            }
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            temperature=0,
+            messages=[
+                {
+                    "role": "system",
+                    "content": """
+You are a professional linguistic evaluator.
+
+Evaluate the edited text based on:
+
+1. GRAMMAR (0–10)
+2. CLARITY (0–10)
+3. COMPLETENESS (0–10)
+4. OVERALL QUALITY (0–10)
+
+Be strict. Do not inflate scores.
+
+Return ONLY in JSON:
+
+{
+  "grammar": X,
+  "clarity": X,
+  "completeness": X,
+  "final": X
+}
+"""
+                },
+                {
+                    "role": "user",
+                    "content": f"""
+ORIGINAL:
+{original}
+
+EDITED:
+{edited}
+"""
+                }
+            ]
+        )
+
+        content = response.choices[0].message.content.strip()
+
+        # Convert JSON string → dict safely
+        import json
+        return json.loads(content)
+
+    except Exception as e:
+        print("COMBINED AI ERROR:", e)
+        return {
+            "grammar": 0,
+            "clarity": 0,
+            "completeness": 0,
+            "final": 0
+        }
 
 def score_post_edit(mt_text, edited):
     try:
@@ -832,6 +907,74 @@ def score_translation_step(source, candidate, direction):
     except Exception as e:
         print("Translation scoring error:", e)
         return 0
+
+def evaluate_translation_combined(source, candidate):
+    try:
+        if not candidate or not candidate.strip():
+            return {
+                "accuracy": 0,
+                "fluency": 0,
+                "completeness": 0,
+                "mt_likelihood": 0,
+                "final": 0
+            }
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            temperature=0,
+            messages=[
+                {
+                    "role": "system",
+                    "content": """
+You are a professional translation evaluator.
+
+Evaluate the candidate translation compared to the source.
+
+Score STRICTLY:
+
+1. ACCURACY (0–10) → meaning preservation
+2. FLUENCY (0–10) → natural language quality
+3. COMPLETENESS (0–10) → all content included
+4. MT_LIKELIHOOD (0–10) → how likely it is machine translation
+
+Be strict. Do not inflate scores.
+
+Return ONLY JSON:
+
+{
+  "accuracy": X,
+  "fluency": X,
+  "completeness": X,
+  "mt_likelihood": X,
+  "final": X
+}
+"""
+                },
+                {
+                    "role": "user",
+                    "content": f"""
+SOURCE:
+{source}
+
+CANDIDATE:
+{candidate}
+"""
+                }
+            ]
+        )
+
+        import json
+        return json.loads(response.choices[0].message.content.strip())
+
+    except Exception as e:
+        print("TRANSLATION COMBINED ERROR:", e)
+        return {
+            "accuracy": 0,
+            "fluency": 0,
+            "completeness": 0,
+            "mt_likelihood": 0,
+            "final": 0
+        }
 
 def score_transcription(original, transcription):
     try:
@@ -1133,19 +1276,20 @@ def submit():
                 step1_original = step1_en
                 step2_original = step2_en
 
-                if step1:
-                    mt_result = detect_mt_similarity(step1_en, step1)
-                    print("MT CHECK:", mt_result)
-                    mt_data = extract_mt_info(mt_result)
-                    print("MT PARSED:", mt_data)
-                else:
-                    mt_result = "MT_SIMILARITY: 0/10\nLIKELY_MT: NO"
-                    mt_data = {"mt_score": 0, "likely_mt": "NO"}
+                # if step1:
+                #    mt_result = detect_mt_similarity(step1_en, step1)
+                #    print("MT CHECK:", mt_result)
+                #    mt_data = extract_mt_info(mt_result)
+                #    print("MT PARSED:", mt_data)
+                # else:
+                #    mt_result = "MT_SIMILARITY: 0/10\nLIKELY_MT: NO"
+                #    mt_data = {"mt_score": 0, "likely_mt": "NO"}
                 
 
                 score1 = 0
                 score2 = 0
                 round_trip_score = 0
+                
 
                 # ---------------------------
                 # LENGTH VALIDATION (ANTI-CHEAT)
@@ -1159,16 +1303,32 @@ def submit():
                     except:
                         return False
 
+                combined_step1 = evaluate_translation_combined(step1_en, step1)
+                print("COMBINED STEP1:", combined_step1)
+
                 if not step1 or not is_valid_length(step1_en, step1):
                     score1 = 0
+
+                elif combined_step1.get("final", 0) > 0:
+                    score1 = combined_step1["final"]
+
                 else:
+                    print("⚠️ Fallback to old scoring (step1)")
                     score1 = score_translation_step(step1_en, step1, f"EN → {language}")
+
+                combined_step2 = evaluate_translation_combined(step2_en, step2)
+                print("COMBINED STEP2:", combined_step2)
 
                 if not step2 or not is_valid_length(step2_en, step2):
                     score2 = 0
-                else:
-                    score2 = score_translation_step(step2_en, step2, f"{language} → EN")
 
+                elif combined_step2.get("final", 0) > 0:
+                    score2 = combined_step2["final"]
+
+                else:
+                    print("⚠️ Fallback to old scoring (step2)")
+                    score2 = score_translation_step(step2_en, step2, f"{language} → EN")
+                
 
                 # ---------------------------
                 # ANTI-CHEAT CHECK
@@ -1204,18 +1364,31 @@ def submit():
                 # ---------------------------
                 # FINAL SCORE (WEIGHTED)
                 # ---------------------------
-                semantic_score = semantic_similarity(step1_en, step1)
-                mt_penalty = 0
+                # semantic_score = semantic_similarity(step1_en, step1)
+                # mt_penalty = 0
 
-                if mt_data["likely_mt"] == "YES":
-                    mt_penalty = mt_data["mt_score"] * 0.3
+                # if mt_data["likely_mt"] == "YES":
+                #    mt_penalty = mt_data["mt_score"] * 0.3
 
-                final_translation_score = max(0,round(
+                # ---------------------------
+                # NEW MT PENALTY (FROM COMBINED AI)
+                # ---------------------------
+                mt_score = combined_step1.get("mt_likelihood", 0)
+
+                if mt_score >= 8:
+                    mt_penalty = 2
+                elif mt_score >= 5:
+                    mt_penalty = 1
+                else:
+                    mt_penalty = 0
+
+                print("NEW MT PENALTY (AI):", mt_penalty)
+
+                final_translation_score = max(0, round(
                     (
-                        (score1 * 0.3) +
-                        (score2 * 0.3) +
-                        (round_trip_score * 0.2) +
-                        (semantic_score * 0.2)
+                        (score1 * 0.4) +
+                        (score2 * 0.4) +
+                        (round_trip_score * 0.2)
                     ) - mt_penalty,
                     2
                 ))
@@ -1227,7 +1400,7 @@ def submit():
                 reason = []
 
                 # AUTO FAIL (high MT usage)
-                if mt_data["mt_score"] >= 8:
+                if combined_step1.get("mt_likelihood", 0) >= 8:
                     decision = "FAIL"
                     confidence = "HIGH"
                     reason.append("High similarity to machine translation output")
@@ -1252,15 +1425,14 @@ def submit():
 
                 explanation = " | ".join(reason)
 
-                print("---- DEBUG MT PENALTY ----")
-                print("MT DATA:", mt_data)
-                print("MT PENALTY:", mt_penalty)
+                # print("---- DEBUG MT PENALTY ----")
+                # print("MT DATA:", mt_data)
+                # print("MT PENALTY:", mt_penalty)
 
                 print("FINAL BEFORE PENALTY:", 
-                    (score1 * 0.3) +
-                    (score2 * 0.3) +
-                    (round_trip_score * 0.2) +
-                    (semantic_score * 0.2)
+                    (score1 * 0.4) +
+                    (score2 * 0.4) +
+                    (round_trip_score * 0.2)
                 )
 
                 print("FINAL AFTER PENALTY:", final_translation_score)
@@ -1293,18 +1465,41 @@ In addition, the team are not aligned with the new strategy and this create conf
 between departments, which affect negatively the overall performance."""
             reference_text = "The company doesn't have enough information to make a decision about the project."
 
-            # AI score
-            editing_score = score_editing(original_text, edit1)
 
-            editing_details = extract_editing_scores(editing_score)
+            # ---------------------------
+            # RULE-BASED SCORE (keep)
+            # ---------------------------
+            rule_score = score_editing_rule_based(edit1, original_text)
+            print("RULE SCORE:", rule_score)
 
-            print("RAW:", editing_score)
-            print("PARSED:", editing_details)
+            # ---------------------------
+            # NEW COMBINED AI (PRIMARY)
+            # ---------------------------
+            combined_scores = evaluate_editing_combined(original_text, edit1)
+            print("COMBINED AI:", combined_scores)
 
-            grammar_score = editing_details["grammar"]
-            clarity_score = editing_details["clarity"]
-            completeness_score = editing_details["completeness"]
-            final_edit_score = editing_details["final"]
+            # ---------------------------
+            # FALLBACK TO OLD METHOD (SAFE)
+            # ---------------------------
+            if combined_scores.get("final", 0) == 0:
+                print("⚠️ Falling back to old AI scoring")
+
+                editing_score = score_editing_ai(original_text, edit1)
+                editing_details = extract_editing_scores(editing_score)
+
+                print("RAW:", editing_score)
+                print("PARSED:", editing_details)
+
+                grammar_score = editing_details["grammar"]
+                clarity_score = editing_details["clarity"]
+                completeness_score = editing_details["completeness"]
+                final_edit_score = editing_details["final"]
+
+            else:
+                grammar_score = combined_scores["grammar"]
+                clarity_score = combined_scores["clarity"]
+                completeness_score = combined_scores["completeness"]
+                final_edit_score = combined_scores["final"]
 
             # BLEU
             bleu_original = calculate_bleu(reference_text, original_text)
@@ -1493,15 +1688,21 @@ as soon as possible to avoid losing customers."""
             if similarity(normalize_text(original_text), normalize_text(edit1)) > 0.9:
                 similarity_penalty = 2
 
+
+            ai_final = (
+                (grammar_score * 0.3) +
+                (clarity_score * 0.3) +
+                (completeness_score * 0.4)
+            )
+
+
             editing_final_score = round(
-                (
-                    (grammar_score * 0.3) +
-                    (clarity_score * 0.3) +
-                    (completeness_score * 0.4) +
-                    (ter_scaled * 0.2)
-                ),
+                (ai_final * 0.6) + (rule_score * 0.4),
                 2
             )
+
+            if rule_score < 3:
+                editing_final_score = rule_score
 
         # ---------------------------
         # FINAL SCORE SELECTION
