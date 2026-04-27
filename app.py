@@ -900,9 +900,7 @@ def home():
     language = request.args.get("lang") or request.form.get("language")
     print("LANG RECEIVED:", language)
 
-    target_texts = [
-        translate_to_target(text, language or "Spanish")
-        for text in REVERSE_TEXTS
+    target_texts = REVERSE_TEXTS
     ]
     t1 = target_texts[0]
     t2 = target_texts[1]
