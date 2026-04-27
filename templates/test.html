@@ -834,6 +834,7 @@ document.getElementById("startTestBtn").addEventListener("click", async () => {
 });
 
 let uploadsInProgress = 0;
+
 async function uploadAudio(base64Audio, fieldId) {
   console.log(" Uploading audio for:", fieldId);
   uploadsInProgress++;
@@ -861,10 +862,13 @@ async function uploadAudio(base64Audio, fieldId) {
 
   } catch (err) {
     console.error("Upload error:", err);
-  }
 
-  uploadsInProgress--;
+  } finally {
+    uploadsInProgress--;
+    console.log("Uploads remaining:", uploadsInProgress);
+  }
 }
+
 let violationCount = 0;
 let isSubmitting = false;
 
@@ -1390,7 +1394,7 @@ if (form) {
     //  BLOCK if uploads still running
     if (uploadsInProgress > 0) {
       e.preventDefault();
-      alert("Please wait, audio is still uploading...");
+      alert(`Please wait, ${uploadsInProgress} upload(s) still in progress...`);
       return;
     }
 
