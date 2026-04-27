@@ -1393,16 +1393,16 @@ as soon as possible to avoid losing customers."""
                         scores.append(0)
                         continue
 
-                    score_text = score_interpretation(
+                    score_text["raw"] = score_interpretation(
                         original_en,
                         translated_back,
                         language
                     )
 
                     parts.append(f"\n AUDIO {i+1} (EN → {language})")
-                    parts.append(score_text)
+                    parts.append(score_text["raw"])
 
-                    acc, comp, flu, final_ai = extract_detailed_scores(score_text)
+                    acc, comp, flu, final_ai = extract_detailed_scores(score_text["raw"])
 
                     transcription_score = score_transcription(original_en, translated_back)
 
@@ -1421,16 +1421,16 @@ as soon as possible to avoid losing customers."""
                 # STEP 2 (TARGET → EN)
                 # -------------------
                 if rev_list[i]:
-                    score_text = score_interpretation(
+                    score_text["raw"] = score_interpretation(
                         REVERSE_TEXTS[i],
                         rev_list[i],
                         language
                     )
 
                     parts.append(f"\n📌 AUDIO {i+1} (Reverse → English)")
-                    parts.append(score_text)
+                    parts.append(score_text["raw"])
 
-                    acc, comp, flu, final_score = extract_detailed_scores(score_text)
+                    acc, comp, flu, final_score = extract_detailed_scores(score_text["raw"])
 
                     scores.append(final_score)
 
