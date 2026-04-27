@@ -784,6 +784,49 @@
 </div>
 
 <script>
+
+document.getElementById("startTestBtn").addEventListener("click", async () => {
+
+  const language = document.getElementById("languageInput").value;
+  const domain = document.getElementById("domainSelect")?.value;
+  const testType = document.getElementById("testType").value;
+
+  console.log("START TEST:", { language, domain, testType });
+
+  // Save language to hidden input (IMPORTANT)
+  document.getElementById("finalLanguage").value = language;
+
+  document.getElementById("loadingIndicator").style.display = "block";
+
+  try {
+    const res = await fetch(`/get_translation?lang=${language}&domain=${domain}`);
+    const data = await res.json();
+
+    console.log("DATA RECEIVED:", data);
+
+    // TRANSLATION TEST
+    if (testType === "translation" && data.step1_en) {
+      document.getElementById("step1Text").innerText = data.step1_en;
+      document.getElementById("step2Text").innerText = data.step2_target;
+      document.getElementById("step2Original").value = data.step2_en;
+    }
+
+    // INTERPRETATION TEST
+    if (testType === "interpretation" && data.target_texts) {
+      document.getElementById("targetText1").innerText = data.target_texts[0];
+      document.getElementById("targetText2").innerText = data.target_texts[1];
+      document.getElementById("targetText3").innerText = data.target_texts[2];
+      document.getElementById("targetText4").innerText = data.target_texts[3];
+    }
+
+  } catch (err) {
+    console.error("ERROR FETCHING TRANSLATION:", err);
+  }
+
+  document.getElementById("loadingIndicator").style.display = "none";
+
+});
+
 let uploadsInProgress = 0;
 async function uploadAudio(base64Audio, fieldId) {
   console.log(" Uploading audio for:", fieldId);

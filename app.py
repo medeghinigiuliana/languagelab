@@ -10,6 +10,8 @@ print("API KEY LOADED:", os.getenv("OPENAI_API_KEY"))
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+print("ENV KEY:", os.getenv("OPENAI_API_KEY"))
+
 # ---------------------------
 # SCORING FUNCTIONS (PHASE 2)
 # ---------------------------
