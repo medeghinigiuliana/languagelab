@@ -1391,7 +1391,7 @@ as soon as possible to avoid losing customers."""
                         scores.append(0)
                         continue
 
-                    score_text["raw"] = score_interpretation(
+                    score_text = score_interpretation(
                         original_en,
                         translated_back,
                         language
@@ -1419,7 +1419,7 @@ as soon as possible to avoid losing customers."""
                 # STEP 2 (TARGET → EN)
                 # -------------------
                 if rev_list[i]:
-                    score_text["raw"] = score_interpretation(
+                    score_text = score_interpretation(
                         REVERSE_TEXTS[i],
                         rev_list[i],
                         language
