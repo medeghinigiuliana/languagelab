@@ -901,7 +901,7 @@ def home():
     print("LANG RECEIVED:", language)
 
     target_texts = REVERSE_TEXTS
-    ]
+
     t1 = target_texts[0]
     t2 = target_texts[1]
 
