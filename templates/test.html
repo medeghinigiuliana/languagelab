@@ -788,18 +788,24 @@
 document.getElementById("startTestBtn").addEventListener("click", async () => {
 
   const language = document.getElementById("languageInput").value;
-  const domain = document.getElementById("domainSelect")?.value;
+  let domain = document.getElementById("domainSelect")?.value;
   const testType = document.getElementById("testType").value;
+
+  if (!domain || domain === "undefined") {
+    domain = "";
+  }
 
   console.log("START TEST:", { language, domain, testType });
 
-  // Save language to hidden input (IMPORTANT)
   document.getElementById("finalLanguage").value = language;
-
   document.getElementById("loadingIndicator").style.display = "block";
 
   try {
-    const res = await fetch(`/get_translation?lang=${language}&domain=${domain}`);
+    const url = domain
+      ? `/get_translation?lang=${language}&domain=${domain}`
+      : `/get_translation?lang=${language}`;
+
+    const res = await fetch(url);
     const data = await res.json();
 
     console.log("DATA RECEIVED:", data);
