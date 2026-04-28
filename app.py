@@ -1181,11 +1181,6 @@ def submit():
         else:
             language = "English"
 
-        except Exception as e:
-            print("🔥 ERROR:", e)
-            import traceback
-            traceback.print_exc()
-            return "Internal server error"
 
 
         a1 = request.form.get("answer1","")
