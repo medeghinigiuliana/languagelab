@@ -1177,9 +1177,15 @@ def submit():
         rev3 = ""
         rev4 = ""
         if language:
-            language = language.strip().capitalize()
+            language = language.strip()
         else:
             language = "English"
+
+        except Exception as e:
+            print("🔥 ERROR:", e)
+            import traceback
+            traceback.print_exc()
+            return "Internal server error"
 
 
         a1 = request.form.get("answer1","")
@@ -1192,6 +1198,8 @@ def submit():
         step2 = request.form.get("step2_answer", "")
 
         violations = int(request.form.get("violations", 0))
+
+        
 
         # ---------------------------
         # TIMER (PHASE 2 - SAFE)
@@ -1304,6 +1312,15 @@ def submit():
                         return False
 
                 combined_step1 = evaluate_translation_combined(step1_en, step1)
+                if not isinstance(combined_step1, dict):
+                    print("⚠️ combined_step1 INVALID:", combined_step1)
+                    combined_step1 = {
+                        "accuracy": 0,
+                        "fluency": 0,
+                        "completeness": 0,
+                        "mt_likelihood": 0,
+                        "final": 0
+                    }
                 print("COMBINED STEP1:", combined_step1)
 
                 if not step1 or not is_valid_length(step1_en, step1):
@@ -1317,6 +1334,15 @@ def submit():
                     score1 = score_translation_step(step1_en, step1, f"EN → {language}")
 
                 combined_step2 = evaluate_translation_combined(step2_en, step2)
+                if not isinstance(combined_step2, dict):
+                    print("⚠️ combined_step2 INVALID:", combined_step2)
+                    combined_step2 = {
+                        "accuracy": 0,
+                        "fluency": 0,
+                        "completeness": 0,
+                        "mt_likelihood": 0,
+                        "final": 0
+                    }
                 print("COMBINED STEP2:", combined_step2)
 
                 if not step2 or not is_valid_length(step2_en, step2):
@@ -1762,6 +1788,13 @@ as soon as possible to avoid losing customers."""
         eastern = pytz.timezone("America/New_York")
         created_at = datetime.now(eastern).strftime("%Y-%m-%d %H:%M:%S")
 
+        print("SAVING RESULT:", {
+            "email": email,
+            "test_type": test_type,
+            "final_score": final_score,
+            "language": language
+        })
+
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
 
@@ -1788,6 +1821,9 @@ as soon as possible to avoid losing customers."""
             ))
 
         conn.commit()
+
+        print("✅ SAVED SUCCESSFULLY")
+
         conn.close()
 
         return redirect(url_for("home", success=1))
