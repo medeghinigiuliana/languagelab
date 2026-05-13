@@ -24,42 +24,55 @@
       font-size: 14px;
       width: 100%;
       border-collapse: collapse;
-      table-layout: fixed;
+      table-layout: auto;
     }
 
     th, td {
-      padding: 12px;
+      padding: 22px 18px;
       border-bottom: 1px solid #1f2937;
+      border-right: 1px solid rgba(255,255,255,0.05);
       text-align: left;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      vertical-align: middle;
+    }
+
+    th:last-child,
+    td:last-child {
+      border-right: none;
+    }
+
+    td {
+      font-size: 15px;
     }
 
     th {
       color: #9ca3af;
-      font-size: 12px;
+      font-size: 13px;
+      letter-spacing: 0.5px;
       text-transform: uppercase;
       position: sticky;
       top: 0;
       background: #0b0f19;
     }
 
-/* ROW HOVER */
     tr:hover {
       background: #111827;
     }
 
-/* BUTTON */
     .button {
       background: #6366f1;
       color: white;
-      padding: 6px 10px;
-      border-radius: 6px;
+      padding: 10px 16px;
+      border-radius: 8px;
       text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: 0.2s ease;
     }
 
-/* INPUTS */
+    .button:hover {
+       background: #7c82ff;
+    }
+
     input, select {
       padding: 8px;
       margin-right: 10px;
@@ -161,7 +174,7 @@
       </td>
 
       <td>
-        {{ r.domain or "-" }}
+        {{ r.domain.replace("_", " ")|title if r.domain else "-" }}
       </td>
 
       <td>
@@ -236,7 +249,7 @@
        </td>
 
        <td>
-         {{ r.created_at[:10] }}
+         {{ r.created_at[5:7] }}/{{ r.created_at[8:10] }}/{{ r.created_at[0:4] }}
        </td>
 
        <td>
