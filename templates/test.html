@@ -221,6 +221,111 @@
         opacity: 0.6;
         cursor: not-allowed;
       }
+
+      .question-title {
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+      .question-title {
+        text-align: left;
+      }
+
+      #medicalQuestions {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      #medicalQuestions {
+        max-width: 900px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .question-card {
+        background: #0f172a;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.05);
+
+        width: 100%;
+        max-width: 700px;
+        margin: 0 auto;
+      }
+
+      .option {
+        display: grid;
+        grid-template-columns: 20px 1fr;
+        align-items: center;
+        gap: 10px; 
+  
+        padding: 10px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      .options-container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .option:hover {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(99,102,241,0.3);
+      }
+     
+      .question-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+
+      .option input[type="radio"] {
+        margin: 0;
+      }
+
+      .option span {
+        text-align: left;
+        line-height: 1.4;
+      }
+
+      .option input[type="radio"]:checked + span {
+        font-weight: 600;
+        color: #c7d2fe;
+
+      }
+      .text-input {
+        width: 100%;
+        padding: 10px;
+        margin-top: 8px;
+        border-radius: 6px;
+        border: 1px solid rgba(255,255,255,0.1);
+        background: #020617;
+        color: white;
+      }
+
+      .instructions {
+        max-width: 900px;
+        margin: 0 auto 20px auto;
+        padding: 15px;
+
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 10px;
+
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .instructions ul {
+        margin: 10px 0 0 18px;
+      }
+
       </style>
 </head>
 
@@ -308,28 +413,78 @@
 
 <!-- EMAIL -->
 <input type="email" name="email" placeholder="Your email" required>
-<select name="test_type" id="testType" required>
+<select name="test_type" id="testType" required onchange="handleTestChange()">
   <option value="">Select Test Type</option>
   <option value="translation">Translation</option>
   <option value="editing">Editing</option>
   <option value="post_editing">Post-MT Editing</option>
-  <option value="interpretation">Interpretation</option>
+  <option value="language_test">Language Test (Spoken)</option>
+  <option value="terminology">Terminology Test</option>
 </select>
 <div id="domainWrapper" style="display:none;">
+
   <select name="domain" id="domainSelect">
+
     <option value="" disabled selected>Select Domain</option>
-    <option value="biology">Biology / Natural Sciences</option>
-    <option value="criminal_justice">Criminal Justice</option>
-    <option value="education">Education</option>
-    <option value="finance">Finance</option>
-    <option value="healthcare">Healthcare</option>
-    <option value="hr">B2B / HR</option>
-    <option value="it">IT (Infrastructure / Systems)</option>
-    <option value="legal">Legal</option>
-    <option value="manufacturing">Manufacturing</option>
-    <option value="marketing">Marketing</option>
-    <option value="medical">Medical</option>
-    <option value="software">Software (Applications / Code)</option>
+
+    <!-- TRANSLATION -->
+    <optgroup label="Translation Domains" class="translation-group">
+
+      <option value="biology" class="translation-option">
+        Biology / Natural Sciences
+      </option>
+
+      <option value="finance" class="translation-option">
+        Finance
+      </option>
+
+      <option value="healthcare" class="translation-option">
+        Healthcare
+      </option>
+
+      <option value="hr" class="translation-option">
+        B2B / HR
+      </option>
+
+      <option value="it" class="translation-option">
+        IT (Infrastructure / Systems)
+      </option>
+
+      <option value="manufacturing" class="translation-option">
+        Manufacturing
+      </option>
+
+      <option value="marketing" class="translation-option">
+        Marketing
+      </option>
+
+      <option value="software" class="translation-option">
+        Software (Applications / Code)
+      </option>
+
+    </optgroup>
+
+    <!-- TERMINOLOGY -->
+    <optgroup label="Terminology Tests" class="terminology-group">
+
+      <option value="medical" class="terminology-option">
+        Medical
+      </option>
+
+      <option value="legal" class="terminology-option">
+        Legal
+      </option>
+
+      <option value="criminal" class="terminology-option">
+        Criminal Justice
+      </option>
+
+      <option value="education" class="terminology-option">
+        Education
+      </option>
+
+    </optgroup>
+
   </select>
 </div>
 
@@ -526,20 +681,27 @@
 </div>
 
 
-<!-- ================= INTERPRETATION ================= -->
-<div id="interpretationTest" style="display:none;">
+<!-- ================= LANGUAGE TEST ================= -->
+<div id="languageTest" style="display:none;">
 
 <div class="card">
 
-  <h3> Audio 1</h3>
+  <h3> Question 1</h3>
 
   <!-- STEP 1 -->
+  <input type="hidden" name="sourceText1" id="hiddenSource1">
   <div class="step">
-    <h4>Step 1 — Listen & Interpret</h4>
+    <h4>Step 1 — Read & Interpret (English → Your Language)</h4>
 
-    <audio id="audio1" controls src="/static/audio1.mp3"></audio>
-
-    <p class="subtitle">You may listen up to 2 times</p>
+    <div style="
+      background:#111827;
+      padding:15px;
+      border-radius:10px;
+      border:1px solid #374151;
+      margin-bottom:10px;
+    ">
+      <p id="sourceText1" style="margin:0;"></p>
+    </div>
 
     <div class="controls">
         <button type="button" class="btn-start" onclick="startRecording('audio1')">
@@ -592,15 +754,22 @@
 
 <div class="card">
 
-  <h3> Audio 2</h3>
+  <h3> Question 2</h3>
 
   <!-- STEP 1 -->
+  <input type="hidden" name="sourceText2" id="hiddenSource2">
   <div class="step">
-    <h4>Step 1 — Listen & Interpret</h4>
+    <h4>Step 1 — Read & Interpret (English → Your Language)</h4>
 
-    <audio id="audio2" controls src="/static/audio2.mp3"></audio>
-
-    <p class="subtitle">You may listen up to 2 times</p>
+    <div style="
+      background:#111827;
+      padding:15px;
+      border-radius:10px;
+      border:1px solid #374151;
+      margin-bottom:10px;
+    ">
+      <p id="sourceText2" style="margin:0;"></p>
+    </div>
 
     <div class="controls">
         <button type="button" class="btn-start" onclick="startRecording('audio2')">
@@ -653,15 +822,22 @@
 
 <div class="card">
 
-  <h3> Audio 3</h3>
+  <h3> Question 3</h3>
 
   <!-- STEP 1 -->
+  <input type="hidden" name="sourceText3" id="hiddenSource3">
   <div class="step">
-    <h4>Step 1 — Listen & Interpret</h4>
+    <h4>Step 1 — Read & Interpret (English → Your Language)</h4>
 
-    <audio id="audio3" controls src="/static/audio3.mp3"></audio>
-
-    <p class="subtitle">You may listen up to 2 times</p>
+    <div style="
+      background:#111827;
+      padding:15px;
+      border-radius:10px;
+      border:1px solid #374151;
+      margin-bottom:10px;
+    ">
+      <p id="sourceText3" style="margin:0;"></p>
+    </div>
 
     <div class="controls">
         <button type="button" class="btn-start" onclick="startRecording('audio3')">
@@ -713,15 +889,22 @@
 
 <div class="card">
 
-  <h3> Audio 4</h3>
+  <h3> Question 4</h3>
 
   <!-- STEP 1 -->
+  <input type="hidden" name="sourceText4" id="hiddenSource4">
   <div class="step">
-    <h4>Step 1 — Listen & Interpret</h4>
+    <h4>Step 1 — Read & Interpret (English → Your Language)</h4>
 
-    <audio id="audio4" controls src="/static/audio4.mp3"></audio>
-    
-    <p class="subtitle">You may listen up to 2 times</p>
+    <div style="
+      background:#111827;
+      padding:15px;
+      border-radius:10px;
+      border:1px solid #374151;
+      margin-bottom:10px;
+    ">
+      <p id="sourceText4" style="margin:0;"></p>
+    </div>
 
     <div class="controls">
         <button type="button" class="btn-start" onclick="startRecording('audio4')">
@@ -770,6 +953,7 @@
   </div>
 
 </div>
+
 </div>
 <div style="margin-top:20px;">
   <button type="submit" id="submitBtn" class="button" style="display:none;">
@@ -783,53 +967,92 @@
 
 </div>
 
+<!-- ================= MEDICAL TEST ================= -->
+<div id="medicalTest" style="display:none; margin-top:40px;">
+
+  <h3 style="text-align:center; margin-bottom:20px;">
+    Medical Terminology Test
+  </h3>
+
+  <div id="testInstructions" class="instructions">
+    <p><strong>Instructions:</strong></p>
+    <ul>
+      <li>Answer all questions to the best of your knowledge.</li>
+      <li>Select only one answer for multiple-choice questions.</li>
+      <li>Type your response clearly for open-ended questions.</li>
+      <li>You have a limited time to complete the test.</li>
+      <li>Do not refresh the page during the test.</li>
+    </ul>
+  </div>
+
+  <div id="medicalQuestions"></div>
+
+  <button type="button" id="submitMedicalBtn" class="button">
+    Submit Medical Test
+  </button>
+
+</div>
+
 <script>
 
-document.getElementById("startTestBtn").addEventListener("click", async () => {
+const languageTexts = {{ language_texts | tojson }};
 
-  const language = document.getElementById("languageInput").value;
-  let domain = document.getElementById("domainSelect")?.value;
-  const testType = document.getElementById("testType").value;
+document.addEventListener("DOMContentLoaded", function () {
 
-  if (!domain || domain === "undefined") {
-    domain = "";
+  // -------------------------
+  // LOAD LANGUAGE TEST TEXTS
+  // -------------------------
+  if (languageTexts && languageTexts.length >= 4) {
+    document.getElementById("sourceText1").innerText = languageTexts[0];
+    document.getElementById("hiddenSource1").value = languageTexts[0];
+
+    document.getElementById("sourceText2").innerText = languageTexts[1];
+    document.getElementById("hiddenSource2").value = languageTexts[1];
+
+    document.getElementById("sourceText3").innerText = languageTexts[2];
+    document.getElementById("hiddenSource3").value = languageTexts[2];
+
+    document.getElementById("sourceText4").innerText = languageTexts[3];
+    document.getElementById("hiddenSource4").value = languageTexts[3];
   }
 
-  console.log("START TEST:", { language, domain, testType });
+  // -------------------------
+  // ELEMENTS
+  // -------------------------
+  const testType = document.getElementById("testType");
+  const languageInput = document.getElementById("languageInput");
+  const domain = document.getElementById("domainSelect");
+  const startBtn = document.getElementById("startTestBtn");
 
-  document.getElementById("finalLanguage").value = language;
-  document.getElementById("loadingIndicator").style.display = "block";
-
-  try {
-    const url = domain
-      ? `/get_translation?lang=${language}&domain=${domain}`
-      : `/get_translation?lang=${language}`;
-
-    const res = await fetch(url);
-    const data = await res.json();
-
-    console.log("DATA RECEIVED:", data);
-
-    // TRANSLATION TEST
-    if (testType === "translation" && data.step1_en) {
-      document.getElementById("step1Text").innerText = data.step1_en;
-      document.getElementById("step2Text").innerText = data.step2_target;
-      document.getElementById("step2Original").value = data.step2_en;
-    }
-
-    // INTERPRETATION TEST
-    if (testType === "interpretation" && data.target_texts) {
-      document.getElementById("targetText1").innerText = data.target_texts[0];
-      document.getElementById("targetText2").innerText = data.target_texts[1];
-      document.getElementById("targetText3").innerText = data.target_texts[2];
-      document.getElementById("targetText4").innerText = data.target_texts[3];
-    }
-
-  } catch (err) {
-    console.error("ERROR FETCHING TRANSLATION:", err);
+  // -------------------------
+  // EVENT LISTENERS
+  // -------------------------
+  if (testType) {
+    testType.addEventListener("change", function () {
+      toggleLanguage();
+      showTest();
+      updateStartButton();
+    });
   }
 
-  document.getElementById("loadingIndicator").style.display = "none";
+  if (languageInput) {
+    languageInput.addEventListener("input", updateStartButton);
+  }
+
+  if (domain) {
+    domain.addEventListener("change", updateStartButton);
+  }
+
+  if (startBtn) {
+    startBtn.addEventListener("click", startTest);
+  }
+
+  // -------------------------
+  // INITIAL STATE
+  // -------------------------
+  toggleLanguage();
+  showTest();
+  updateStartButton();
 
 });
 
@@ -898,54 +1121,6 @@ let timers = {};
 let testStartTime = null;
 let timerInterval = null;
 
-// ------------------
-// SHOW / HIDE TEST
-// ------------------
-function checkReady() {
-  const testType = document.getElementById("testType");
-  const languageInput = document.getElementById("languageInput");
-  const startBtn = document.getElementById("startTestBtn");
-  const domain = document.getElementById("domainSelect");
-
-  if (!testType || !languageInput || !startBtn) return;
-
-  const type = testType.value;
-  const lang = languageInput.value.trim();
-  const dom = domain ? domain.value : "";
-
-  if (type === "editing" || type === "post_editing") {
-    section.style.display = "block";
-
-    if (startBtn) startBtn.style.display = "none";
-    if (submitBtn) submitBtn.style.display = "block";
-
-    setMaxTime(type);
-
-    document.getElementById("testTimer").style.display = "none";
-    document.getElementById("timeValue").innerText = "00:00";
-
-    setTimeout(() => {
-      startTimer();
-    }, 100);
-
-    return;
-  }
-
-  if (type === "interpretation") {
-    startBtn.style.display = "block";
-    startBtn.disabled = !lang;
-    return;
-  }
-
-  if (type === "translation") {
-    startBtn.style.display = "block";
-    startBtn.disabled = !(lang && dom);
-    return;
-  }
-
-  startBtn.style.display = "block";
-  startBtn.disabled = true;
-}
 
 function showTest() {
   const testType = document.getElementById("testType");
@@ -969,7 +1144,6 @@ function showTest() {
   const section = document.getElementById(type + "Test");
 
   if (!section) {
-    checkReady();
     return;
   }
 
@@ -982,7 +1156,6 @@ function showTest() {
 
   // Other tests → wait for Start
   section.style.display = "none";
-  checkReady();
 }
 
 let maxTime = 1200;
@@ -991,8 +1164,10 @@ let maxTime = 1200;
       if (type === "translation") maxTime = 1800;      // 30 min
       else if (type === "editing") maxTime = 1500;     // 25 min
       else if (type === "post_editing") maxTime = 1200; // 20 min
-      else if (type === "interpretation") maxTime = 1200; // 20 min
+      else if (type === "language_test") maxTime = 1200; // 20 min
+      else if (type === "terminology") maxTime = 1800;
     }
+
 
 function startTimer() {
   if (timerInterval) clearInterval(timerInterval);
@@ -1026,6 +1201,10 @@ function startTimer() {
 // LANGUAGE TRANSLATION 
 // ------------------
 async function startTest() {
+  const startBtn = document.getElementById("startTestBtn");
+
+  startBtn.disabled = true;
+  startBtn.innerText = "Starting...";
   const type = document.getElementById("testType").value;
   setMaxTime(type);
   document.getElementById("testTimer").style.display = "none";
@@ -1036,45 +1215,155 @@ async function startTest() {
 
 if (!type) {
   alert("Please select test type");
+  startBtn.disabled = false;
+  startBtn.innerText = "Start Test";
   return;
 }
 
 // Translation → needs language + domain
 if (type === "translation" && (!lang || !domain)) {
-  alert("Please select language and domain");
+  alert("Please select test type");
+  startBtn.disabled = false;
+  startBtn.innerText = "Start Test";
   return;
 }
 
-// Interpretation → needs language only
-if (type === "interpretation" && !lang) {
-  alert("Please select language");
+
+// Language Test → needs language only
+if (type === "language_test" && !lang) {
+  alert("Please select test type");
+  startBtn.disabled = false;
+  startBtn.innerText = "Start Test";
   return;
 }
+
+// -------------------------
+// TERMINOLOGY TEST
+// -------------------------
+if (type === "terminology") {
+
+  const domain = document.getElementById("domainSelect").value;
+
+  if (!domain) {
+    alert("Please select a terminology domain");
+    startBtn.disabled = false;
+    startBtn.innerText = "Start Test";
+    return;
+  }
+
+  const res = await fetch(`/get_questions/terminology?domain=${domain}`);
+
+  const data = await res.json();
+
+  const container = document.getElementById("medicalQuestions");
+
+  container.innerHTML = "";
+
+  data.questions.forEach((q, index) => {
+
+    let html = `
+      <div class="question-card">
+        <p class="question-title">${index + 1}. ${q.q}</p>
+    `;
+
+    // MCQ
+    if (q.type === "mcq") {
+
+      html += `<div class="options-container">`;
+
+      q.options.forEach(opt => {
+
+        html += `
+          <label class="option">
+            <input type="radio" name="q${q.id}" value="${opt}">
+            <span>${opt}</span>
+          </label>
+        `;
+      });
+
+      html += `</div>`;
+    }
+
+    // TEXT
+    if (q.type === "fill" || q.type === "abbr" || q.type === "match") {
+
+      html += `
+        <input type="text" name="q${q.id}" class="text-input" />
+      `;
+    }
+
+    // TRUE/FALSE
+    if (q.type === "tf") {
+
+      html += `
+        <div class="options-container">
+
+          <label class="option">
+            <input type="radio" name="q${q.id}" value="True">
+            <span>True</span>
+          </label>
+
+          <label class="option">
+            <input type="radio" name="q${q.id}" value="False">
+            <span>False</span>
+          </label>
+
+        </div>
+      `;
+    }
+
+    html += `</div>`;
+
+    container.innerHTML += html;
+  });
+
+  document.getElementById("medicalTest").style.display = "block";
+
+  document.getElementById("submitBtn").style.display = "none";
+
+  document.getElementById("submitMedicalBtn").style.display = "block";
+
+  lockTestFields();
+
+  startBtn.style.display = "none";
+
+  document.getElementById("medicalTest").scrollIntoView({
+    behavior: "smooth"
+  });
+
+  startBtn.innerText = "Test Started";
+
+  startTimer();
+
+  return;
+  }
 
 // Editing / Post-editing → no requirements
 
 
   lockTestFields();
 
-  const startBtn = document.getElementById("startTestBtn");
   if (startBtn) startBtn.style.display = "none";
 
   document.getElementById("submitBtn").style.display = "block";
 
   document.getElementById("loadingIndicator").style.display = "block";
 
-  // Hide all tests
-  document.querySelectorAll('[id$="Test"]').forEach(el => {
-    el.style.display = "none";
-  });
 
   
     try {
 
     // -------------------------
-    // INTERPRETATION
+    // EDITING + POST EDITING
     // -------------------------
-    if (type === "interpretation") {
+    if (type === "editing" || type === "post_editing") {
+      // No API needed
+    }
+
+    // -------------------------
+    // LANGUAGE TEST
+    // -------------------------
+    if (type === "language_test") {
       const res = await fetch(`/get_translation?lang=${encodeURIComponent(lang)}`);
       const data = await res.json();
 
@@ -1108,7 +1397,14 @@ if (type === "interpretation" && !lang) {
     document.getElementById("loadingIndicator").style.display = "none";
 
     // Show test AFTER data is ready
-    const section = document.getElementById(type + "Test");
+    let section;
+
+    if (type === "language_test") {
+      section = document.getElementById("languageTest");
+    } else {
+      section = document.getElementById(type + "Test");
+    }
+
     if (section) {
       section.style.display = "block";
       section.scrollIntoView({ behavior: "smooth" });
@@ -1147,91 +1443,31 @@ async function updateLanguage() {
   }
 }
 
+
 // ------------------
 // LANGUAGE TOGGLE
 // ------------------
   function toggleLanguage() {
   const type = document.getElementById("testType").value;
 
+  console.log("Selected test type:", type);
+
   const langWrapper = document.getElementById("languageWrapper");
   const domainWrapper = document.getElementById("domainWrapper");
 
-  if (!langWrapper || !domainWrapper) return;
-
-  // Reset
-  langWrapper.style.display = "none";
-  domainWrapper.style.display = "none";
-
-  if (type === "translation") {
+  if (type === "language_test" || type === "translation") {
     langWrapper.style.display = "block";
+  } else {
+    langWrapper.style.display = "none";
+  }
+
+  if (type === "translation" || type === "terminology") {
     domainWrapper.style.display = "block";
+  } else {
+    domainWrapper.style.display = "none";
   }
-
-  else if (type === "interpretation") {
-    langWrapper.style.display = "block";
-  }
-
-  // Editing / Post-editing → nothing shown
 }
 
-// ------------------
-// EVENT LISTENERS (CLEAN)
-// ------------------
-document.addEventListener("DOMContentLoaded", function () {
-  const testType = document.getElementById("testType");
-  const languageInput = document.getElementById("languageInput");
-  const startBtn = document.getElementById("startTestBtn");
-  const domain = document.getElementById("domainSelect"); 
-
-  function updateStartButton() {
-    const type = testType.value;
-    const lang = languageInput.value;
-    const dom = domain ? domain.value : "";
-
-    // Editing → no requirements
-    if (type === "editing" || type === "post_editing") {
-      startBtn.style.display = "none";
-      return;
-    }
-
-    // Interpretation → needs language
-    if (type === "interpretation") {
-      startBtn.style.display = "block";
-      startBtn.disabled = !lang;
-      return;
-    }
-
-    // Translation → needs language + domain
-    if (type === "translation") {
-      startBtn.style.display = "block";
-      startBtn.disabled = !(lang && dom);
-      return;
-    }
-
-    // Default fallback
-    startBtn.style.display = "block";
-    startBtn.disabled = true;
-  }
-
-  if (testType) {
-    testType.addEventListener("change", showTest);
-  }
-
-  if (languageInput) {
-    languageInput.addEventListener("input", checkReady);
-    languageInput.addEventListener("change", checkReady);
-  }
-
-  if (domain) {
-    domain.addEventListener("change", checkReady);
-  }
-
-  if (startBtn) {
-    startBtn.addEventListener("click", startTest);
-  }
-
-  showTest();
-});
 
 // ------------------
 // AUDIO + RECORDING (KEEP YOUR ORIGINAL BELOW)
@@ -1432,29 +1668,181 @@ function lockTestFields() {
   });
 }
 
-// if (form) {
-//   form.addEventListener("submit", function(e) {
-//     const type = document.getElementById("testType").value;
-//
-//     if (type === "interpretation") {
-//       const audios = [
-//         document.getElementById("audioData1").value,
-//         document.getElementById("audioData2").value,
-//         document.getElementById("audioData3").value,
-//         document.getElementById("audioData4").value,
-//         document.getElementById("audioDatarev1").value,
-//         document.getElementById("audioDatarev2").value,
-//         document.getElementById("audioDatarev3").value,
-//         document.getElementById("audioDatarev4").value
-//       ];
-//
-//       if (audios.every(a => !a)) {
-//         e.preventDefault();
-//         alert("Please record at least one interpretation.");
-//       }
-//     }
-//   });
-// }
+function updateStartButton() {
+
+    const type = document.getElementById("testType").value;
+    const lang = document.getElementById("languageInput").value;
+    const domain = document.getElementById("domainSelect").value;
+    const startBtn = document.getElementById("startTestBtn");
+
+    // nothing selected
+    if (!type) {
+      startBtn.disabled = true;
+      return;
+    }
+
+    // translation needs BOTH
+    if (type === "translation") {
+      startBtn.disabled = !(lang && domain);
+      return;
+    }
+
+    // terminology needs domain
+    if (type === "terminology") {
+      startBtn.disabled = !domain;
+      return;
+    }
+
+    // language test needs language
+    if (type === "language_test") {
+      startBtn.disabled = !lang;
+      return;
+    }
+
+    // everything else
+    startBtn.disabled = false;
+}
+
+function handleTestChange() {
+
+  const testType = document.getElementById("testType").value;
+
+  const domainWrapper = document.getElementById("domainWrapper");
+  const languageWrapper = document.getElementById("languageWrapper");
+
+  const translationGroup = document.querySelector(".translation-group");
+  const terminologyGroup = document.querySelector(".terminology-group");
+
+  // -------------------------
+  // DOMAIN WRAPPER
+  // -------------------------
+
+  if (testType === "translation" || testType === "terminology") {
+    domainWrapper.style.display = "block";
+  } else {
+    domainWrapper.style.display = "none";
+  }
+
+  // -------------------------
+  // LANGUAGE WRAPPER
+  // -------------------------
+
+  if (
+    testType === "translation" ||
+    testType === "language_test"
+  ) {
+    languageWrapper.style.display = "block";
+  } else {
+    languageWrapper.style.display = "none";
+  }
+
+  // -------------------------
+  // SHOW ONLY TRANSLATION DOMAINS
+  // -------------------------
+
+  if (testType === "translation") {
+
+    translationGroup.style.display = "block";
+    terminologyGroup.style.display = "none";
+
+  }
+
+  // -------------------------
+  // SHOW ONLY TERMINOLOGY DOMAINS
+  // -------------------------
+
+  else if (testType === "terminology") {
+
+    translationGroup.style.display = "none";
+    terminologyGroup.style.display = "block";
+
+  }
+
+  // -------------------------
+  // HIDE BOTH
+  // -------------------------
+
+  else {
+
+    translationGroup.style.display = "none";
+    terminologyGroup.style.display = "none";
+
+  }
+
+  updateStartButton();
+}
+
+document.getElementById("submitMedicalBtn")?.addEventListener("click", async () => {
+
+  try {
+
+    const answers = {};
+
+    document.querySelectorAll(
+      '#medicalQuestions input[type="radio"]:checked'
+    ).forEach(input => {
+
+      answers[input.name] = input.value;
+    });
+
+    document.querySelectorAll(
+      '#medicalQuestions .text-input'
+    ).forEach(input => {
+
+      if (input.name && input.value) {
+        answers[input.name] = input.value;
+      }
+    });
+
+    answers.first_name =
+      document.querySelector('input[name="first_name"]').value;
+
+    answers.last_name =
+      document.querySelector('input[name="last_name"]').value;
+
+    answers.email =
+      document.querySelector('input[name="email"]').value;
+
+    answers.test_type =
+      document.getElementById("testType").value;
+
+    answers.domain =
+      document.getElementById("domainSelect").value;
+
+    console.log("Submitting answers:", answers);
+
+    const res = await fetch("/submit_test", {
+
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify(answers)
+    });
+
+    console.log("Response status:", res.status);
+
+    const text = await res.text();
+
+    console.log("Raw response:", text);
+
+    const result = JSON.parse(text);
+
+    alert(
+      `Score: ${result.score}/${result.total} (${result.percentage}%)`
+    );
+
+  } catch (err) {
+
+    console.error("SUBMIT ERROR:", err);
+
+    alert("Submit failed. Check console.");
+  }
+
+});
+  
 </script>
 
 </body>

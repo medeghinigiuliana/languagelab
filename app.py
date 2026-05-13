@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request, Response, redirect, url_for
+from flask import jsonify
 import sqlite3
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
+
 
 load_dotenv()
 
@@ -246,6 +248,7 @@ def init_db():
         ("rev_transcription2", "TEXT"),
         ("rev_transcription3", "TEXT"),
         ("rev_transcription4", "TEXT"),
+        ("domain", "TEXT"),
     ]
 
     for col, col_type in columns:
@@ -268,12 +271,568 @@ ORIGINAL_AUDIO_TEXTS = [
     "The doctor decided to let the patient go."
 ]
 
-REVERSE_TEXTS = [
-    "A public meeting will be held next week to discuss the development of the new community pool, including its proposed location, budget allocation, and expected impact on local residents.",
-    "Some professors may struggle to engage students effectively in the classroom, particularly when teaching large groups or relying heavily on traditional lecture-based methods.",
-    "The document must be signed in the presence of a notary public, who will verify the identity of all parties involved and ensure that the signing is conducted in accordance with legal requirements.",
-    "After evaluating the patient’s progress and reviewing the test results, the doctor decided to discharge the patient with specific instructions for follow-up care and medication."
+import random
+
+DIALOGUE_SETS = [
+
+    # ------------------ SET 1 ------------------
+    {
+        "step1": [
+            "The meeting is scheduled for tomorrow at 10 a.m., and everyone is expected to arrive on time.",
+            "Please bring a valid ID and wait in the lobby until your name is called.",
+            "The doctor will see you shortly, but first you need to complete this medical form.",
+            "Your appointment has been confirmed, and you will need to sign a document upon arrival."
+        ],
+        "step2": [
+            "All participants must confirm their attendance and review the agenda before the meeting begins.",
+            "If you have any questions while waiting, please speak with the front desk staff.",
+            "After completing the form, the patient will be called in for further evaluation.",
+            "The document should be reviewed carefully to ensure all information is accurate before signing."
+        ]
+    },
+
+    # ------------------ SET 2 ------------------
+    {
+        "step1": [
+            "The training session will begin at 9 a.m., and attendance is mandatory for all employees.",
+            "Please check in at reception and provide your identification for verification.",
+            "You will be asked to describe your symptoms before the consultation begins.",
+            "Make sure all required sections are completed before submitting the document."
+        ],
+        "step2": [
+            "Employees must arrive on time and be prepared to participate actively in the session.",
+            "Reception staff will assist you with the check-in process if needed.",
+            "The patient’s information will be reviewed before proceeding with the evaluation.",
+            "Incomplete forms may delay processing and require additional review."
+        ]
+    },
+
+    # ------------------ SET 3 ------------------
+    {
+        "step1": [
+            "We will begin the meeting shortly, so please take your seats and silence your phones.",
+            "Kindly remain in the waiting area until your appointment is ready.",
+            "The nurse will collect your information before the doctor comes in.",
+            "You will need to sign the agreement before we can proceed."
+        ],
+        "step2": [
+            "All attendees are expected to follow meeting guidelines and minimize disruptions.",
+            "Staff will notify you once it is time for your appointment.",
+            "Collected information will be used to support accurate diagnosis and care.",
+            "The agreement must be reviewed and signed to continue with the process."
+        ]
+    },
+
+    # ------------------ SET 4 ------------------
+    {
+        "step1": [
+            "The appointment has been rescheduled, and you will receive a confirmation email shortly.",
+            "Please arrive early to allow enough time for check-in procedures.",
+            "The doctor may need to review your previous records before the consultation.",
+            "You are required to sign the consent form before receiving any treatment."
+        ],
+        "step2": [
+            "Clients should verify appointment details and notify staff of any changes.",
+            "Arriving early helps ensure a smooth and efficient check-in process.",
+            "Medical history plays an important role in determining appropriate treatment.",
+            "Consent must be obtained before any procedure is performed."
+        ]
+    }
 ]
+
+MEDICAL_QUESTION_BANK = [
+
+# --- MCQ ---
+{"id":1,"type":"mcq","q":"Tachycardia means:","options":["Slow breathing","Fast heart rate","Low blood sugar","Chest infection"],"answer":"Fast heart rate"},
+{"id":2,"type":"mcq","q":"Hypertension refers to:","options":["Low blood pressure","High blood pressure","High fever","Low oxygen"],"answer":"High blood pressure"},
+{"id":3,"type":"mcq","q":"Myocardial infarction is:","options":["Stroke","Heart attack","Kidney failure","Blood clot"],"answer":"Heart attack"},
+{"id":4,"type":"mcq","q":"Dyspnea means:","options":["Difficulty swallowing","Difficulty breathing","Difficulty walking","Difficulty hearing"],"answer":"Difficulty breathing"},
+{"id":5,"type":"mcq","q":"Pneumonia is:","options":["Lung infection","Liver disease","Bone fracture","Kidney infection"],"answer":"Lung infection"},
+{"id":6,"type":"mcq","q":"Dysphagia means:","options":["Difficulty breathing","Difficulty swallowing","Difficulty speaking","Difficulty urinating"],"answer":"Difficulty swallowing"},
+{"id":7,"type":"mcq","q":"Hepatitis affects the:","options":["Kidney","Liver","Heart","Brain"],"answer":"Liver"},
+{"id":8,"type":"mcq","q":"Hematuria means:","options":["Blood in urine","Sugar in urine","Protein in blood","Infection"],"answer":"Blood in urine"},
+{"id":9,"type":"mcq","q":"Hysterectomy is:","options":["Removal of uterus","Removal of kidney","Removal of lung","Bone repair"],"answer":"Removal of uterus"},
+{"id":10,"type":"mcq","q":"Neuropathy refers to:","options":["Nerve damage","Lung disease","Skin infection","Blood disorder"],"answer":"Nerve damage"},
+{"id":11,"type":"mcq","q":"Hyperglycemia means:","options":["Low sugar","High sugar","Low oxygen","High fever"],"answer":"High sugar"},
+{"id":12,"type":"mcq","q":"Arthritis is:","options":["Joint inflammation","Muscle tear","Bone fracture","Skin disease"],"answer":"Joint inflammation"},
+{"id":13,"type":"mcq","q":"Dermatitis means:","options":["Skin inflammation","Bone disease","Blood disorder","Lung issue"],"answer":"Skin inflammation"},
+{"id":14,"type":"mcq","q":"Anemia refers to:","options":["Low red blood cells","High fever","Infection","Swelling"],"answer":"Low red blood cells"},
+{"id":15,"type":"mcq","q":"Syncope means:","options":["Fainting","Fever","Cough","Pain"],"answer":"Fainting"},
+{"id":16,"type":"mcq","q":"Bradycardia means:","options":["Fast heart rate","Slow heart rate","Irregular breathing","Chest pain"],"answer":"Slow heart rate"},
+{"id":17,"type":"mcq","q":"Hypoglycemia means:","options":["Low blood sugar","High blood sugar","Low oxygen","High blood pressure"],"answer":"Low blood sugar"},
+{"id":18,"type":"mcq","q":"Edema is:","options":["Swelling","Bleeding","Pain","Infection"],"answer":"Swelling"},
+{"id":19,"type":"mcq","q":"Fracture means:","options":["Broken bone","Muscle tear","Joint pain","Skin cut"],"answer":"Broken bone"},
+{"id":20,"type":"mcq","q":"Sepsis is:","options":["Severe infection response","Mild fever","Bone disease","Skin rash"],"answer":"Severe infection response"},
+{"id":21,"type":"mcq","q":"Biopsy is:","options":["Tissue removal for exam","Blood test","X-ray","Injection"],"answer":"Tissue removal for exam"},
+{"id":22,"type":"mcq","q":"UTI refers to:","options":["Urinary infection","Lung disease","Heart disease","Brain injury"],"answer":"Urinary infection"},
+{"id":23,"type":"mcq","q":"MRI is used for:","options":["Imaging","Medication","Surgery","Therapy"],"answer":"Imaging"},
+{"id":24,"type":"mcq","q":"CBC measures:","options":["Blood components","Heart rate","Oxygen only","Bone density"],"answer":"Blood components"},
+{"id":25,"type":"mcq","q":"Oncology studies:","options":["Cancer","Bones","Skin","Heart"],"answer":"Cancer"},
+{"id":26,"type":"mcq","q":"Neonate means:","options":["Newborn","Adult","Teen","Elderly"],"answer":"Newborn"},
+{"id":27,"type":"mcq","q":"Malignant means:","options":["Cancerous","Benign","Temporary","Mild"],"answer":"Cancerous"},
+{"id":28,"type":"mcq","q":"Laceration is:","options":["Cut","Burn","Bruise","Rash"],"answer":"Cut"},
+{"id":29,"type":"mcq","q":"Rhinitis affects the:","options":["Nose","Ear","Eye","Lung"],"answer":"Nose"},
+{"id":30,"type":"mcq","q":"Otitis media is:","options":["Ear infection","Eye disease","Skin rash","Bone issue"],"answer":"Ear infection"},
+
+# --- MATCH ---
+{"id":31,"type":"match","q":"cardio-","answer":"Heart"},
+{"id":32,"type":"match","q":"neuro-","answer":"Nerve"},
+{"id":33,"type":"match","q":"gastro-","answer":"Stomach"},
+{"id":34,"type":"match","q":"nephro-","answer":"Kidney"},
+{"id":35,"type":"match","q":"derm-","answer":"Skin"},
+
+# --- FILL ---
+{"id":36,"type":"fill","q":"Inflammation of tonsils","answer":"Tonsillitis"},
+{"id":37,"type":"fill","q":"Appendix removal","answer":"Appendectomy"},
+{"id":38,"type":"fill","q":"Low blood sugar","answer":"Hypoglycemia"},
+{"id":39,"type":"fill","q":"Nosebleed","answer":"Epistaxis"},
+{"id":40,"type":"fill","q":"Painful urination","answer":"Dysuria"},
+{"id":41,"type":"fill","q":"Heart electrical test","answer":"ECG"},
+{"id":42,"type":"fill","q":"Gallbladder inflammation","answer":"Cholecystitis"},
+
+# --- ABBR ---
+{"id":43,"type":"abbr","q":"BP","answer":"Blood pressure"},
+{"id":44,"type":"abbr","q":"HR","answer":"Heart rate"},
+{"id":45,"type":"abbr","q":"SOB","answer":"Shortness of breath"},
+{"id":46,"type":"abbr","q":"NPO","answer":"Nothing by mouth"},
+{"id":47,"type":"abbr","q":"ICU","answer":"Intensive care unit"},
+{"id":48,"type":"abbr","q":"CT","answer":"Computed tomography"},
+{"id":49,"type":"abbr","q":"MRI","answer":"Magnetic resonance imaging"},
+
+# --- TRUE/FALSE ---
+{"id":50,"type":"tf","q":"Bradycardia means fast heart rate","answer":False},
+{"id":51,"type":"tf","q":"Hypoxia means low oxygen","answer":True},
+{"id":52,"type":"tf","q":"Gastritis is stomach inflammation","answer":True},
+{"id":53,"type":"tf","q":"Renal refers to liver","answer":False},
+{"id":54,"type":"tf","q":"Fracture means broken bone","answer":True},
+{"id":55,"type":"tf","q":"Benign means cancerous","answer":False},
+{"id":56,"type":"tf","q":"Ambulate means to walk","answer":True},
+{"id":57,"type":"tf","q":"Sepsis is minor infection","answer":False},
+
+# --- EXTRA (FOR RANDOMIZATION POWER) ---
+{"id":58,"type":"mcq","q":"Hypoxia means:","options":["Low oxygen","High oxygen","Low sugar","High sugar"],"answer":"Low oxygen"},
+{"id":59,"type":"mcq","q":"CVA refers to:","options":["Stroke","Fracture","Infection","Tumor"],"answer":"Stroke"},
+{"id":60,"type":"mcq","q":"DVT is:","options":["Blood clot","Infection","Tumor","Fracture"],"answer":"Blood clot"},
+{"id":61,"type":"mcq","q":"Ultrasound uses:","options":["Sound waves","Radiation","Heat","Electricity"],"answer":"Sound waves"},
+{"id":62,"type":"mcq","q":"Endocrine system controls:","options":["Hormones","Bones","Skin","Muscles"],"answer":"Hormones"},
+{"id":63,"type":"mcq","q":"Pulmonology studies:","options":["Lungs","Heart","Brain","Kidney"],"answer":"Lungs"},
+{"id":64,"type":"mcq","q":"Urology studies:","options":["Urinary system","Brain","Skin","Eyes"],"answer":"Urinary system"},
+{"id":65,"type":"mcq","q":"Orthopedics focuses on:","options":["Bones","Skin","Blood","Lungs"],"answer":"Bones"},
+{"id":66,"type":"mcq","q":"Lymphadenopathy means:","options":["Swollen lymph nodes","Bone pain","Skin rash","Blood loss"],"answer":"Swollen lymph nodes"},
+{"id":67,"type":"mcq","q":"Electrocardiogram measures:","options":["Heart activity","Brain activity","Lung function","Blood pressure"],"answer":"Heart activity"},
+{"id":68,"type":"mcq","q":"Diabetes affects:","options":["Blood sugar","Bones","Skin","Eyes"],"answer":"Blood sugar"},
+{"id":69,"type":"mcq","q":"Gestation refers to:","options":["Pregnancy period","Surgery","Diagnosis","Infection"],"answer":"Pregnancy period"},
+{"id":70,"type":"mcq","q":"Dysmenorrhea means:","options":["Painful menstruation","No menstruation","Heavy breathing","Infection"],"answer":"Painful menstruation"},
+]
+
+LEGAL_QUESTION_BANK = [
+
+# ---------------- MCQ ----------------
+{"id":1,"type":"mcq","q":"A plaintiff is:","options":["The accused person","The person bringing a lawsuit","A witness","A judge"],"answer":"The person bringing a lawsuit"},
+{"id":2,"type":"mcq","q":"A defendant is:","options":["The lawyer","The person accused or sued","The judge","The witness"],"answer":"The person accused or sued"},
+{"id":3,"type":"mcq","q":"Subpoena means:","options":["Legal punishment","Court order to appear","Contract agreement","Property transfer"],"answer":"Court order to appear"},
+{"id":4,"type":"mcq","q":"Litigation refers to:","options":["Negotiation","Court proceedings","Mediation","Arbitration"],"answer":"Court proceedings"},
+{"id":5,"type":"mcq","q":"Perjury means:","options":["Stealing property","Lying under oath","Physical assault","Signing a contract"],"answer":"Lying under oath"},
+{"id":6,"type":"mcq","q":"Affidavit is:","options":["Verbal agreement","Written sworn statement","Court ruling","Police report"],"answer":"Written sworn statement"},
+{"id":7,"type":"mcq","q":"Jurisdiction refers to:","options":["Court authority","Legal contract","Witness testimony","Appeal request"],"answer":"Court authority"},
+{"id":8,"type":"mcq","q":"Hearsay is:","options":["Direct evidence","Secondhand testimony","Physical evidence","Expert testimony"],"answer":"Secondhand testimony"},
+{"id":9,"type":"mcq","q":"A felony is:","options":["Minor offense","Serious crime","Civil dispute","Traffic ticket"],"answer":"Serious crime"},
+{"id":10,"type":"mcq","q":"Misdemeanor refers to:","options":["Serious crime","Minor criminal offense","Civil violation","Federal appeal"],"answer":"Minor criminal offense"},
+{"id":11,"type":"mcq","q":"Deposition means:","options":["Court verdict","Out-of-court sworn testimony","Final sentence","Arrest warrant"],"answer":"Out-of-court sworn testimony"},
+{"id":12,"type":"mcq","q":"Probation means:","options":["Prison sentence","Supervised release","Appeal hearing","Jury selection"],"answer":"Supervised release"},
+{"id":13,"type":"mcq","q":"Parole refers to:","options":["Conditional early release","Civil lawsuit","Divorce filing","Search warrant"],"answer":"Conditional early release"},
+{"id":14,"type":"mcq","q":"An appeal is:","options":["A criminal charge","Request to review a decision","Witness testimony","Arbitration agreement"],"answer":"Request to review a decision"},
+{"id":15,"type":"mcq","q":"Testimony means:","options":["Legal contract","Evidence given by witness","Court fee","Settlement"],"answer":"Evidence given by witness"},
+{"id":16,"type":"mcq","q":"A warrant is:","options":["Legal authorization","Financial agreement","Insurance policy","Jury decision"],"answer":"Legal authorization"},
+{"id":17,"type":"mcq","q":"Custody refers to:","options":["Property ownership","Legal care/control","Court appeal","Criminal sentence"],"answer":"Legal care/control"},
+{"id":18,"type":"mcq","q":"Negligence means:","options":["Intentional harm","Failure to use reasonable care","Fraud","Contract breach"],"answer":"Failure to use reasonable care"},
+{"id":19,"type":"mcq","q":"Liability refers to:","options":["Legal responsibility","Court delay","Witness statement","Police custody"],"answer":"Legal responsibility"},
+{"id":20,"type":"mcq","q":"Breach of contract means:","options":["Agreement fulfillment","Failure to honor agreement","Court appeal","Property transfer"],"answer":"Failure to honor agreement"},
+{"id":21,"type":"mcq","q":"An injunction is:","options":["Court order requiring action","Witness testimony","Arrest report","Jury instruction"],"answer":"Court order requiring action"},
+{"id":22,"type":"mcq","q":"Embezzlement means:","options":["Property damage","Misuse of entrusted funds","Physical assault","False testimony"],"answer":"Misuse of entrusted funds"},
+{"id":23,"type":"mcq","q":"Fraud refers to:","options":["Accidental mistake","Intentional deception","Witness intimidation","Appeal process"],"answer":"Intentional deception"},
+{"id":24,"type":"mcq","q":"A settlement is:","options":["Court trial","Agreement resolving dispute","Arrest procedure","Jury deliberation"],"answer":"Agreement resolving dispute"},
+{"id":25,"type":"mcq","q":"Tort law mainly deals with:","options":["Taxes","Civil wrongs","Immigration","Criminal sentencing"],"answer":"Civil wrongs"},
+{"id":26,"type":"mcq","q":"The burden of proof refers to:","options":["Legal responsibility to prove claim","Court costs","Judge authority","Witness credibility"],"answer":"Legal responsibility to prove claim"},
+{"id":27,"type":"mcq","q":"A verdict is:","options":["Legal motion","Final jury decision","Police report","Appeal request"],"answer":"Final jury decision"},
+{"id":28,"type":"mcq","q":"Cross-examination means:","options":["Direct questioning by opposing attorney","Judge ruling","Contract negotiation","Settlement process"],"answer":"Direct questioning by opposing attorney"},
+{"id":29,"type":"mcq","q":"A plea bargain is:","options":["Trial postponement","Agreement to plead guilty for reduced penalty","Civil settlement","Witness agreement"],"answer":"Agreement to plead guilty for reduced penalty"},
+{"id":30,"type":"mcq","q":"Discovery refers to:","options":["Investigation stage of evidence exchange","Jury selection","Sentencing phase","Appeal filing"],"answer":"Investigation stage of evidence exchange"},
+
+# ---------------- MATCH ----------------
+{"id":31,"type":"match","q":"homicide","answer":"Killing"},
+{"id":32,"type":"match","q":"litigation","answer":"Lawsuit"},
+{"id":33,"type":"match","q":"testator","answer":"Person making a will"},
+{"id":34,"type":"match","q":"alimony","answer":"Spousal support"},
+{"id":35,"type":"match","q":"defamation","answer":"Damaging reputation"},
+{"id":36,"type":"match","q":"juvenile","answer":"Minor"},
+{"id":37,"type":"match","q":"statute","answer":"Law"},
+{"id":38,"type":"match","q":"testify","answer":"Give evidence"},
+{"id":39,"type":"match","q":"arraignment","answer":"Formal charge hearing"},
+{"id":40,"type":"match","q":"acquittal","answer":"Not guilty decision"},
+
+# ---------------- FILL ----------------
+{"id":41,"type":"fill","q":"Written law enacted by legislature","answer":"Statute"},
+{"id":42,"type":"fill","q":"Unlawful killing of another person","answer":"Homicide"},
+{"id":43,"type":"fill","q":"A person who witnesses a legal document signing","answer":"Witness"},
+{"id":44,"type":"fill","q":"The process of selecting a jury","answer":"Voir dire"},
+{"id":45,"type":"fill","q":"A legal document transferring property after death","answer":"Will"},
+{"id":46,"type":"fill","q":"Failure to obey a court order","answer":"Contempt"},
+{"id":47,"type":"fill","q":"A legal agreement resolving a dispute","answer":"Settlement"},
+{"id":48,"type":"fill","q":"A judge’s official decision","answer":"Ruling"},
+{"id":49,"type":"fill","q":"The punishment imposed after conviction","answer":"Sentence"},
+{"id":50,"type":"fill","q":"A formal accusation initiating criminal proceedings","answer":"Indictment"},
+
+# ---------------- ABBREVIATIONS ----------------
+{"id":51,"type":"abbr","q":"DUI","answer":"Driving under the influence"},
+{"id":52,"type":"abbr","q":"NDA","answer":"Non disclosure agreement"},
+{"id":53,"type":"abbr","q":"POA","answer":"Power of attorney"},
+{"id":54,"type":"abbr","q":"IP","answer":"Intellectual property"},
+{"id":55,"type":"abbr","q":"DA","answer":"District attorney"},
+{"id":56,"type":"abbr","q":"FBI","answer":"Federal Bureau of Investigation"},
+{"id":57,"type":"abbr","q":"DWI","answer":"Driving while intoxicated"},
+{"id":58,"type":"abbr","q":"LLC","answer":"Limited liability company"},
+{"id":59,"type":"abbr","q":"CPS","answer":"Child protective services"},
+{"id":60,"type":"abbr","q":"ICE","answer":"Immigration and Customs Enforcement"},
+
+# ---------------- TRUE/FALSE ----------------
+{"id":61,"type":"tf","q":"Perjury means telling the truth under oath","answer":False},
+{"id":62,"type":"tf","q":"A subpoena may require someone to appear in court","answer":True},
+{"id":63,"type":"tf","q":"A felony is generally more serious than a misdemeanor","answer":True},
+{"id":64,"type":"tf","q":"Negligence requires reasonable care","answer":True},
+{"id":65,"type":"tf","q":"An acquittal means guilty verdict","answer":False},
+{"id":66,"type":"tf","q":"Parole occurs before conviction","answer":False},
+{"id":67,"type":"tf","q":"Hearsay is direct firsthand testimony","answer":False},
+{"id":68,"type":"tf","q":"Cross-examination is conducted by opposing counsel","answer":True},
+{"id":69,"type":"tf","q":"Probation always requires imprisonment","answer":False},
+{"id":70,"type":"tf","q":"Defamation involves damaging someone's reputation","answer":True},
+
+# ---------------- EXTRA RANDOMIZATION ----------------
+{"id":71,"type":"mcq","q":"Arbitration is:","options":["Trial by jury","Private dispute resolution","Criminal sentence","Police investigation"],"answer":"Private dispute resolution"},
+{"id":72,"type":"mcq","q":"A contract requires:","options":["Mutual agreement","Arrest warrant","Jury vote","Police report"],"answer":"Mutual agreement"},
+{"id":73,"type":"mcq","q":"Custodial interrogation means:","options":["Questioning while detained","Civil mediation","Contract review","Appeal hearing"],"answer":"Questioning while detained"},
+{"id":74,"type":"mcq","q":"Miranda rights protect:","options":["Voting rights","Rights during police questioning","Property rights","Employment rights"],"answer":"Rights during police questioning"},
+{"id":75,"type":"mcq","q":"A motion is:","options":["Formal request to court","Physical evidence","Jury instruction","Search procedure"],"answer":"Formal request to court"},
+{"id":76,"type":"mcq","q":"Defendant’s attorney is responsible for:","options":["Prosecution","Legal defense","Jury selection only","Court recording"],"answer":"Legal defense"},
+{"id":77,"type":"mcq","q":"A search warrant must usually be supported by:","options":["Probable cause","Witness opinion","Settlement","Jury vote"],"answer":"Probable cause"},
+{"id":78,"type":"mcq","q":"The prosecution represents:","options":["The accused","The government","The jury","The witness"],"answer":"The government"},
+{"id":79,"type":"mcq","q":"Mediation differs from litigation because it:","options":["Avoids court trial","Requires prison","Needs jury","Is criminal only"],"answer":"Avoids court trial"},
+{"id":80,"type":"mcq","q":"An affidavit is generally signed:","options":["Under oath","By jury only","Without review","After sentencing"],"answer":"Under oath"}
+
+]
+
+CRIMINAL_QUESTION_BANK = [
+
+# ---------------- MCQ ----------------
+{"id":1,"type":"mcq","q":"Probable cause refers to:","options":["A final conviction","Reasonable grounds for belief","A sentencing guideline","A parole decision"],"answer":"Reasonable grounds for belief"},
+{"id":2,"type":"mcq","q":"Miranda rights are read to:","options":["Witnesses","Jurors","Suspects in custody","Judges"],"answer":"Suspects in custody"},
+{"id":3,"type":"mcq","q":"Chain of custody refers to:","options":["Court scheduling","Evidence handling documentation","Witness protection","Sentencing review"],"answer":"Evidence handling documentation"},
+{"id":4,"type":"mcq","q":"Arraignment is:","options":["Final sentencing","Initial court appearance for charges","Jury deliberation","Evidence collection"],"answer":"Initial court appearance for charges"},
+{"id":5,"type":"mcq","q":"Bail is:","options":["A prison sentence","Temporary release payment","Police interrogation","Final verdict"],"answer":"Temporary release payment"},
+{"id":6,"type":"mcq","q":"Parole means:","options":["Pretrial release","Conditional release after imprisonment","Dismissal of charges","Community service"],"answer":"Conditional release after imprisonment"},
+{"id":7,"type":"mcq","q":"Probation is:","options":["Incarceration","Supervised release instead of jail","Police custody","Appeal process"],"answer":"Supervised release instead of jail"},
+{"id":8,"type":"mcq","q":"A felony is generally:","options":["A civil violation","A serious crime","A traffic citation","A contractual dispute"],"answer":"A serious crime"},
+{"id":9,"type":"mcq","q":"A misdemeanor is usually:","options":["A severe offense","A minor criminal offense","A federal crime only","A civil lawsuit"],"answer":"A minor criminal offense"},
+{"id":10,"type":"mcq","q":"The prosecution represents:","options":["The defendant","The government","The jury","The victim only"],"answer":"The government"},
+{"id":11,"type":"mcq","q":"Cross-examination is conducted by:","options":["The judge","Opposing attorney","The defendant","The jury"],"answer":"Opposing attorney"},
+{"id":12,"type":"mcq","q":"A search warrant is issued by:","options":["Police officer","Judge","Witness","Defense attorney"],"answer":"Judge"},
+{"id":13,"type":"mcq","q":"Homicide refers to:","options":["Property theft","Killing of one person by another","Fraud","Kidnapping"],"answer":"Killing of one person by another"},
+{"id":14,"type":"mcq","q":"Burglary involves:","options":["Tax fraud","Unauthorized entry to commit crime","Traffic offense","Public intoxication"],"answer":"Unauthorized entry to commit crime"},
+{"id":15,"type":"mcq","q":"Robbery includes:","options":["Property damage","Taking property through force or threat","Forgery","Cybercrime"],"answer":"Taking property through force or threat"},
+{"id":16,"type":"mcq","q":"Assault generally means:","options":["Financial fraud","Threat or attempt of harm","Trespassing","Property transfer"],"answer":"Threat or attempt of harm"},
+{"id":17,"type":"mcq","q":"Battery refers to:","options":["Physical unlawful contact","Online fraud","False testimony","Court appeal"],"answer":"Physical unlawful contact"},
+{"id":18,"type":"mcq","q":"Perjury means:","options":["Stealing evidence","Lying under oath","Resisting arrest","Tampering with records"],"answer":"Lying under oath"},
+{"id":19,"type":"mcq","q":"An indictment is:","options":["Police interview","Formal criminal charge","Civil settlement","Search authorization"],"answer":"Formal criminal charge"},
+{"id":20,"type":"mcq","q":"Plea bargain means:","options":["Trial postponement","Agreement to plead guilty for reduced penalty","Case dismissal","Witness protection"],"answer":"Agreement to plead guilty for reduced penalty"},
+{"id":21,"type":"mcq","q":"Due process guarantees:","options":["Automatic release","Fair legal procedures","Immediate acquittal","Reduced sentencing"],"answer":"Fair legal procedures"},
+{"id":22,"type":"mcq","q":"An acquittal means:","options":["Guilty verdict","Not guilty verdict","Case appeal","Probation"],"answer":"Not guilty verdict"},
+{"id":23,"type":"mcq","q":"A conviction means:","options":["Charges dismissed","Found guilty","Released on parole","Case transferred"],"answer":"Found guilty"},
+{"id":24,"type":"mcq","q":"Forensic evidence includes:","options":["Witness opinion","Scientific analysis","Settlement agreements","Jury instructions"],"answer":"Scientific analysis"},
+{"id":25,"type":"mcq","q":"DNA evidence is commonly used to:","options":["Schedule hearings","Identify individuals","Approve warrants","Determine bail"],"answer":"Identify individuals"},
+{"id":26,"type":"mcq","q":"Contempt of court means:","options":["Respecting procedure","Disobeying court authority","Case dismissal","Jury disagreement"],"answer":"Disobeying court authority"},
+{"id":27,"type":"mcq","q":"A juvenile offender is generally:","options":["Under legal adult age","Federal employee","Parole officer","Victim advocate"],"answer":"Under legal adult age"},
+{"id":28,"type":"mcq","q":"Extradition refers to:","options":["Evidence review","Transfer of suspect between jurisdictions","Court appeal","Witness examination"],"answer":"Transfer of suspect between jurisdictions"},
+{"id":29,"type":"mcq","q":"Obstruction of justice means:","options":["Helping investigation","Interfering with legal process","Paying fines","Appealing conviction"],"answer":"Interfering with legal process"},
+{"id":30,"type":"mcq","q":"A suspect is presumed:","options":["Guilty","Innocent until proven guilty","Liable","Convicted"],"answer":"Innocent until proven guilty"},
+
+# ---------------- MATCH ----------------
+{"id":31,"type":"match","q":"homicide","answer":"Killing"},
+{"id":32,"type":"match","q":"burglary","answer":"Unlawful entry"},
+{"id":33,"type":"match","q":"arson","answer":"Intentional fire"},
+{"id":34,"type":"match","q":"probation","answer":"Supervised release"},
+{"id":35,"type":"match","q":"parole","answer":"Conditional release"},
+{"id":36,"type":"match","q":"indictment","answer":"Formal charge"},
+{"id":37,"type":"match","q":"forensics","answer":"Scientific evidence"},
+{"id":38,"type":"match","q":"testimony","answer":"Witness statement"},
+{"id":39,"type":"match","q":"warrant","answer":"Legal authorization"},
+{"id":40,"type":"match","q":"appeal","answer":"Request for review"},
+
+# ---------------- FILL ----------------
+{"id":41,"type":"fill","q":"Legal principle requiring fair procedures","answer":"Due process"},
+{"id":42,"type":"fill","q":"A person accused of a crime","answer":"Defendant"},
+{"id":43,"type":"fill","q":"Written authorization for arrest or search","answer":"Warrant"},
+{"id":44,"type":"fill","q":"The unlawful killing of another person","answer":"Homicide"},
+{"id":45,"type":"fill","q":"Scientific examination of crime evidence","answer":"Forensics"},
+{"id":46,"type":"fill","q":"Temporary release before trial","answer":"Bail"},
+{"id":47,"type":"fill","q":"Failure to obey court authority","answer":"Contempt"},
+{"id":48,"type":"fill","q":"Formal accusation by grand jury","answer":"Indictment"},
+{"id":49,"type":"fill","q":"Taking property by force","answer":"Robbery"},
+{"id":50,"type":"fill","q":"Review of lower court decision","answer":"Appeal"},
+
+# ---------------- ABBREVIATIONS ----------------
+{"id":51,"type":"abbr","q":"DUI","answer":"Driving under the influence"},
+{"id":52,"type":"abbr","q":"FBI","answer":"Federal Bureau of Investigation"},
+{"id":53,"type":"abbr","q":"DEA","answer":"Drug Enforcement Administration"},
+{"id":54,"type":"abbr","q":"CSI","answer":"Crime scene investigation"},
+{"id":55,"type":"abbr","q":"APB","answer":"All points bulletin"},
+{"id":56,"type":"abbr","q":"BOLO","answer":"Be on the lookout"},
+{"id":57,"type":"abbr","q":"SWAT","answer":"Special Weapons and Tactics"},
+{"id":58,"type":"abbr","q":"LEO","answer":"Law enforcement officer"},
+{"id":59,"type":"abbr","q":"DNA","answer":"Deoxyribonucleic acid"},
+{"id":60,"type":"abbr","q":"DA","answer":"District attorney"},
+
+# ---------------- TRUE/FALSE ----------------
+{"id":61,"type":"tf","q":"A defendant is presumed innocent until proven guilty","answer":True},
+{"id":62,"type":"tf","q":"Perjury means telling the truth under oath","answer":False},
+{"id":63,"type":"tf","q":"A felony is more serious than a misdemeanor","answer":True},
+{"id":64,"type":"tf","q":"Miranda rights apply during custodial interrogation","answer":True},
+{"id":65,"type":"tf","q":"Probation always requires imprisonment","answer":False},
+{"id":66,"type":"tf","q":"Forensic science can analyze DNA evidence","answer":True},
+{"id":67,"type":"tf","q":"Chain of custody is unrelated to evidence handling","answer":False},
+{"id":68,"type":"tf","q":"An acquittal means the defendant was found guilty","answer":False},
+{"id":69,"type":"tf","q":"A search warrant is generally approved by a judge","answer":True},
+{"id":70,"type":"tf","q":"Cross-examination is performed by opposing counsel","answer":True},
+
+# ---------------- EXTRA RANDOMIZATION ----------------
+{"id":71,"type":"mcq","q":"Kidnapping involves:","options":["Property theft","Unlawful confinement or transport","Tax evasion","Cybercrime"],"answer":"Unlawful confinement or transport"},
+{"id":72,"type":"mcq","q":"Evidence obtained illegally may be excluded under:","options":["Exclusionary rule","Miranda doctrine","Civil code","Probation act"],"answer":"Exclusionary rule"},
+{"id":73,"type":"mcq","q":"A grand jury primarily determines:","options":["Sentencing","Whether charges should proceed","Probation terms","Witness credibility"],"answer":"Whether charges should proceed"},
+{"id":74,"type":"mcq","q":"Restitution means:","options":["Community patrol","Payment to victim for losses","Parole hearing","Evidence review"],"answer":"Payment to victim for losses"},
+{"id":75,"type":"mcq","q":"Cybercrime refers to:","options":["Online criminal activity","Traffic violations","Juvenile offenses","Civil litigation"],"answer":"Online criminal activity"},
+{"id":76,"type":"mcq","q":"An informant is typically:","options":["Court clerk","Person providing information to authorities","Defense attorney","Jury member"],"answer":"Person providing information to authorities"},
+{"id":77,"type":"mcq","q":"Mens rea refers to:","options":["Physical evidence","Criminal intent","Witness testimony","Search procedure"],"answer":"Criminal intent"},
+{"id":78,"type":"mcq","q":"Actus reus refers to:","options":["Criminal act","Court appeal","Plea agreement","Police report"],"answer":"Criminal act"},
+{"id":79,"type":"mcq","q":"Recidivism means:","options":["Repeated criminal behavior","Case dismissal","Victim compensation","Evidence suppression"],"answer":"Repeated criminal behavior"},
+{"id":80,"type":"mcq","q":"Victim advocacy services mainly provide:","options":["Financial audits","Support and assistance to victims","Sentencing appeals","Evidence collection"],"answer":"Support and assistance to victims"}
+
+]
+
+EDUCATION_QUESTION_BANK = [
+
+# ---------------- MCQ ----------------
+{"id":1,"type":"mcq","q":"IEP stands for:","options":["Individual Education Program","Individualized Education Program","Integrated Education Plan","Instructional Evaluation Process"],"answer":"Individualized Education Program"},
+{"id":2,"type":"mcq","q":"A formative assessment is used to:","options":["Assign final grades","Monitor student learning during instruction","Evaluate teachers","Determine school funding"],"answer":"Monitor student learning during instruction"},
+{"id":3,"type":"mcq","q":"Summative assessment typically occurs:","options":["Before instruction","During instruction","At the end of instruction","Only in elementary school"],"answer":"At the end of instruction"},
+{"id":4,"type":"mcq","q":"Differentiated instruction means:","options":["Teaching every student identically","Adapting instruction to student needs","Reducing curriculum standards","Using only group work"],"answer":"Adapting instruction to student needs"},
+{"id":5,"type":"mcq","q":"A rubric is used to:","options":["Take attendance","Evaluate assignments using criteria","Schedule classes","Provide discipline"],"answer":"Evaluate assignments using criteria"},
+{"id":6,"type":"mcq","q":"Classroom management primarily focuses on:","options":["Budget planning","Maintaining productive learning environment","Teacher evaluations","Transportation services"],"answer":"Maintaining productive learning environment"},
+{"id":7,"type":"mcq","q":"A syllabus generally includes:","options":["Student medical records","Course expectations and schedule","Teacher salary information","Transportation routes"],"answer":"Course expectations and schedule"},
+{"id":8,"type":"mcq","q":"Inclusive education refers to:","options":["Teaching only advanced students","Educating students of all abilities together","Online-only instruction","Private tutoring"],"answer":"Educating students of all abilities together"},
+{"id":9,"type":"mcq","q":"Curriculum refers to:","options":["School building layout","Planned instructional content","Student attendance","Teacher certification"],"answer":"Planned instructional content"},
+{"id":10,"type":"mcq","q":"Pedagogy means:","options":["Student behavior","Methods and practice of teaching","School finance","Transportation policy"],"answer":"Methods and practice of teaching"},
+{"id":11,"type":"mcq","q":"A learning objective should be:","options":["Vague","Measurable and clear","Optional","Confidential"],"answer":"Measurable and clear"},
+{"id":12,"type":"mcq","q":"A GPA measures:","options":["Teacher performance","Student academic average","School attendance","Graduation rate"],"answer":"Student academic average"},
+{"id":13,"type":"mcq","q":"A prerequisite course is:","options":["Optional class","Required before another course","Extracurricular activity","Graduation ceremony"],"answer":"Required before another course"},
+{"id":14,"type":"mcq","q":"Academic integrity refers to:","options":["Building maintenance","Honesty in academic work","Sportsmanship","School budgeting"],"answer":"Honesty in academic work"},
+{"id":15,"type":"mcq","q":"Plagiarism means:","options":["Collaborative work","Using someone else's work without credit","Peer review","Class participation"],"answer":"Using someone else's work without credit"},
+{"id":16,"type":"mcq","q":"Attendance policy refers to:","options":["Dress code","Rules regarding presence in class","Grading system","Teacher evaluations"],"answer":"Rules regarding presence in class"},
+{"id":17,"type":"mcq","q":"An elective course is:","options":["Mandatory","Chosen by student","A disciplinary action","Special education service"],"answer":"Chosen by student"},
+{"id":18,"type":"mcq","q":"Special education services are designed for students who:","options":["Need additional academic support","Are teachers","Are graduating","Play sports"],"answer":"Need additional academic support"},
+{"id":19,"type":"mcq","q":"A transcript contains:","options":["Behavior reports only","Academic record","Medical history","Financial information"],"answer":"Academic record"},
+{"id":20,"type":"mcq","q":"Parent-teacher conferences are intended to:","options":["Discuss school construction","Review student progress","Assign detention","Approve budgets"],"answer":"Review student progress"},
+{"id":21,"type":"mcq","q":"Remote learning refers to:","options":["Outdoor instruction","Education conducted online or remotely","Private tutoring only","Summer school"],"answer":"Education conducted online or remotely"},
+{"id":22,"type":"mcq","q":"A standardized test is designed to:","options":["Measure learning consistently","Replace teachers","Provide transportation","Manage discipline"],"answer":"Measure learning consistently"},
+{"id":23,"type":"mcq","q":"An accommodation in education helps students by:","options":["Lowering standards","Providing support for access to learning","Changing grades","Eliminating assignments"],"answer":"Providing support for access to learning"},
+{"id":24,"type":"mcq","q":"A lesson plan outlines:","options":["School funding","Instructional activities and goals","Teacher salaries","Building repairs"],"answer":"Instructional activities and goals"},
+{"id":25,"type":"mcq","q":"Early childhood education typically focuses on:","options":["College courses","Young children's development","Sports training","Vocational licensing"],"answer":"Young children's development"},
+{"id":26,"type":"mcq","q":"A benchmark assessment is used to:","options":["Track progress over time","Determine parking permits","Assign detention","Evaluate school lunch"],"answer":"Track progress over time"},
+{"id":27,"type":"mcq","q":"Professional development refers to:","options":["Teacher training and growth","Student testing","Building maintenance","School discipline"],"answer":"Teacher training and growth"},
+{"id":28,"type":"mcq","q":"A guidance counselor primarily supports:","options":["Building inspections","Student academic and personal development","Teacher payroll","Transportation"],"answer":"Student academic and personal development"},
+{"id":29,"type":"mcq","q":"Student-centered learning emphasizes:","options":["Teacher lectures only","Active student participation","Silent classrooms","Uniform grading"],"answer":"Active student participation"},
+{"id":30,"type":"mcq","q":"The purpose of homework is generally to:","options":["Replace instruction","Reinforce learning","Punish students","Reduce class time"],"answer":"Reinforce learning"},
+
+# ---------------- MATCH ----------------
+{"id":31,"type":"match","q":"curriculum","answer":"Instructional content"},
+{"id":32,"type":"match","q":"rubric","answer":"Scoring guide"},
+{"id":33,"type":"match","q":"pedagogy","answer":"Teaching methods"},
+{"id":34,"type":"match","q":"transcript","answer":"Academic record"},
+{"id":35,"type":"match","q":"plagiarism","answer":"Using work without credit"},
+{"id":36,"type":"match","q":"assessment","answer":"Evaluation"},
+{"id":37,"type":"match","q":"attendance","answer":"Presence in class"},
+{"id":38,"type":"match","q":"elective","answer":"Optional course"},
+{"id":39,"type":"match","q":"syllabus","answer":"Course outline"},
+{"id":40,"type":"match","q":"accommodation","answer":"Learning support"},
+
+# ---------------- FILL ----------------
+{"id":41,"type":"fill","q":"The process of evaluating student learning","answer":"Assessment"},
+{"id":42,"type":"fill","q":"A planned guide for a course","answer":"Syllabus"},
+{"id":43,"type":"fill","q":"Instruction adapted to student needs","answer":"Differentiation"},
+{"id":44,"type":"fill","q":"Academic dishonesty involving copied work","answer":"Plagiarism"},
+{"id":45,"type":"fill","q":"Document showing academic performance","answer":"Transcript"},
+{"id":46,"type":"fill","q":"Support plan for students with disabilities","answer":"IEP"},
+{"id":47,"type":"fill","q":"The methods and practice of teaching","answer":"Pedagogy"},
+{"id":48,"type":"fill","q":"Evaluation at the end of instruction","answer":"Summative assessment"},
+{"id":49,"type":"fill","q":"Evaluation during instruction","answer":"Formative assessment"},
+{"id":50,"type":"fill","q":"Rules regarding student presence in class","answer":"Attendance policy"},
+
+# ---------------- ABBREVIATIONS ----------------
+{"id":51,"type":"abbr","q":"IEP","answer":"Individualized Education Program"},
+{"id":52,"type":"abbr","q":"ELL","answer":"English Language Learner"},
+{"id":53,"type":"abbr","q":"ESL","answer":"English as a Second Language"},
+{"id":54,"type":"abbr","q":"GPA","answer":"Grade Point Average"},
+{"id":55,"type":"abbr","q":"PTA","answer":"Parent Teacher Association"},
+{"id":56,"type":"abbr","q":"FERPA","answer":"Family Educational Rights and Privacy Act"},
+{"id":57,"type":"abbr","q":"LMS","answer":"Learning Management System"},
+{"id":58,"type":"abbr","q":"STEM","answer":"Science Technology Engineering and Mathematics"},
+{"id":59,"type":"abbr","q":"ADA","answer":"Americans with Disabilities Act"},
+{"id":60,"type":"abbr","q":"SAT","answer":"Scholastic Assessment Test"},
+
+# ---------------- TRUE/FALSE ----------------
+{"id":61,"type":"tf","q":"Plagiarism is considered academic dishonesty","answer":True},
+{"id":62,"type":"tf","q":"A rubric helps evaluate assignments consistently","answer":True},
+{"id":63,"type":"tf","q":"An elective course is always mandatory","answer":False},
+{"id":64,"type":"tf","q":"Formative assessments occur during learning","answer":True},
+{"id":65,"type":"tf","q":"A transcript contains academic records","answer":True},
+{"id":66,"type":"tf","q":"Inclusive education excludes students with disabilities","answer":False},
+{"id":67,"type":"tf","q":"An IEP supports students with special educational needs","answer":True},
+{"id":68,"type":"tf","q":"Remote learning only happens inside classrooms","answer":False},
+{"id":69,"type":"tf","q":"Attendance policies relate to class participation and presence","answer":True},
+{"id":70,"type":"tf","q":"Pedagogy refers to transportation planning","answer":False},
+
+# ---------------- EXTRA RANDOMIZATION ----------------
+{"id":71,"type":"mcq","q":"A capstone project is generally:","options":["A disciplinary report","A final comprehensive project","An attendance policy","A grading scale"],"answer":"A final comprehensive project"},
+{"id":72,"type":"mcq","q":"Peer review involves:","options":["Teacher discipline","Students evaluating each other’s work","Budget approval","School inspections"],"answer":"Students evaluating each other’s work"},
+{"id":73,"type":"mcq","q":"Academic probation means:","options":["Recognition award","Warning due to poor academic performance","Graduation requirement","Teacher evaluation"],"answer":"Warning due to poor academic performance"},
+{"id":74,"type":"mcq","q":"A prerequisite ensures students:","options":["Skip classes","Have necessary background knowledge","Avoid homework","Graduate early"],"answer":"Have necessary background knowledge"},
+{"id":75,"type":"mcq","q":"Blended learning combines:","options":["Online and in-person instruction","Only textbooks","Only lectures","Only testing"],"answer":"Online and in-person instruction"},
+{"id":76,"type":"mcq","q":"Student engagement refers to:","options":["Building maintenance","Participation and involvement in learning","Teacher payroll","Transportation services"],"answer":"Participation and involvement in learning"},
+{"id":77,"type":"mcq","q":"A registrar typically manages:","options":["Academic records and enrollment","Sports teams","Lunch services","Building security"],"answer":"Academic records and enrollment"},
+{"id":78,"type":"mcq","q":"An academic advisor helps students with:","options":["Construction planning","Course selection and goals","School transportation","Medical treatment"],"answer":"Course selection and goals"},
+{"id":79,"type":"mcq","q":"Remedial education is intended to:","options":["Provide advanced coursework","Help students improve foundational skills","Assign discipline","Replace assessments"],"answer":"Help students improve foundational skills"},
+{"id":80,"type":"mcq","q":"Collaborative learning emphasizes:","options":["Independent testing only","Group interaction and teamwork","Silent instruction","Teacher-only participation"],"answer":"Group interaction and teamwork"}
+
+]
+
+QUESTION_BANKS = {
+    "medical": MEDICAL_QUESTION_BANK,
+    "legal": LEGAL_QUESTION_BANK,
+    "criminal": CRIMINAL_QUESTION_BANK,
+    "education": EDUCATION_QUESTION_BANK,
+}
+
+@app.route("/get_questions/<test_type>")
+def get_questions(test_type):
+
+    # -------------------------
+    # TERMINOLOGY TESTS
+    # -------------------------
+    if test_type == "terminology":
+
+        domain = request.args.get("domain")
+
+        bank = QUESTION_BANKS.get(domain)
+
+    else:
+        bank = QUESTION_BANKS.get(test_type)
+
+    if not bank:
+        return {"error": "Invalid test type"}, 400
+
+    questions = random.sample(bank, 35)
+
+    return {"questions": questions}
+
+@app.route("/submit_test", methods=["POST"])
+def submit_test():
+
+    data = request.json
+
+    test_type = data.get("test_type")
+    domain = data.get("domain")
+
+    # -------------------------
+    # TERMINOLOGY TESTS
+    # -------------------------
+    if test_type == "terminology":
+
+        domain = data.get("domain")
+
+        bank = QUESTION_BANKS.get(domain)
+
+    else:
+        bank = None
+
+    if not bank:
+        return {"error": "Invalid test type"}, 400
+
+    first_name = data.get("first_name")
+    last_name = data.get("last_name")
+    email = data.get("email")
+
+    score = 0
+
+    total = len([k for k in data.keys() if k.startswith("q")])
+
+    for q in bank:
+
+        key = f"q{q['id']}"
+
+        if key not in data:
+            continue
+
+        user_answer = data.get(key)
+
+        if not user_answer:
+            continue
+
+        correct_answer = str(q["answer"]).strip().lower()
+
+        if str(user_answer).strip().lower() == correct_answer:
+            score += 1
+
+    percentage = round((score / total) * 100, 2)
+
+    passed = percentage >= 80
+
+    # SAVE TO DB
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    final_score = percentage
+    status = "PASSED" if passed else "FAILED"
+
+    c.execute("""
+        INSERT INTO results (
+            first_name,
+            last_name,
+            email,
+            test_type,
+            domain,
+            final_score,
+            status,
+            created_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        first_name,
+        last_name,
+        email,
+        test_type,
+        domain,
+        final_score,
+        status,
+        datetime.now().isoformat()
+    ))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "score": score,
+        "total": total,
+        "percentage": percentage,
+        "passed": passed
+    })
 
 # ---------------------------
 # HELPERS
@@ -1043,18 +1602,18 @@ def home():
     language = request.args.get("lang") or request.form.get("language")
     print("LANG RECEIVED:", language)
 
-    target_texts = REVERSE_TEXTS
+    
+    import random
 
-    t1 = target_texts[0]
-    t2 = target_texts[1]
+    selected_set = random.choice(DIALOGUE_SETS)
+
+    session["language_texts"] = selected_set["step1"]
+    session["reverse_texts"] = selected_set["step2"]
 
     return render_template(
         "test.html",
-        success=success,
-        target_texts=target_texts,
-        language=language,
-        t1=t1,
-        t2=t2
+        language_texts=session["language_texts"],
+        success=False
     )
 
 @app.route("/get_translation")
@@ -1082,9 +1641,12 @@ def get_translation():
                 "step2_en": step2_en
             }
 
+
+        reverse_texts = session.get("reverse_texts", [])
+
         target_texts = [
             translate_to_target(text, language or "Spanish")
-            for text in REVERSE_TEXTS
+            for text in reverse_texts
         ]
 
         response = {"target_texts": target_texts}
@@ -1094,7 +1656,6 @@ def get_translation():
                 "language": language or "Spanish",
                 "api_key_present": bool(os.getenv("OPENAI_API_KEY")),
                 "last_translation_error": LAST_TRANSLATION_ERROR,
-                "first_text_changed": target_texts[0] != REVERSE_TEXTS[0]
             }
 
         return response
@@ -1125,6 +1686,7 @@ def upload_audio():
     except Exception as e:
         print("Upload error:", e)
         return {"error": str(e)}, 500
+
 
 # ---------------------------
 # SUBMIT
@@ -1207,7 +1769,7 @@ def submit():
             MAX_TIME = 25 * 60
         elif test_type == "post_editing":
             MAX_TIME = 20 * 60
-        elif test_type == "interpretation":
+        elif test_type == "language_test":
             MAX_TIME = 20 * 60
         else:
             MAX_TIME = 25 * 60
@@ -1554,7 +2116,7 @@ as soon as possible to avoid losing customers."""
             
 
         # AUDIO 
-        if test_type == "interpretation":
+        if test_type == "language_test":
             t1 = process_audio_file(request.form.get("audio1"), language)
             t2 = process_audio_file(request.form.get("audio2"), language)
             t3 = process_audio_file(request.form.get("audio3"), language)
@@ -1578,9 +2140,9 @@ as soon as possible to avoid losing customers."""
 
 
 
-        # INTERPRETATION
+        # LANGUAGE TEST
         domain = request.form.get("domain")
-        if test_type == "interpretation":
+        if test_type == "language_test":
 
             parts = []
             scores = []
@@ -1593,7 +2155,16 @@ as soon as possible to avoid losing customers."""
 
             for i in range(4):
 
-                original_en = ORIGINAL_AUDIO_TEXTS[i]
+                original = request.form.get(f"sourceText{i+1}")
+
+                # SAFETY FALLBACK (VERY IMPORTANT)
+                if not original:
+                    session_texts = session.get("language_texts", [])
+
+                    original = request.form.get(f"sourceText{i+1}")
+
+                    if not original:
+                        original = session_texts[i]
 
                 # -------------------
                 # STEP 1 (EN → TARGET → EN)
@@ -1601,26 +2172,32 @@ as soon as possible to avoid losing customers."""
                 if t_list[i]:
                     translated_back = translate_to_english(t_list[i])
 
-                    if not translated_back or len(translated_back.split()) < 5:
-                        parts.append(f"\n AUDIO {i+1} (EN → {language})")
+                    if not translated_back or len(translated_back.split()) < len(original.split()) * 0.5:
+                        parts.append(f"\n QUESTION {i+1} (EN → {language})")
                         parts.append("SCORE: 0/10\nExplanation: Response too short or incomplete.")
                         scores.append(0)
                         continue
 
                     score_text = score_interpretation(
-                        original_en,
+                        original,
                         translated_back,
                         language
                     )
 
-                    parts.append(f"\n AUDIO {i+1} (EN → {language})")
+                    parts.append(f"\n QUESTION {i+1} (EN → {language})")
                     parts.append(score_text["raw"])
 
                     acc, comp, flu, final_ai = extract_detailed_scores(score_text["raw"])
 
-                    transcription_score = score_transcription(original_en, translated_back)
+                    if acc < 5:
+                        final_ai = min(final_ai, 4)
 
-                    combined_score = max(0, round((final_ai * 0.6) + (transcription_score * 0.4), 2))
+                    transcription_score = score_transcription(original, translated_back)
+
+                    combined_score = round(
+                        (final_ai * 0.8) + (transcription_score * 0.2),
+                        2
+                    )
                
                     print("AI:", final_ai, "Transcription:", transcription_score, "Final:", combined_score)
 
@@ -1635,8 +2212,10 @@ as soon as possible to avoid losing customers."""
                 # STEP 2 (TARGET → EN)
                 # -------------------
                 if rev_list[i]:
+                    reverse_texts = session.get("reverse_texts", [])
+
                     score_text = score_interpretation(
-                        REVERSE_TEXTS[i],
+                        reverse_texts[i],
                         rev_list[i],
                         language
                     )
@@ -1756,7 +2335,7 @@ as soon as possible to avoid losing customers."""
         elif test_type == "translation":
             final_score = final_translation_score if 'final_translation_score' in locals() else 0
 
-        elif test_type == "interpretation":
+        elif test_type == "language_test":
             final_score = i_score
 
         final_score = max(0, final_score or 0)
@@ -1793,19 +2372,48 @@ as soon as possible to avoid losing customers."""
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
 
+
+        if test_type == "terminology":
+            final_score = percentage
+            status = "passed" if passed else "failed"
+
+            # terminology has no translation metrics
+            translation_score = None
+            interpretation_score = None
+            editing_score = None
+            post_edit_score = None
+            gleu_score = None
+            bleu_score = None
+            ter_score = None
+            ai_component = None
+            bleu_component = None
+            ter_component = None
+
+            # terminology has no audio/text fields
+            t1 = t2 = t3 = t4 = None
+            t1_en = t2_en = t3_en = t4_en = None
+
+            step1_original = None
+            step2_original = None
+            step1 = None
+            step2 = None
+
+            rev1 = rev2 = rev3 = rev4 = None
+
         c.execute("""
         INSERT INTO results 
         (first_name,last_name,email,test_type,created_at,language,answer,
         translation_score,interpretation_score,editing_score,post_edit_score,
-        gleu_score,bleu_score,ter_score,final_score,status,flag,
+        gleu_score,bleu_score,ter_score,final_score,status,flag,domain,
         ai_component,bleu_component,ter_component,
         transcription1,transcription2,transcription3,transcription4,t1_en, t2_en, t3_en, t4_en,step1_original, step2_original, step1_answer, step2_answer, rev_transcription1, rev_transcription2, rev_transcription3, rev_transcription4)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """,(
              first_name,last_name,email,test_type,created_at,language,answer,
              translation_score,interpretation_score,editing_score,post_edit_score,
              gleu_score,bleu_score,ter_score,final_score,status,flag,
              ai_component,bleu_component,ter_component,
+             domain,
              t1,t2,t3,t4,
              t1_en,t2_en,t3_en,t4_en,
              step1_original,
