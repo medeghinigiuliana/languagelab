@@ -828,6 +828,7 @@ def submit_test():
     conn.close()
 
     return jsonify({
+        "success": True,
         "score": score,
         "total": total,
         "percentage": percentage,
@@ -1597,23 +1598,13 @@ def detect_suspicious_behavior(original, answer):
 # ROUTES
 # ---------------------------
 @app.route("/")
-def home():
+def index():
+
     success = request.args.get("success")
-    language = request.args.get("lang") or request.form.get("language")
-    print("LANG RECEIVED:", language)
-
-    
-    import random
-
-    selected_set = random.choice(DIALOGUE_SETS)
-
-    session["language_texts"] = selected_set["step1"]
-    session["reverse_texts"] = selected_set["step2"]
 
     return render_template(
         "test.html",
-        language_texts=session["language_texts"],
-        success=False
+        success=success
     )
 
 @app.route("/get_translation")
