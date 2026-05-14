@@ -1059,7 +1059,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const testType = document.getElementById("testType");
   const languageInput = document.getElementById("languageInput");
   const domain = document.getElementById("domainSelect");
-  const startBtn = document.getElementById("startTestBtn");
+  const startBtn = document.getElementById("startBtn");
 
   // -------------------------
   // EVENT LISTENERS
@@ -1164,7 +1164,7 @@ function showTest() {
   if (!testType) return;
 
   const type = testType.value;
-  const startBtn = document.getElementById("startTestBtn");
+  const startBtn = document.getElementById("startBtn");
   const submitBtn = document.getElementById("submitBtn");
   const loadingIndicator = document.getElementById("loadingIndicator");
 
@@ -1238,7 +1238,7 @@ function startTimer() {
 // LANGUAGE TRANSLATION 
 // ------------------
 async function startTest() {
-  const startBtn = document.getElementById("startTestBtn");
+  const startBtn = document.getElementById("startBtn");
 
   startBtn.disabled = true;
   startBtn.innerText = "Starting...";
@@ -1447,6 +1447,7 @@ if (type === "terminology") {
       section.scrollIntoView({ behavior: "smooth" });
 
       startTimer();
+      return;
     }
   } catch (err) {
     document.getElementById("loadingIndicator").style.display = "none";
@@ -1710,7 +1711,7 @@ function updateStartButton() {
     const type = document.getElementById("testType").value;
     const lang = document.getElementById("languageInput").value;
     const domain = document.getElementById("domainSelect").value;
-    const startBtn = document.getElementById("startTestBtn");
+    const startBtn = document.getElementById("startBtn");
 
     // nothing selected
     if (!type) {
@@ -1855,7 +1856,10 @@ document.getElementById("submitMedicalBtn")?.addEventListener("click", async () 
 
     const res = await fetch("/submit_test", {
       method: "POST",
-      body: formData
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(answers)
     });
 
     const result = await res.json();
