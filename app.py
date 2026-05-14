@@ -1604,9 +1604,9 @@ def index():
 
     return render_template(
         "test.html",
-        success=success
+        success=success,
+        language_texts=language_texts
     )
-
 @app.route("/get_translation")
 
 def get_translation():
