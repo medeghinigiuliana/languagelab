@@ -1866,10 +1866,6 @@ document.getElementById("submitMedicalBtn")?.addEventListener("click", async () 
 
     if (result.success) {
 
-      alert(
-        `Test submitted successfully!\n\nScore: ${result.score}/${result.total} (${result.percentage}%)`
-      );
-
       window.location.href = "/?success=1";
 
     } else {
