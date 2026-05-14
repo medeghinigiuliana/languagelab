@@ -49,15 +49,15 @@
       }
 
       .button {
-        width: 100%;
-        margin-top: 25px;
         background: linear-gradient(135deg, #6366f1, #4f46e5);
-        padding: 14px;
+        padding: 10px 18px;
         border: none;
         border-radius: 10px;
         color: white;
         font-weight: bold;
         cursor: pointer;
+        text-decoration:none;
+        display:inline-block;
       }
 
       #submitBtn.processing {
@@ -324,6 +324,36 @@
 
       .instructions ul {
         margin: 10px 0 0 18px;
+      }
+
+      .submit-wrapper{
+        display:flex;
+        justify-content:center;
+        margin:50px 0 30px;
+      }
+
+      .submit-btn{
+        background:linear-gradient(90deg,#6366f1,#4f46e5);
+        color:white;
+        border:none;
+        border-radius:14px;
+        padding:16px 40px;
+        font-size:16px;
+        font-weight:bold;
+        cursor:pointer;
+        min-width:260px;
+        transition:0.2s ease;
+        box-shadow:0 4px 14px rgba(99,102,241,0.35);
+      }
+
+      .submit-btn:hover{
+        transform:translateY(-1px);
+        opacity:0.95;
+      }
+
+      .submit-btn:disabled{
+        opacity:0.6;
+        cursor:not-allowed;
       }
 
       </style>
@@ -967,7 +997,6 @@
 
 </div>
 
-<!-- ================= MEDICAL TEST ================= -->
 <div id="medicalTest" style="display:none; margin-top:40px;">
 
   <h3 style="text-align:center; margin-bottom:20px;">
@@ -987,9 +1016,13 @@
 
   <div id="medicalQuestions"></div>
 
-  <button type="button" id="submitMedicalBtn" class="button">
-    Submit Medical Test
+  <div class="submit-wrapper">
+
+  <button type="button" id="submitMedicalBtn" class="submit-btn">
+    Submit Test
   </button>
+
+</div>
 
 </div>
 
@@ -1811,28 +1844,33 @@ document.getElementById("submitMedicalBtn")?.addEventListener("click", async () 
 
     console.log("Submitting answers:", answers);
 
+    const btn = document.getElementById("submitMedicalBtn");
+
+    btn.disabled = true;
+    btn.innerText = "Submitting...";
+
     const res = await fetch("/submit_test", {
-
       method: "POST",
-
-      headers: {
-        "Content-Type": "application/json"
-      },
-
-      body: JSON.stringify(answers)
+      body: formData
     });
 
-    console.log("Response status:", res.status);
+    const result = await res.json();
 
-    const text = await res.text();
+    if (result.success) {
 
-    console.log("Raw response:", text);
+      alert(
+        `Test submitted successfully!\n\nScore: ${result.score}/${result.total} (${result.percentage}%)`
+      );
 
-    const result = JSON.parse(text);
+      window.location.href = "/?success=1";
 
-    alert(
-      `Score: ${result.score}/${result.total} (${result.percentage}%)`
-    );
+    } else {
+
+      btn.disabled = false;
+      btn.innerText = "Submit Test";
+
+      alert("Submission failed. Please try again.");
+    }
 
   } catch (err) {
 
