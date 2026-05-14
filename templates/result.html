@@ -168,16 +168,37 @@
   <div class="value">{{ r.email }}</div>
 
   <div class="label">Language</div>
-  <div class="value">{{ r.language }}</div>
+  <div class="value">{{ r.language or "-" }}</div>
 
-  <div class="label">Test Type</div>
-  <div class="value">
-    {% if r.test_type == "post_editing" %}
-      Post-MT Editing
-    {% else %}
-      {{ r.test_type|capitalize }}
-    {% endif %}
-  </div>
+<div class="label">Test Type</div>
+
+<div class="value">
+
+  {% if r.test_type == "post_editing" %}
+
+    Post-MT Editing
+
+  {% elif r.test_type == "language_test" %}
+
+    Spoken Language
+
+  {% elif r.test_type == "terminology" %}
+
+    Terminology
+
+  {% else %}
+
+    {{ r.test_type|replace("_", " ")|title }}
+
+  {% endif %}
+
+</div>
+
+<div class="label">Domain</div>
+
+<div class="value">
+  {{ r.domain.replace("_", " ")|title if r.domain else "-" }}
+</div>
 
   <div class="label">Final Score</div>
   <div class="score">{{ r.final_score or '-' }}</div>
@@ -212,6 +233,9 @@
     </div>
   </div>
 </div>
+
+
+
 {% endif %}
 
 <!-- RESULTS -->
@@ -250,6 +274,8 @@
   </div>
   {% endif %}
 
+{% if r.test_type in ["translation", "editing", "post_editing"] %}
+
 <div class="section">
   <h4>Step 1 — Original (English)</h4>
   <pre>{{ r.step1_original or '-' }}</pre>
@@ -266,13 +292,48 @@
   <pre>{{ r.step2_answer or '-' }}</pre>
 </div>
 
+{% endif %}
 
-
-
-{% if r.test_type == "interpretation" %}
+{% if r.test_type == "terminology" %}
 
 <div class="section">
-  <h4>Interpretation Evaluation</h4>
+
+  <h4>Terminology Evaluation</h4>
+
+  <p>
+    <strong>Domain:</strong>
+    {{ r.domain.replace("_", " ")|title if r.domain else "-" }}
+  </p>
+
+  <p>
+    <strong>Final Score:</strong>
+
+    {% if r.final_score >= 80 %}
+      <span style="color:#22c55e;">{{ r.final_score }}%</span>
+
+    {% elif r.final_score >= 60 %}
+      <span style="color:#f59e0b;">{{ r.final_score }}%</span>
+
+    {% else %}
+      <span style="color:#ef4444;">{{ r.final_score }}%</span>
+
+    {% endif %}
+  </p>
+
+  <p>
+    <strong>Status:</strong>
+    {{ r.status }}
+  </p>
+
+</div>
+
+{% endif %}
+
+
+{% if r.test_type == "language_test" %}
+
+<div class="section">
+  <h4>AI Evaluation Feedback</h4>
 
   <p>
     <strong>Average Score:</strong>
@@ -284,7 +345,14 @@
 
 <!-- STEP 1 -->
 <div class="section">
-  <h4>Step 1 — Interpretation ({{ r.language }} → English)</h4>
+  <h4>Step 1 — Spoken Response ({{ r.language }} → English)
+
+  <!-- AUDIO PLAYER -->
+  {% if r.audio1 %}
+  <audio controls style="width:100%; margin-bottom:15px;">
+    <source src="{{ r.audio1 }}">
+  </audio>
+  {% endif %}
 
   <p class="label">Candidate Response ({{ r.language }})</p>
   <pre>{{ r.transcription1 or '-' }}</pre>
@@ -352,34 +420,39 @@
 <div class="section">
   <h4>Evaluation & Score</h4>
   <pre>{{ r.editing_score or 'No feedback available' }}</pre>
+
   <div class="section">
-  <h4>Score Breakdown</h4>
+    <h4>Score Breakdown</h4>
 
-  <div class="metrics">
-    <div class="metric-box">
-      <div class="metric-title">AI Score</div>
-      <div class="metric-value">{{ r.ai_component or '-' }}</div>
+    <div class="metrics">
+
+      <div class="metric-box">
+        <div class="metric-title">AI Score</div>
+        <div class="metric-value">{{ r.ai_component or '-' }}</div>
+      </div>
+
+      <div class="metric-box">
+        <div class="metric-title">BLEU Component</div>
+        <div class="metric-value">{{ r.bleu_component or '-' }}</div>
+      </div>
+
+      <div class="metric-box">
+        <div class="metric-title">TER Component</div>
+        <div class="metric-value">{{ r.ter_component or '-' }}</div>
+      </div>
+
     </div>
 
-    <div class="metric-box">
-      <div class="metric-title">BLEU Component</div>
-      <div class="metric-value">{{ r.bleu_component or '-' }}</div>
-    </div>
-
-    <div class="metric-box">
-      <div class="metric-title">TER Component</div>
-      <div class="metric-value">{{ r.ter_component or '-' }}</div>
-    </div>
   </div>
+
 </div>
 
-
 {% endif %}
-
 {% if r.test_type == "post_editing" %}
 
 <div class="section">
   <h4>Machine Translation (Original)</h4>
+
   <pre>
 The system present many errors and it is not working correct in all devices. 
 Users is reporting that the application crash frequently when they try to upload files, 
@@ -395,31 +468,40 @@ as soon as possible to avoid losing customers.
 </div>
 
 <div class="section">
+
   <h4>Evaluation & Score</h4>
+
   <pre>{{ r.post_edit_score or 'No feedback available' }}</pre>
+
   <div class="section">
-  <h4>Score Breakdown</h4>
 
-  <div class="metrics">
-    <div class="metric-box">
-      <div class="metric-title">AI Score</div>
-      <div class="metric-value">{{ r.ai_component or '-' }}</div>
+    <h4>Score Breakdown</h4>
+
+    <div class="metrics">
+
+      <div class="metric-box">
+        <div class="metric-title">AI Score</div>
+        <div class="metric-value">{{ r.ai_component or '-' }}</div>
+      </div>
+
+      <div class="metric-box">
+        <div class="metric-title">BLEU Component</div>
+        <div class="metric-value">{{ r.bleu_component or '-' }}</div>
+      </div>
+
+      <div class="metric-box">
+        <div class="metric-title">TER Component</div>
+        <div class="metric-value">{{ r.ter_component or '-' }}</div>
+      </div>
+
     </div>
 
-    <div class="metric-box">
-      <div class="metric-title">BLEU Component</div>
-      <div class="metric-value">{{ r.bleu_component or '-' }}</div>
-    </div>
-
-    <div class="metric-box">
-      <div class="metric-title">TER Component</div>
-      <div class="metric-value">{{ r.ter_component or '-' }}</div>
-    </div>
   </div>
+
 </div>
 
-
 {% endif %}
+
 </div>
 
 </body>
