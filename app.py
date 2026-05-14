@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, Response, redirect, url_for
 from flask import jsonify
 import sqlite3
+import json
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -770,6 +771,7 @@ def submit_test():
     email = data.get("email")
 
     score = 0
+    terminology_results = []
 
     total = len([k for k in data.keys() if k.startswith("q")])
 
@@ -787,8 +789,17 @@ def submit_test():
 
         correct_answer = str(q["answer"]).strip().lower()
 
-        if str(user_answer).strip().lower() == correct_answer:
+        is_correct = str(user_answer).strip().lower() == correct_answer
+
+        if is_correct:
             score += 1
+
+        terminology_results.append({
+            "question": q["q"],
+            "candidate_answer": user_answer,
+            "correct_answer": q["answer"],
+            "correct": is_correct
+        })
 
     percentage = round((score / total) * 100, 2)
 
@@ -810,9 +821,10 @@ def submit_test():
             domain,
             final_score,
             status,
+            terminology_results,
             created_at
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         first_name,
         last_name,
@@ -821,6 +833,7 @@ def submit_test():
         domain,
         final_score,
         status,
+        json.dumps(terminology_results),
         datetime.now().isoformat()
     ))
 
