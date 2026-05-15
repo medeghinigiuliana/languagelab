@@ -806,7 +806,7 @@ def submit_test():
             "correct": is_correct
         })
 
-    total_questions = len(questions)
+    total_questions = total
 
     percentage = round(
         (score / total_questions) * 100,
@@ -827,7 +827,6 @@ def submit_test():
     c = conn.cursor()
 
     final_score = percentage
-    status = "PASSED" if passed else "FAILED"
 
     c.execute("""
         INSERT INTO results (
@@ -862,7 +861,8 @@ def submit_test():
         "score": score,
         "total": total,
         "percentage": percentage,
-        "passed": passed
+        "status": status
+        
     })
 
 # ---------------------------
