@@ -2452,8 +2452,8 @@ as soon as possible to avoid losing customers."""
         audio1,audio2,audio3,audio4,
         rev_audio1,rev_audio2,rev_audio3,rev_audio4,
         transcription1,transcription2,transcription3,transcription4,t1_en, t2_en, t3_en, t4_en,step1_original, step2_original, step1_answer, step2_answer, rev_transcription1, rev_transcription2, rev_transcription3, rev_transcription4)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-        """,(
+        VALUES ({})
+        """.format(",".join(["?"] * 45)),(
              first_name,last_name,email,test_type,created_at,language,answer,
              translation_score,interpretation_score,editing_score,post_edit_score,
              gleu_score,bleu_score,ter_score,final_score,status,flag,
