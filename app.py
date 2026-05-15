@@ -806,9 +806,21 @@ def submit_test():
             "correct": is_correct
         })
 
-    percentage = round((score / total) * 100, 2)
+    total_questions = len(questions)
 
-    passed = percentage >= 80
+    percentage = round(
+        (score / total_questions) * 100,
+        2
+    )
+
+    if percentage >= 80:
+        status = "PASSED"
+
+    elif percentage >= 60:
+        status = "BORDERLINE"
+
+    else:
+        status = "FAILED"
 
     # SAVE TO DB
     conn = sqlite3.connect(DB_PATH)
