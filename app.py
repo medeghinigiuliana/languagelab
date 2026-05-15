@@ -249,7 +249,12 @@ def init_db():
         ("rev_transcription2", "TEXT"),
         ("rev_transcription3", "TEXT"),
         ("rev_transcription4", "TEXT"),
+        ("rev_audio1", "TEXT"),
+        ("rev_audio2", "TEXT"),
+        ("rev_audio3", "TEXT"),
+        ("rev_audio4", "TEXT"),
         ("domain", "TEXT"),
+        ("terminology_results", "TEXT"),
     ]
 
     for col, col_type in columns:
@@ -2133,6 +2138,16 @@ as soon as possible to avoid losing customers."""
 
         # AUDIO 
         if test_type == "language_test":
+            audio1 = request.form.get("audio1")
+            audio2 = request.form.get("audio2")
+            audio3 = request.form.get("audio3")
+            audio4 = request.form.get("audio4")
+
+            rev_audio1 = request.form.get("rev_audio1")
+            rev_audio2 = request.form.get("rev_audio2")
+            rev_audio3 = request.form.get("rev_audio3")
+            rev_audio4 = request.form.get("rev_audio4")
+
             t1 = process_audio_file(request.form.get("audio1"), language)
             t2 = process_audio_file(request.form.get("audio2"), language)
             t3 = process_audio_file(request.form.get("audio3"), language)
@@ -2422,20 +2437,29 @@ as soon as possible to avoid losing customers."""
         translation_score,interpretation_score,editing_score,post_edit_score,
         gleu_score,bleu_score,ter_score,final_score,status,flag,domain,
         ai_component,bleu_component,ter_component,
+        audio1,audio2,audio3,audio4,
+        rev_audio1,rev_audio2,rev_audio3,rev_audio4,
         transcription1,transcription2,transcription3,transcription4,t1_en, t2_en, t3_en, t4_en,step1_original, step2_original, step1_answer, step2_answer, rev_transcription1, rev_transcription2, rev_transcription3, rev_transcription4)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """,(
              first_name,last_name,email,test_type,created_at,language,answer,
              translation_score,interpretation_score,editing_score,post_edit_score,
              gleu_score,bleu_score,ter_score,final_score,status,flag,
-             ai_component,bleu_component,ter_component,
              domain,
+             ai_component,bleu_component,ter_component,
+
+             audio1,audio2,audio3,audio4,
+             rev_audio1,rev_audio2,rev_audio3,rev_audio4,
+
              t1,t2,t3,t4,
+
              t1_en,t2_en,t3_en,t4_en,
+
              step1_original,
              step2_original,
              step1,
              step2,
+
              rev1, rev2, rev3, rev4
             ))
 
@@ -2542,12 +2566,27 @@ def download_csv():
 
 @app.route("/result/<int:id>")
 def result_detail(id):
+
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
     c.execute("SELECT * FROM results WHERE id = ?", (id,))
     result = c.fetchone()
+
     conn.close()
+
+    # LOAD TERMINOLOGY JSON
+    if result["terminology_results"]:
+        result = dict(result)
+
+        result["terminology_results"] = json.loads(
+            result["terminology_results"]
+        )
+
+    else:
+        result = dict(result)
+
+        result["terminology_results"] = []
 
     return render_template("result.html", r=result)

@@ -153,10 +153,6 @@
   <a href="/dashboard" class="button">← Back to Dashboard</a>
 </div>
 
-<div style="margin-bottom:20px;">
-  <a href="/dashboard" class="button">← Back to Dashboard</a>
-</div>
-
 <!-- SUMMARY CARD -->
 <div class="card">
   <div class="label">Name</div>
@@ -327,8 +323,116 @@
 
 </div>
 
-{% endif %}
+<div class="section">
 
+  <h3>Terminology Results</h3>
+
+  <table style="
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+  ">
+
+    <thead>
+
+      <tr style="
+        background:#111827;
+        border-bottom:1px solid #374151;
+      ">
+
+        <th style="padding:12px; text-align:left;">#</th>
+
+        <th style="padding:12px; text-align:left;">
+          Question
+        </th>
+
+        <th style="padding:12px; text-align:left;">
+          Candidate Answer
+        </th>
+
+        <th style="padding:12px; text-align:left;">
+          Correct Answer
+        </th>
+
+        <th style="padding:12px; text-align:left;">
+          Result
+        </th>
+
+      </tr>
+
+    </thead>
+
+    <tbody>
+
+      {% for item in r.terminology_results %}
+
+      <tr style="
+        border-bottom:1px solid #1f2937;
+      ">
+
+        <td style="padding:12px;">
+          {{ loop.index }}
+        </td>
+
+        <td style="padding:12px;">
+          {{ item.question }}
+        </td>
+
+        <td style="padding:12px;">
+
+          {% if item.candidate_answer %}
+
+            {{ item.candidate_answer }}
+
+          {% else %}
+
+            <span style="opacity:0.5;">
+              No answer
+            </span>
+
+          {% endif %}
+
+        </td>
+
+        <td style="padding:12px;">
+          {{ item.correct_answer }}
+        </td>
+
+        <td style="padding:12px;">
+
+          {% if item.correct %}
+
+            <span style="
+              color:#22c55e;
+              font-weight:bold;
+            ">
+              ✓ Correct
+            </span>
+
+          {% else %}
+
+            <span style="
+              color:#ef4444;
+              font-weight:bold;
+            ">
+              ✗ Incorrect
+            </span>
+
+          {% endif %}
+
+        </td>
+
+      </tr>
+
+      {% endfor %}
+
+    </tbody>
+
+  </table>
+
+</div>
+
+{% endif %}
 
 {% if r.test_type == "language_test" %}
 
@@ -345,9 +449,12 @@
 
 <!-- STEP 1 -->
 <div class="section">
-  <h4>Step 1 — Spoken Response ({{ r.language }} → English)
+  <h4>Step 1 — Spoken Response ({{ r.language }} → English)</h4>
+</div>
 
-  <!-- AUDIO PLAYER -->
+<!-- QUESTION 1 -->
+<div class="section">
+
   {% if r.audio1 %}
   <audio controls style="width:100%; margin-bottom:15px;">
     <source src="{{ r.audio1 }}">
@@ -359,53 +466,119 @@
 
   <p class="label">Normalized (English)</p>
   <pre>{{ r.t1_en or '-' }}</pre>
+
 </div>
 
+<!-- QUESTION 2 -->
 <div class="section">
+
+  {% if r.audio2 %}
+  <audio controls style="width:100%; margin-bottom:15px;">
+    <source src="{{ r.audio2 }}">
+  </audio>
+  {% endif %}
+
   <p class="label">Candidate Response ({{ r.language }})</p>
   <pre>{{ r.transcription2 or '-' }}</pre>
 
   <p class="label">Normalized (English)</p>
   <pre>{{ r.t2_en or '-' }}</pre>
+
 </div>
 
+<!-- QUESTION 3 -->
 <div class="section">
+
+  {% if r.audio3 %}
+  <audio controls style="width:100%; margin-bottom:15px;">
+    <source src="{{ r.audio3 }}">
+  </audio>
+  {% endif %}
+
   <p class="label">Candidate Response ({{ r.language }})</p>
   <pre>{{ r.transcription3 or '-' }}</pre>
 
   <p class="label">Normalized (English)</p>
   <pre>{{ r.t3_en or '-' }}</pre>
+
 </div>
 
+<!-- QUESTION 4 -->
 <div class="section">
+
+  {% if r.audio4 %}
+  <audio controls style="width:100%; margin-bottom:15px;">
+    <source src="{{ r.audio4 }}">
+  </audio>
+  {% endif %}
+
   <p class="label">Candidate Response ({{ r.language }})</p>
   <pre>{{ r.transcription4 or '-' }}</pre>
 
   <p class="label">Normalized (English)</p>
   <pre>{{ r.t4_en or '-' }}</pre>
+
 </div>
 
 <!-- STEP 2 -->
 <div class="section">
   <h4>Step 2 — Reverse Interpretation (English)</h4>
+</div>
+
+<!-- REVERSE 1 -->
+<div class="section">
+
+  {% if r.rev_audio1 %}
+  <audio controls style="width:100%; margin-bottom:15px;">
+    <source src="{{ r.rev_audio1 }}">
+  </audio>
+  {% endif %}
 
   <p class="label">Candidate Response (English)</p>
   <pre>{{ r.rev_transcription1 or '-' }}</pre>
+
 </div>
 
+<!-- REVERSE 2 -->
 <div class="section">
+
+  {% if r.rev_audio2 %}
+  <audio controls style="width:100%; margin-bottom:15px;">
+    <source src="{{ r.rev_audio2 }}">
+  </audio>
+  {% endif %}
+
   <p class="label">Candidate Response (English)</p>
   <pre>{{ r.rev_transcription2 or '-' }}</pre>
+
 </div>
 
+<!-- REVERSE 3 -->
 <div class="section">
+
+  {% if r.rev_audio3 %}
+  <audio controls style="width:100%; margin-bottom:15px;">
+    <source src="{{ r.rev_audio3 }}">
+  </audio>
+  {% endif %}
+
   <p class="label">Candidate Response (English)</p>
   <pre>{{ r.rev_transcription3 or '-' }}</pre>
+
 </div>
 
+<!-- REVERSE 4 -->
 <div class="section">
+
+  {% if r.rev_audio4 %}
+  <audio controls style="width:100%; margin-bottom:15px;">
+    <source src="{{ r.rev_audio4 }}">
+  </audio>
+  {% endif %}
+
   <p class="label">Candidate Response (English)</p>
   <pre>{{ r.rev_transcription4 or '-' }}</pre>
+
 </div>
 
 {% endif %}
